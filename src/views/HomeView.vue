@@ -3,18 +3,15 @@ import ScheduleHeader from '@/components/ScheduleHeader.vue'
 
 defineProps({
   days: Array,
+  timeSlots: Array,
+  lessons: Array,
 })
 </script>
 
 <template>
   <main>
-    <ScheduleHeader :days="days" />
+    <ScheduleHeader :days="days" :timeSlots="timeSlots" :lessons="lessons" />
   </main>
 </template>
 
-<style scoped>
-main {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-</style>
+<style scoped></style>
