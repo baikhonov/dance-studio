@@ -9,6 +9,23 @@ const props = defineProps({
 const getLessonForSlot = (time, day) => {
   return props.lessons?.find((lesson) => lesson.time === time && lesson.day === day)
 }
+
+const directionStyles = {
+  lady: 'border-purple-500 bg-purple-50',
+  bachata: 'border-orange-500 bg-orange-50',
+  растяжка: 'border-blue-500 bg-blue-50',
+  stretching: 'border-blue-500 bg-blue-50',
+  contemporary: 'border-teal-500 bg-teal-50',
+  party: 'border-red-500 bg-red-50',
+}
+
+const getDirectionClass = (direction) => {
+  const lower = direction.toLowerCase()
+  for (const [key, value] of Object.entries(directionStyles)) {
+    if (lower.includes(key)) return value
+  }
+  return '' // дефолтный класс
+}
 </script>
 
 <template>
@@ -53,13 +70,7 @@ const getLessonForSlot = (time, day) => {
           <template v-if="lesson = getLessonForSlot(time, day)">
             <div
               class="bg-amber-50 p-2 rounded border-l-4 border-amber-500 hover:shadow-md hover:scale-[1.02] transition-all duration-200 cursor-pointer h-full flex flex-col"
-              :class="{
-                'border-purple-500 bg-purple-50': lesson.direction.toLowerCase().includes('lady'),
-                'border-orange-500 bg-orange-50': lesson.direction
-                  .toLowerCase()
-                  .includes('bachata'),
-                'border-blue-500 bg-blue-50': lesson.direction.toLowerCase().includes('растяжка'),
-              }"
+              :class="getDirectionClass(lesson.direction)"
             >
               <!-- Верхняя часть: направление и уровень -->
               <div class="flex-1">
