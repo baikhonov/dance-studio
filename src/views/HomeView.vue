@@ -1,5 +1,5 @@
 <script setup>
-import ScheduleHeader from '@/components/ScheduleHeader.vue'
+import Schedule from '@/components/Schedule.vue'
 
 defineProps({
   days: Array,
@@ -10,7 +10,7 @@ defineProps({
 
 <template>
   <main>
-    <ScheduleHeader :days="days" :timeSlots="timeSlots" :lessons="lessons" />
+    <Schedule :days="days" :timeSlots="timeSlots" :lessons="lessons" />
   </main>
 </template>
 

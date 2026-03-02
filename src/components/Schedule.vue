@@ -20,7 +20,7 @@ const getLessonForSlot = (time, day) => {
       <!-- ШАПКА С ДНЯМИ (первая строка) -->
       <div class="grid grid-cols-[80px_repeat(7,1fr)] bg-gray-50 border-b border-gray-200">
         <!-- Угловая ячейка (пустая) -->
-        <div class="p-3 font-medium text-gray-600 border-r border-gray-200">Время</div>
+        <div class="p-3 font-medium text-gray-600 border-r border-gray-200 text-center">Время</div>
 
         <!-- Дни недели -->
         <div
@@ -39,7 +39,7 @@ const getLessonForSlot = (time, day) => {
         class="grid grid-cols-[80px_repeat(7,1fr)] border-b border-gray-200 last:border-b-0"
       >
         <!-- Колонка с временем -->
-        <div class="p-3 bg-gray-50 border-r border-gray-200 font-medium text-gray-700">
+        <div class="p-3 bg-gray-50 border-r border-gray-200 font-medium text-gray-700 text-center">
           {{ time }}
         </div>
 
@@ -54,9 +54,11 @@ const getLessonForSlot = (time, day) => {
             <div
               class="bg-amber-50 p-2 rounded border-l-4 border-amber-500 hover:shadow-md hover:scale-[1.02] transition-all duration-200 cursor-pointer h-full flex flex-col"
               :class="{
-                'border-purple-500 bg-purple-50': lesson.direction.includes('Contemporary'),
-                'border-orange-500 bg-orange-50': lesson.direction.includes('Bachata'),
-                'border-blue-500 bg-blue-50': lesson.direction.includes('Hip-Hop'),
+                'border-purple-500 bg-purple-50': lesson.direction.toLowerCase().includes('lady'),
+                'border-orange-500 bg-orange-50': lesson.direction
+                  .toLowerCase()
+                  .includes('bachata'),
+                'border-blue-500 bg-blue-50': lesson.direction.toLowerCase().includes('растяжка'),
               }"
             >
               <!-- Верхняя часть: направление и уровень -->
@@ -68,25 +70,21 @@ const getLessonForSlot = (time, day) => {
               <!-- Нижняя часть: преподаватели -->
               <div
                 class="flex items-center justify-between mt-2 pt-1 border-t border-amber-200/50"
-                :class="{
-                  'border-purple-200/50': lesson.direction.includes('Contemporary'),
-                  'border-orange-200/50': lesson.direction.includes('Bachata'),
-                  'border-blue-200/50': lesson.direction.includes('Hip-Hop'),
-                }"
+                :class="border - orange - 200 / 50"
               >
                 <!-- Имена преподавателей -->
-                <p class="text-xs text-gray-500 truncate max-w-[60%]">
+                <p class="text-xs text-gray-500 max-w-[60%]">
                   {{ lesson.teachers.map((t) => t.name).join(' & ') }}
                 </p>
 
                 <!-- Фотографии преподавателей -->
-                <div class="flex -space-x-2 ml-1">
+                <div class="flex shrink-0 -space-x-2 ml-1">
                   <img
                     v-for="(teacher, idx) in lesson.teachers"
                     :key="teacher.name"
                     :src="`/images/teachers/${teacher.photo}`"
                     :alt="teacher.name"
-                    class="w-6 h-6 rounded-full border-2 border-white shadow-sm"
+                    class="w-16 h-16 rounded-full border-2 border-white shadow-sm"
                     :class="{ 'relative z-10': idx === 0 && lesson.teachers.length > 1 }"
                     @error="$event.target.src = '/images/teachers/default-avatar.jpg'"
                   />
@@ -96,11 +94,11 @@ const getLessonForSlot = (time, day) => {
           </template>
 
           <!-- Пустая ячейка -->
-          <div v-else class="text-xs text-gray-300 h-full flex items-center justify-center">—</div>
+          <div v-else class="text-xs text-gray-300 h-full flex items-center justify-center"></div>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped></style>
