@@ -141,7 +141,7 @@ const getDirectionClass = (direction) => {
     </div>
 
     <!-- СЕТКА: Внешний контейнер -->
-    <div class="border border-t-0 border-gray-300 shadow-md">
+    <div class="border border-t-0 border-gray-300">
       <!-- ШАПКА С ДНЯМИ -->
       <div
         class="sticky z-11 grid grid-cols-[80px_repeat(7,1fr)] bg-gray-100 border-t border-b border-gray-300"
