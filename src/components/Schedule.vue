@@ -1,11 +1,74 @@
 <script setup>
-import { computed } from 'vue'
+import Filters from '@/components/Filters.vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+
+const filtersSection = ref(null)
+const filtersHeight = ref(0)
+
+const updateFiltersHeight = () => {
+  if (filtersSection.value) {
+    // offsetHeight включает высоту элемента + padding + border
+    filtersHeight.value = filtersSection.value.offsetHeight
+  }
+}
+
+onMounted(() => {
+  updateFiltersHeight()
+  window.addEventListener('resize', updateFiltersHeight)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateFiltersHeight)
+})
 
 const SLOT_HEIGHT = 120
 const props = defineProps({
   days: Array,
   timeSlots: Array,
   lessons: Array,
+})
+
+const uniqueDirections = computed(() => {
+  const dirs = [...new Set(props.lessons?.map((lesson) => lesson.direction).filter(Boolean))]
+  return dirs.sort()
+})
+
+const uniqueLevels = computed(() => {
+  const levels = [...new Set(props.lessons?.map((lesson) => lesson.level).filter(Boolean))]
+  return levels.filter(
+    (level) => level.toLowerCase() !== 'для всех' && level.toLowerCase() !== 'все уровни',
+  )
+})
+
+const filters = ref({
+  direction: '',
+  level: '',
+})
+
+const filteredLessons = computed(() => {
+  if (!props.lessons) return []
+
+  const lessons = props.lessons.filter((lesson) => {
+    let matchDirection = true
+
+    if (filters.value.direction) {
+      // если фильтр активен — сравниваем
+      matchDirection = lesson.direction.toLowerCase() === filters.value.direction.toLowerCase()
+    }
+
+    let matchLevel = true
+
+    if (filters.value.level) {
+      // если фильтр активен — сравниваем (с защитой от отсутствия level)
+      const lessonLevel = lesson.level?.toLowerCase()
+      const selectedLevel = filters.value.level.toLowerCase()
+      matchLevel = lessonLevel === selectedLevel || lessonLevel === 'для всех'
+    }
+
+    return matchDirection && matchLevel
+  })
+
+  return lessons
 })
 
 // Вспомогательная функция: время в минуты
@@ -16,7 +79,7 @@ const timeToMinutes = (time) => {
 
 // Получаем занятия для конкретного дня
 const getLessonsForDay = (day) => {
-  return props.lessons?.filter((lesson) => lesson.day === day) || []
+  return filteredLessons.value?.filter((lesson) => lesson.day === day) || []
 }
 
 // Вычисляем стиль для занятия
@@ -63,12 +126,27 @@ const getDirectionClass = (direction) => {
 
 <template>
   <div class="schedule">
-    <h2 class="text-center text-2xl font-semibold mb-4">Расписание занятий</h2>
+    <div ref="filtersSection" class="sticky top-0 z-20 bg-gray-100 pb-2">
+      <h2 class="text-center text-2xl font-semibold mb-4">Расписание занятий</h2>
+      <div class="flex gap-2 justify-end items-center mb-4">
+        <Filters :directions="uniqueDirections" :levels="uniqueLevels" v-model="filters" />
+
+        <div
+          v-if="filters.direction || filters.level"
+          class="text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full"
+        >
+          Найдено: {{ filteredLessons.length }}
+        </div>
+      </div>
+    </div>
 
     <!-- СЕТКА: Внешний контейнер -->
-    <div class="border border-gray-300 rounded-lg overflow-hidden shadow-md">
+    <div class="border border-t-0 border-gray-300 shadow-md">
       <!-- ШАПКА С ДНЯМИ -->
-      <div class="grid grid-cols-[80px_repeat(7,1fr)] bg-gray-100 border-b border-gray-300">
+      <div
+        class="sticky z-11 grid grid-cols-[80px_repeat(7,1fr)] bg-gray-100 border-t border-b border-gray-300"
+        :style="{ top: `${filtersHeight}px` }"
+      >
         <div
           class="p-3 font-semibold text-gray-700 border-r border-gray-300 text-center bg-gray-200/50"
         >
@@ -113,7 +191,7 @@ const getDirectionClass = (direction) => {
           ></div>
 
           <!-- Занятия поверх сетки -->
-          <template v-for="lesson in getLessonsForDay(day)" :key="lesson.id">
+          <template v-auto-animate v-for="lesson in getLessonsForDay(day)" :key="lesson.id">
             <div
               class="absolute rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer border-l-4"
               :class="getDirectionClass(lesson.direction)"
