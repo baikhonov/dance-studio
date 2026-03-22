@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 
-const SLOT_HEIGHT = 120 // или 100, или 120 - экспериментируй
+const SLOT_HEIGHT = 120
 const props = defineProps({
   days: Array,
   timeSlots: Array,
@@ -24,14 +24,11 @@ const getLessonStyle = (lesson) => {
   const startMinutes = timeToMinutes(lesson.time)
   const endMinutes = timeToMinutes(lesson.endTime)
 
-  // Находим индекс первого временного слота (09:00)
   const firstSlotMinutes = timeToMinutes(props.timeSlots[0])
 
-  // Позиция сверху: (время начала - первый слот) / высота слота
   const minutesFromStart = startMinutes - firstSlotMinutes
   const top = (minutesFromStart / 60) * SLOT_HEIGHT
 
-  // Высота: длительность в часах * высота слота
   const durationHours = (endMinutes - startMinutes) / 60
   const height = durationHours * SLOT_HEIGHT
 
@@ -41,17 +38,18 @@ const getLessonStyle = (lesson) => {
     left: '3px',
     right: '3px',
     height: `${height - 6}px`,
-    zIndex: 1,
+    zIndex: 10,
   }
 }
 
 const directionStyles = {
-  lady: 'border-purple-500 bg-purple-50',
-  bachata: 'border-orange-500 bg-orange-50',
-  растяжка: 'border-blue-500 bg-blue-50',
-  stretching: 'border-blue-500 bg-blue-50',
-  contemporary: 'border-teal-500 bg-teal-50',
-  party: 'border-red-500 bg-red-50',
+  lady: 'border-purple-600 bg-purple-100 hover:bg-purple-200',
+  пар: 'border-orange-600 bg-orange-100 hover:bg-orange-200',
+  растяжка: 'border-blue-600 bg-blue-100 hover:bg-blue-200',
+  stretching: 'border-blue-600 bg-blue-100 hover:bg-blue-200',
+  общее: 'border-teal-600 bg-teal-100 hover:bg-teal-200',
+  party: 'border-red-600 bg-red-100 hover:bg-red-200',
+  вечеринка: 'border-red-600 bg-red-100 hover:bg-red-200',
 }
 
 const getDirectionClass = (direction) => {
@@ -59,7 +57,7 @@ const getDirectionClass = (direction) => {
   for (const [key, value] of Object.entries(directionStyles)) {
     if (lower.includes(key)) return value
   }
-  return 'border-amber-500 bg-amber-50' // дефолтный класс
+  return 'border-amber-600 bg-amber-100 hover:bg-amber-200'
 }
 </script>
 
@@ -68,14 +66,18 @@ const getDirectionClass = (direction) => {
     <h2 class="text-center text-2xl font-semibold mb-4">Расписание занятий</h2>
 
     <!-- СЕТКА: Внешний контейнер -->
-    <div class="border border-gray-200 rounded-lg overflow-hidden">
+    <div class="border border-gray-300 rounded-lg overflow-hidden shadow-md">
       <!-- ШАПКА С ДНЯМИ -->
-      <div class="grid grid-cols-[80px_repeat(7,1fr)] bg-gray-50 border-b border-gray-200">
-        <div class="p-3 font-medium text-gray-600 border-r border-gray-200 text-center">Время</div>
+      <div class="grid grid-cols-[80px_repeat(7,1fr)] bg-gray-100 border-b border-gray-300">
+        <div
+          class="p-3 font-semibold text-gray-700 border-r border-gray-300 text-center bg-gray-200/50"
+        >
+          Время
+        </div>
         <div
           v-for="day in days"
           :key="day"
-          class="p-3 font-medium text-gray-600 text-center border-r border-gray-200 last:border-r-0"
+          class="p-3 font-semibold text-gray-700 text-center border-r border-gray-300 last:border-r-0 bg-gray-200/50"
         >
           {{ day }}
         </div>
@@ -84,11 +86,11 @@ const getDirectionClass = (direction) => {
       <!-- ОСНОВНОЙ КОНТЕЙНЕР: временная сетка + занятия -->
       <div class="grid grid-cols-[80px_repeat(7,1fr)]">
         <!-- Колонка с временными метками -->
-        <div class="bg-gray-50">
+        <div class="bg-gray-100">
           <div
             v-for="time in timeSlots"
             :key="time"
-            class="border-b border-r border-gray-200 text-sm p-2 text-gray-500 text-center"
+            class="border-b border-r border-gray-300 text-sm p-2 text-gray-600 font-medium text-center"
             :style="{ height: SLOT_HEIGHT + 'px' }"
           >
             {{ time }}
@@ -99,21 +101,21 @@ const getDirectionClass = (direction) => {
         <div
           v-for="day in days"
           :key="day"
-          class="relative bg-gray-50 border-r border-gray-200 last:border-r-0"
-          :style="{ minHeight: `${timeSlots.length * 60}px` }"
+          class="relative bg-gray-100 border-r border-gray-300 last:border-r-0"
+          :style="{ minHeight: `${timeSlots.length * SLOT_HEIGHT}px` }"
         >
-          <!-- Фоновая сетка (серые линии) -->
+          <!-- Фоновая сетка -->
           <div
             v-for="time in timeSlots"
             :key="time"
-            class="border-b border-gray-200"
+            class="border-b border-gray-300"
             :style="{ height: SLOT_HEIGHT + 'px' }"
           ></div>
 
           <!-- Занятия поверх сетки -->
           <template v-for="lesson in getLessonsForDay(day)" :key="lesson.id">
             <div
-              class="absolute rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+              class="absolute rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer border-l-4"
               :class="getDirectionClass(lesson.direction)"
               :style="getLessonStyle(lesson)"
             >
@@ -121,26 +123,28 @@ const getDirectionClass = (direction) => {
               <div class="h-full p-1.5 flex flex-col text-[10px] overflow-y-auto">
                 <!-- Название -->
                 <p
-                  class="shrink-0 font-bold text-xs leading-tight truncate"
+                  class="shrink-0 font-bold text-xs leading-tight truncate text-gray-900"
                   :title="lesson.direction"
                 >
                   {{ lesson.direction }}
                 </p>
 
-                <!-- Уровень (если есть) -->
-                <p v-if="lesson.level" class="text-xs text-gray-600 mt-0.5">
+                <!-- Уровень -->
+                <p v-if="lesson.level" class="text-xs text-gray-700 mt-0.5 font-medium">
                   {{ lesson.level }}
                 </p>
 
-                <div class="text-xs font-medium mt-1">{{ lesson.time }}—{{ lesson.endTime }}</div>
+                <!-- Время на полупрозрачном фоне -->
+                <div
+                  class="text-xs font-medium mt-1 bg-white/50 px-1 py-0.5 rounded inline-block self-start"
+                >
+                  {{ lesson.time }}—{{ lesson.endTime }}
+                </div>
 
                 <!-- Преподаватели -->
-                <div
-                  class="flex items-center justify-between mt-1 pt-1 border-t border-amber-200/50"
-                  :class="'border-orange-200/50'"
-                >
+                <div class="flex items-center justify-between mt-1 pt-1 border-t border-white/50">
                   <!-- Имена преподавателей -->
-                  <p class="text-xs text-gray-500 max-w-[60%]">
+                  <p class="text-xs text-gray-700 font-medium max-w-[60%] truncate">
                     {{ lesson.teachers.map((t) => t.name).join(' & ') }}
                   </p>
 
@@ -151,7 +155,7 @@ const getDirectionClass = (direction) => {
                       :key="teacher.name"
                       :src="`/images/teachers/${teacher.photo}`"
                       :alt="teacher.name"
-                      class="w-10 h-10 rounded-full border-2 border-white shadow-sm"
+                      class="w-9 h-9 rounded-full border-2 border-white shadow-sm"
                       :class="{ 'relative z-10': idx === 0 && lesson.teachers.length > 1 }"
                       @error="$event.target.src = '/images/teachers/default-avatar.jpg'"
                     />
@@ -170,7 +174,7 @@ const getDirectionClass = (direction) => {
 /* Для скролла внутри длинных занятий */
 .overflow-y-auto {
   scrollbar-width: thin;
-  scrollbar-color: #ccc #f0f0f0;
+  scrollbar-color: #999 #e0e0e0;
 }
 
 .overflow-y-auto::-webkit-scrollbar {
@@ -178,11 +182,16 @@ const getDirectionClass = (direction) => {
 }
 
 .overflow-y-auto::-webkit-scrollbar-track {
-  background: #f0f0f0;
+  background: #e0e0e0;
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: #999;
   border-radius: 4px;
+}
+
+/* Улучшаем читаемость текста на цветном фоне */
+.text-gray-900 {
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 </style>
