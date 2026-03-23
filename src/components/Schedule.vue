@@ -253,7 +253,10 @@ const openLessonModal = (lesson) => {
                   </div>
                 </div>
                 <!-- Постер мероприятия -->
-                <div v-else-if="lesson.type === 'party'" class="flex justify-end">
+                <div
+                  v-else-if="lesson.type === 'party'"
+                  class="flex items-center justify-end mt-1 pt-1 border-t border-white/50"
+                >
                   <img
                     v-if="lesson.poster"
                     :src="`/images/posters/${lesson.poster}`"
