@@ -79,7 +79,7 @@ const getDirectionColor = (direction) => {
                 <!-- Преподаватели -->
                 <div v-if="lesson.teachers && lesson.teachers.length > 0" class="mb-6">
                   <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                    Преподаватели
+                    {{ lesson.teachers.length > 1 ? 'Преподаватели' : 'Преподаватель' }}
                   </h4>
                   <div class="flex flex-wrap gap-4">
                     <div
@@ -93,10 +93,7 @@ const getDirectionColor = (direction) => {
                         class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
                         @error="$event.target.src = '/images/teachers/default-avatar.jpg'"
                       />
-                      <div>
-                        <p class="font-semibold text-gray-800">{{ teacher.name }}</p>
-                        <p class="text-xs text-gray-500">Преподаватель</p>
-                      </div>
+                      <p class="font-semibold text-gray-800">{{ teacher.name }}</p>
                     </div>
                   </div>
                 </div>
