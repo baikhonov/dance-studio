@@ -90,7 +90,7 @@ const getDirectionColor = (direction) => {
                       <img
                         :src="`/images/teachers/${teacher.photo}`"
                         :alt="teacher.name"
-                        class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
+                        class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
                         @error="$event.target.src = '/images/teachers/default-avatar.jpg'"
                       />
                       <p class="font-semibold text-gray-800">{{ teacher.name }}</p>
