@@ -130,8 +130,6 @@ let selectedLesson = ref()
 const openLessonModal = (lesson) => {
   selectedLesson.value = lesson
   isModalOpen.value = true
-
-  console.log(selectedLesson.value)
 }
 </script>
 
@@ -238,7 +236,7 @@ const openLessonModal = (lesson) => {
                 >
                   <!-- Имена преподавателей -->
                   <p class="text-xs text-gray-700 font-medium max-w-[60%] truncate">
-                    {{ lesson.teachers.map((t) => t.name).join(' & ') }}
+                    {{ lesson.teachers.map((t) => t.name).join(' и ') }}
                   </p>
 
                   <!-- Фотографии преподавателей -->
