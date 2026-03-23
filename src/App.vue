@@ -37,6 +37,8 @@ const lessons = ref([
     direction: 'Lady Style (соло)',
     level: 'Продолжающие',
     teachers: [{ name: 'Татьяна', photo: 'tatyana.jpg' }],
+    type: 'lesson',
+    poster: null,
   },
   {
     id: 2,
@@ -46,6 +48,8 @@ const lessons = ref([
     direction: 'Бачата в паре',
     level: 'Начинающие',
     teachers: [{ name: 'Кеулемжай и Татьяна', photo: 'keulemzhai-tatyana2.jpg' }],
+    type: 'lesson',
+    poster: null,
   },
   {
     id: 3,
@@ -55,6 +59,8 @@ const lessons = ref([
     direction: 'Общее хорео (соло)',
     level: 'Для всех',
     teachers: [{ name: 'Кеулемжай', photo: 'keulemzhai.jpg' }],
+    type: 'lesson',
+    poster: null,
   },
   {
     id: 4,
@@ -64,6 +70,8 @@ const lessons = ref([
     direction: 'Бачата в паре',
     level: 'Продолжающие',
     teachers: [{ name: 'Кеулемжай и Татьяна', photo: 'keulemzhai-tatyana2.jpg' }],
+    type: 'lesson',
+    poster: null,
   },
   {
     id: 5,
@@ -73,6 +81,8 @@ const lessons = ref([
     direction: 'Lady Style (соло)',
     level: 'Продолжающие',
     teachers: [{ name: 'Татьяна', photo: 'tatyana.jpg' }],
+    type: 'lesson',
+    poster: null,
   },
   {
     id: 6,
@@ -82,6 +92,8 @@ const lessons = ref([
     direction: 'Бачата в паре',
     level: 'Начинающие',
     teachers: [{ name: 'Кеулемжай и Татьяна', photo: 'keulemzhai-tatyana2.jpg' }],
+    type: 'lesson',
+    poster: null,
   },
   {
     id: 7,
@@ -91,6 +103,8 @@ const lessons = ref([
     direction: 'Общее хорео (соло)',
     level: 'Для всех',
     teachers: [{ name: 'Кеулемжай', photo: 'keulemzhai.jpg' }],
+    type: 'lesson',
+    poster: null,
   },
   {
     id: 8,
@@ -100,6 +114,8 @@ const lessons = ref([
     direction: 'Бачата в паре',
     level: 'Продолжающие',
     teachers: [{ name: 'Кеулемжай и Татьяна', photo: 'keulemzhai-tatyana2.jpg' }],
+    type: 'lesson',
+    poster: null,
   },
   {
     id: 9,
@@ -109,15 +125,19 @@ const lessons = ref([
     direction: 'Lady Style (соло)',
     level: 'Начинающие',
     teachers: [{ name: 'Татьяна', photo: 'tatyana.jpg' }],
+    type: 'lesson',
+    poster: null,
   },
   {
-    id: 9,
+    id: 10,
     day: 'Пятница',
     time: '20:30',
     endTime: '22:30',
     direction: 'Бачата интенсив "Украшения в паре"',
     level: 'Для всех',
     teachers: [{ name: 'Кеулемжай и Татьяна', photo: 'keulemzhai-tatyana2.jpg' }],
+    type: 'lesson',
+    poster: null,
   },
   {
     id: 19,
@@ -126,7 +146,8 @@ const lessons = ref([
     endTime: '23:00',
     direction: 'Вечеринка',
     level: 'Для всех',
-    teachers: [{ name: '', photo: 'party-bachatamania.jpg' }],
+    type: 'party',
+    poster: 'party-bachatamania.jpg',
   },
   {
     id: 20,
@@ -136,6 +157,8 @@ const lessons = ref([
     direction: 'Lady Style (соло)',
     level: 'Начинающие',
     teachers: [{ name: 'Татьяна', photo: 'tatyana.jpg' }],
+    type: 'lesson',
+    poster: null,
   },
 ])
 </script>

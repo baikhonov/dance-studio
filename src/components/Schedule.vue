@@ -1,5 +1,6 @@
 <script setup>
 import Filters from '@/components/Filters.vue'
+import LessonModal from '@/components/LessonModal.vue'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const filtersSection = ref(null)
@@ -122,6 +123,16 @@ const getDirectionClass = (direction) => {
   }
   return 'border-amber-600 bg-amber-100 hover:bg-amber-200'
 }
+
+let isModalOpen = ref(false)
+let selectedLesson = ref()
+
+const openLessonModal = (lesson) => {
+  selectedLesson.value = lesson
+  isModalOpen.value = true
+
+  console.log(selectedLesson.value)
+}
 </script>
 
 <template>
@@ -196,6 +207,7 @@ const getDirectionClass = (direction) => {
               class="absolute rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer border-l-4"
               :class="getDirectionClass(lesson.direction)"
               :style="getLessonStyle(lesson)"
+              @click="openLessonModal(lesson)"
             >
               <!-- Контент занятия -->
               <div class="h-full p-1.5 flex flex-col text-[10px] overflow-y-auto">
@@ -220,7 +232,10 @@ const getDirectionClass = (direction) => {
                 </div>
 
                 <!-- Преподаватели -->
-                <div class="flex items-center justify-between mt-1 pt-1 border-t border-white/50">
+                <div
+                  v-if="lesson.teachers && lesson.teachers.length > 0"
+                  class="flex items-center justify-between mt-1 pt-1 border-t border-white/50"
+                >
                   <!-- Имена преподавателей -->
                   <p class="text-xs text-gray-700 font-medium max-w-[60%] truncate">
                     {{ lesson.teachers.map((t) => t.name).join(' & ') }}
@@ -239,12 +254,23 @@ const getDirectionClass = (direction) => {
                     />
                   </div>
                 </div>
+                <!-- Постер мероприятия -->
+                <div v-else-if="lesson.type === 'party'" class="flex justify-end">
+                  <img
+                    v-if="lesson.poster"
+                    :src="`/images/posters/${lesson.poster}`"
+                    :alt="lesson.direction"
+                    class="w-9 h-9 rounded-full border-2 border-white shadow-sm object-cover"
+                  />
+                </div>
               </div>
             </div>
           </template>
         </div>
       </div>
     </div>
+
+    <LessonModal :lesson="selectedLesson" :isOpen="isModalOpen" @close="isModalOpen = false" />
   </div>
 </template>
 
