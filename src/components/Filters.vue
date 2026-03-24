@@ -11,7 +11,6 @@ const filters = defineModel({
 
 function updateDirection(event) {
   const value = event.target.value
-  console.log(`Выбрано направление ${value}`)
   filters.value = {
     ...filters.value,
     direction: value,
@@ -20,7 +19,6 @@ function updateDirection(event) {
 
 function updateLevel(event) {
   const value = event.target.value
-  console.log(`Выбран уровень ${value}`)
   filters.value = {
     ...filters.value,
     level: value,

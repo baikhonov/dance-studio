@@ -1,7 +1,9 @@
 <script setup>
 import Filters from '@/components/Filters.vue'
 import LessonModal from '@/components/LessonModal.vue'
+import { useScheduleStore } from '@/stores/schedule'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { storeToRefs } from 'pinia'
 
 const filtersSection = ref(null)
 const filtersHeight = ref(0)
@@ -23,54 +25,14 @@ onUnmounted(() => {
 })
 
 const SLOT_HEIGHT = 120
-const props = defineProps({
-  days: Array,
-  timeSlots: Array,
-  lessons: Array,
-})
 
-const uniqueDirections = computed(() => {
-  const dirs = [...new Set(props.lessons?.map((lesson) => lesson.direction).filter(Boolean))]
-  return dirs.sort()
-})
+const store = useScheduleStore()
+const { days, timeSlots, filters } = storeToRefs(store)
 
-const uniqueLevels = computed(() => {
-  const levels = [...new Set(props.lessons?.map((lesson) => lesson.level).filter(Boolean))]
-  return levels.filter(
-    (level) => level.toLowerCase() !== 'для всех' && level.toLowerCase() !== 'все уровни',
-  )
-})
+const uniqueDirections = computed(() => store.uniqueDirections)
+const uniqueLevels = computed(() => store.uniqueLevels)
 
-const filters = ref({
-  direction: '',
-  level: '',
-})
-
-const filteredLessons = computed(() => {
-  if (!props.lessons) return []
-
-  const lessons = props.lessons.filter((lesson) => {
-    let matchDirection = true
-
-    if (filters.value.direction) {
-      // если фильтр активен — сравниваем
-      matchDirection = lesson.direction.toLowerCase() === filters.value.direction.toLowerCase()
-    }
-
-    let matchLevel = true
-
-    if (filters.value.level) {
-      // если фильтр активен — сравниваем (с защитой от отсутствия level)
-      const lessonLevel = lesson.level?.toLowerCase()
-      const selectedLevel = filters.value.level.toLowerCase()
-      matchLevel = lessonLevel === selectedLevel || lessonLevel === 'для всех'
-    }
-
-    return matchDirection && matchLevel
-  })
-
-  return lessons
-})
+const filteredLessons = computed(() => store.filteredLessons)
 
 // Вспомогательная функция: время в минуты
 const timeToMinutes = (time) => {
@@ -78,17 +40,12 @@ const timeToMinutes = (time) => {
   return hours * 60 + minutes
 }
 
-// Получаем занятия для конкретного дня
-const getLessonsForDay = (day) => {
-  return filteredLessons.value?.filter((lesson) => lesson.day === day) || []
-}
-
 // Вычисляем стиль для занятия
 const getLessonStyle = (lesson) => {
   const startMinutes = timeToMinutes(lesson.time)
   const endMinutes = timeToMinutes(lesson.endTime)
 
-  const firstSlotMinutes = timeToMinutes(props.timeSlots[0])
+  const firstSlotMinutes = timeToMinutes(store.timeSlots[0])
 
   const minutesFromStart = startMinutes - firstSlotMinutes
   const top = (minutesFromStart / 60) * SLOT_HEIGHT
@@ -200,7 +157,7 @@ const openLessonModal = (lesson) => {
           ></div>
 
           <!-- Занятия поверх сетки -->
-          <template v-auto-animate v-for="lesson in getLessonsForDay(day)" :key="lesson.id">
+          <template v-auto-animate v-for="lesson in store.getLessonsByDay(day)" :key="lesson.id">
             <div
               class="absolute rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer border-l-4"
               :class="getDirectionClass(lesson.direction)"

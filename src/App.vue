@@ -1,188 +1,19 @@
 <script setup>
 import { ref } from 'vue'
 import { RouterView } from 'vue-router'
+import { useScheduleStore } from '@/stores/schedule'
+import { storeToRefs } from 'pinia'
 
-const daysOfWeek = ref([
-  'Понедельник',
-  'Вторник',
-  'Среда',
-  'Четверг',
-  'Пятница',
-  'Суббота',
-  'Воскресенье',
-])
-const timeSlots = ref([
-  '09:00',
-  '10:00',
-  '11:00',
-  '12:00',
-  '13:00',
-  '14:00',
-  '15:00',
-  '16:00',
-  '17:00',
-  '18:00',
-  '19:00',
-  '20:00',
-  '21:00',
-  '22:00',
-  '23:00',
-])
-const lessons = ref([
-  {
-    id: 1,
-    day: 'Понедельник',
-    time: '19:30',
-    endTime: '20:30',
-    direction: 'Lady Style (соло)',
-    level: 'Продолжающие',
-    teachers: [{ name: 'Татьяна', photo: 'tatyana.jpg' }],
-    type: 'lesson',
-    poster: null,
-  },
-  {
-    id: 2,
-    day: 'Понедельник',
-    time: '20:30',
-    endTime: '21:30',
-    direction: 'Бачата в паре',
-    level: 'Начинающие',
-    teachers: [
-      { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-      { name: 'Татьяна', photo: 'tatyana.jpg' },
-    ],
-    type: 'lesson',
-    poster: null,
-  },
-  {
-    id: 3,
-    day: 'Вторник',
-    time: '19:30',
-    endTime: '20:30',
-    direction: 'Общее хорео (соло)',
-    level: 'Для всех',
-    teachers: [{ name: 'Кеулемжай', photo: 'keulemzhai.jpg' }],
-    type: 'lesson',
-    poster: null,
-  },
-  {
-    id: 4,
-    day: 'Вторник',
-    time: '20:30',
-    endTime: '21:30',
-    direction: 'Бачата в паре',
-    level: 'Продолжающие',
-    teachers: [
-      { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-      { name: 'Татьяна', photo: 'tatyana.jpg' },
-    ],
-    type: 'lesson',
-    poster: null,
-  },
-  {
-    id: 5,
-    day: 'Среда',
-    time: '19:30',
-    endTime: '20:30',
-    direction: 'Lady Style (соло)',
-    level: 'Продолжающие',
-    teachers: [{ name: 'Татьяна', photo: 'tatyana.jpg' }],
-    type: 'lesson',
-    poster: null,
-  },
-  {
-    id: 6,
-    day: 'Среда',
-    time: '20:30',
-    endTime: '21:30',
-    direction: 'Бачата в паре',
-    level: 'Начинающие',
-    teachers: [
-      { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-      { name: 'Татьяна', photo: 'tatyana.jpg' },
-    ],
-    type: 'lesson',
-    poster: null,
-  },
-  {
-    id: 7,
-    day: 'Четверг',
-    time: '19:30',
-    endTime: '20:30',
-    direction: 'Общее хорео (соло)',
-    level: 'Для всех',
-    teachers: [{ name: 'Кеулемжай', photo: 'keulemzhai.jpg' }],
-    type: 'lesson',
-    poster: null,
-  },
-  {
-    id: 8,
-    day: 'Четверг',
-    time: '20:30',
-    endTime: '21:30',
-    direction: 'Бачата в паре',
-    level: 'Продолжающие',
-    teachers: [
-      { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-      { name: 'Татьяна', photo: 'tatyana.jpg' },
-    ],
-    type: 'lesson',
-    poster: null,
-  },
-  {
-    id: 9,
-    day: 'Пятница',
-    time: '19:30',
-    endTime: '20:30',
-    direction: 'Lady Style (соло)',
-    level: 'Начинающие',
-    teachers: [{ name: 'Татьяна', photo: 'tatyana.jpg' }],
-    type: 'lesson',
-    poster: null,
-  },
-  {
-    id: 10,
-    day: 'Пятница',
-    time: '20:30',
-    endTime: '22:30',
-    direction: 'Бачата интенсив "Украшения в паре"',
-    level: 'Для всех',
-    teachers: [
-      { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-      { name: 'Татьяна', photo: 'tatyana.jpg' },
-    ],
-    type: 'lesson',
-    poster: null,
-  },
-  {
-    id: 19,
-    day: 'Суббота',
-    time: '20:00',
-    endTime: '23:00',
-    direction: 'Вечеринка',
-    level: 'Для всех',
-    type: 'party',
-    poster: 'party-bachatamania.webp',
-  },
-  {
-    id: 20,
-    day: 'Воскресенье',
-    time: '13:00',
-    endTime: '14:00',
-    direction: 'Lady Style (соло)',
-    level: 'Начинающие',
-    teachers: [{ name: 'Татьяна', photo: 'tatyana.jpg' }],
-    type: 'lesson',
-    poster: null,
-  },
-])
+const store = useScheduleStore()
+
+const { days, timeSlots, lessons } = storeToRefs(store)
 </script>
 
 <template>
   <header class="my-8 text-center">
     <h1 class="text-4xl font-light tracking-widest text-gray-800 uppercase mb-2">Школа танцев</h1>
   </header>
-  <RouterView :days="daysOfWeek" :timeSlots="timeSlots" :lessons="lessons" />
+  <RouterView :days="days" :timeSlots="timeSlots" :lessons="lessons" />
   <footer class="my-6 text-center text-gray-600">© 2026 Школа танцев. Все права защищены.</footer>
 </template>
 
