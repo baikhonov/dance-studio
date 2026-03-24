@@ -98,17 +98,13 @@ const getDirectionColor = (direction) => {
                   </div>
                 </div>
                 <!-- Постер мероприятия -->
-                <div v-else-if="lesson.type === 'party' && lesson.poster" class="mb-6">
-                  <div
-                    class="rounded-xl overflow-hidden bg-gradient-to-r from-purple-100 to-pink-100 p-6 text-center"
-                  >
-                    <img
-                      :src="`/images/posters/${lesson.poster}`"
-                      :alt="lesson.direction"
-                      class="w-full max-w-xs mx-auto rounded-lg shadow-md mb-4"
-                      @error="$event.target.src = '/images/events/default-party.jpg'"
-                    />
-                  </div>
+                <div v-else-if="lesson.type === 'party' && lesson.poster">
+                  <img
+                    :src="`/images/posters/${lesson.poster}`"
+                    :alt="lesson.direction"
+                    class="w-full mx-auto rounded-lg shadow-md"
+                    @error="$event.target.src = '/images/events/default-party.jpg'"
+                  />
                 </div>
               </div>
 
