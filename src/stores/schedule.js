@@ -183,8 +183,10 @@ export const useScheduleStore = defineStore('schedule', {
   }),
   getters: {
     // Получаем занятия для конкретного дня
-    getLessonsByDay: (state) => (day) => {
-      return state.filteredLessons.filter((lesson) => lesson.day === day)
+    getLessonsByDay() {
+      return (day) => {
+        return this.filteredLessons.filter((lesson) => lesson.day === day)
+      }
     },
     uniqueDirections: (state) => {
       const dirs = [...new Set(state.lessons?.map((lesson) => lesson.direction).filter(Boolean))]
