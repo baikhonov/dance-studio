@@ -93,14 +93,14 @@ const openLessonModal = (lesson) => {
 <template>
   <div class="schedule">
     <!-- БЛОК ФИЛЬТРОВ (sticky) -->
-    <div ref="filtersSection" class="sticky top-0 z-20 bg-gray-100 py-2">
+    <div ref="filtersSection" class="md:sticky md:top-0 z-20 bg-gray-100 py-2">
       <h2 class="text-center text-2xl font-semibold mb-4">Расписание занятий</h2>
-      <div class="flex gap-2 justify-end items-center mb-4">
+      <div class="flex flex-col md:flex-row gap-2 justify-end items-stretch md:items-center mb-4">
         <Filters :directions="uniqueDirections" :levels="uniqueLevels" v-model="filters" />
 
         <div
           v-if="filters.direction || filters.level"
-          class="text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full"
+          class="text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full text-center"
         >
           Найдено: {{ filteredLessons.length }}
         </div>
@@ -111,7 +111,7 @@ const openLessonModal = (lesson) => {
     <div class="border border-t-0 border-gray-300">
       <!-- ШАПКА С ДНЯМИ (sticky) -->
       <div
-        class="sticky z-11 grid grid-cols-[80px_repeat(7,1fr)] bg-gray-100 border-t border-b border-gray-300"
+        class="sticky z-11 grid grid-cols-[80px_repeat(7,minmax(110px,1fr))] bg-gray-100 border-t border-b border-gray-300"
         :style="{ top: `${filtersHeight}px` }"
       >
         <!-- УГЛОВАЯ ЯЧЕЙКА "Время" -->
@@ -126,12 +126,13 @@ const openLessonModal = (lesson) => {
           :key="day"
           class="p-3 font-semibold text-gray-700 text-center border-r border-gray-300 last:border-r-0 bg-gray-200/50"
         >
-          {{ day }}
+          <span class="md:hidden">{{ day.slice(0, 3) }}</span>
+          <span class="hidden md:inline">{{ day }}</span>
         </div>
       </div>
 
       <!-- ОСНОВНОЙ КОНТЕЙНЕР: временная сетка + занятия -->
-      <div class="grid grid-cols-[80px_repeat(7,1fr)]">
+      <div class="grid grid-cols-[80px_repeat(7,minmax(110px,1fr))]">
         <!-- КОЛОНКА С ВРЕМЕННЫМИ МЕТКАМИ -->
         <div class="bg-gray-100">
           <div

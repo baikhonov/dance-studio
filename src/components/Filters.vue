@@ -31,9 +31,9 @@ const resetFilters = () => {
 </script>
 
 <template>
-  <div class="filters flex gap-2">
+  <div class="filters flex flex-col md:flex-row gap-2 w-full md:w-auto">
     <select
-      class="w-auto max-w-[200px] px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer"
+      class="w-full md:w-auto max-w-full md:max-w-[200px] px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer"
       :value="filters.direction"
       @change="updateDirection"
     >
@@ -43,7 +43,7 @@ const resetFilters = () => {
       </option>
     </select>
     <select
-      class="w-auto max-w-[200px] px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer"
+      class="w-full md:w-auto max-w-full md:max-w-[200px] px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer"
       :value="filters.level"
       @change="updateLevel"
     >
@@ -55,7 +55,7 @@ const resetFilters = () => {
     <button
       v-if="filters.direction || filters.level"
       @click="resetFilters"
-      class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+      class="w-full md:w-auto px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
     >
       ✕ Сбросить
     </button>

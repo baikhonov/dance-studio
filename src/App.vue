@@ -13,7 +13,7 @@ const { days, timeSlots, lessons } = storeToRefs(store)
   <header class="my-8 text-center">
     <h1 class="text-4xl font-light tracking-widest text-gray-800 uppercase mb-2">Школа танцев</h1>
   </header>
-  <RouterView :days="days" :timeSlots="timeSlots" :lessons="lessons" />
+  <RouterView />
   <footer class="my-6 text-center text-gray-600">© 2026 Школа танцев. Все права защищены.</footer>
 </template>
 
