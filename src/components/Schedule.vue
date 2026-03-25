@@ -2,8 +2,18 @@
 import Filters from '@/components/Filters.vue'
 import LessonModal from '@/components/LessonModal.vue'
 import { useScheduleStore } from '@/stores/schedule'
+import { useUserStore } from '@/stores/user'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
+
+const userStore = useUserStore()
+const { isAdmin } = storeToRefs(userStore)
+
+const scheduleStore = useScheduleStore()
+
+const getTeachers = (teacherIds) => {
+  return scheduleStore.getTeachersForLesson(teacherIds)
+}
 
 const filtersSection = ref(null)
 const filtersHeight = ref(0)
@@ -201,23 +211,31 @@ const openLessonModal = (lesson) => {
 
                   <!-- Преподаватели -->
                   <div
-                    v-if="lesson.teachers && lesson.teachers.length > 0"
+                    v-if="
+                      getTeachers(lesson.teacherIds) && getTeachers(lesson.teacherIds).length > 0
+                    "
                     class="flex items-center justify-between mt-1 pt-1 border-t border-white/50"
                   >
                     <!-- Имена преподавателей -->
                     <p class="text-xs text-gray-700 font-medium max-w-[60%] truncate">
-                      {{ lesson.teachers.map((t) => t.name).join(' и ') }}
+                      {{
+                        getTeachers(lesson.teacherIds)
+                          .map((t) => t.name)
+                          .join(' и ')
+                      }}
                     </p>
 
                     <!-- Фотографии преподавателей -->
                     <div class="flex shrink-0 -space-x-4 md:-space-x-2 ml-1">
                       <img
-                        v-for="(teacher, idx) in lesson.teachers"
+                        v-for="(teacher, idx) in getTeachers(lesson.teacherIds)"
                         :key="teacher.name"
                         :src="`/images/teachers/${teacher.photo}`"
                         :alt="teacher.name"
                         class="w-9 h-9 rounded-full border-1 md:border-2 border-white shadow-sm"
-                        :class="{ 'relative z-10': idx === 0 && lesson.teachers.length > 1 }"
+                        :class="{
+                          'relative z-10': idx === 0 && getTeachers(lesson.teacherIds).length > 1,
+                        }"
                         @error="$event.target.src = '/images/teachers/default-avatar.jpg'"
                       />
                     </div>
@@ -243,7 +261,12 @@ const openLessonModal = (lesson) => {
     </div>
 
     <!-- МОДАЛКА ДЕТАЛЬНОЙ ИНФОРМАЦИИ -->
-    <LessonModal :lesson="selectedLesson" :isOpen="isModalOpen" @close="isModalOpen = false" />
+    <LessonModal
+      :lesson="selectedLesson"
+      :isOpen="isModalOpen"
+      :isAdmin="isAdmin"
+      @close="isModalOpen = false"
+    />
   </div>
 </template>
 

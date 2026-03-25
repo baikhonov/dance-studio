@@ -36,7 +36,7 @@ export const useScheduleStore = defineStore('schedule', {
         endTime: '20:30',
         direction: 'Lady Style (соло)',
         level: 'Продолжающие',
-        teachers: [{ name: 'Татьяна', photo: 'tatyana.jpg' }],
+        teacherIds: [7], // Татьяна
         type: 'lesson',
         poster: null,
       },
@@ -47,10 +47,7 @@ export const useScheduleStore = defineStore('schedule', {
         endTime: '21:30',
         direction: 'Бачата в паре',
         level: 'Начинающие',
-        teachers: [
-          { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-          { name: 'Татьяна', photo: 'tatyana.jpg' }
-        ],
+        teacherIds: [5, 7], // Кеулемжай, Татьяна
         type: 'lesson',
         poster: null,
       },
@@ -61,7 +58,7 @@ export const useScheduleStore = defineStore('schedule', {
         endTime: '20:30',
         direction: 'Общее хорео (соло)',
         level: 'Для всех',
-        teachers: [{ name: 'Кеулемжай', photo: 'keulemzhai.jpg' }],
+        teacherIds: [5], // Кеулемжай
         type: 'lesson',
         poster: null,
       },
@@ -72,10 +69,7 @@ export const useScheduleStore = defineStore('schedule', {
         endTime: '21:30',
         direction: 'Бачата в паре',
         level: 'Продолжающие',
-        teachers: [
-          { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-          { name: 'Татьяна', photo: 'tatyana.jpg' }
-        ],
+        teacherIds: [5, 7], // Кеулемжай, Татьяна
         type: 'lesson',
         poster: null,
       },
@@ -86,7 +80,7 @@ export const useScheduleStore = defineStore('schedule', {
         endTime: '20:30',
         direction: 'Lady Style (соло)',
         level: 'Продолжающие',
-        teachers: [{ name: 'Татьяна', photo: 'tatyana.jpg' }],
+        teacherIds: [7], // Татьяна
         type: 'lesson',
         poster: null,
       },
@@ -97,10 +91,7 @@ export const useScheduleStore = defineStore('schedule', {
         endTime: '21:30',
         direction: 'Бачата в паре',
         level: 'Начинающие',
-        teachers: [
-          { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-          { name: 'Татьяна', photo: 'tatyana.jpg' }
-        ],
+        teacherIds: [5, 7], // Кеулемжай, Татьяна
         type: 'lesson',
         poster: null,
       },
@@ -111,7 +102,7 @@ export const useScheduleStore = defineStore('schedule', {
         endTime: '20:30',
         direction: 'Общее хорео (соло)',
         level: 'Для всех',
-        teachers: [{ name: 'Кеулемжай', photo: 'keulemzhai.jpg' }],
+        teacherIds: [5], // Кеулемжай
         type: 'lesson',
         poster: null,
       },
@@ -122,10 +113,7 @@ export const useScheduleStore = defineStore('schedule', {
         endTime: '21:30',
         direction: 'Бачата в паре',
         level: 'Продолжающие',
-        teachers: [
-          { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-          { name: 'Татьяна', photo: 'tatyana.jpg' }
-        ],
+        teacherIds: [5, 7], // Кеулемжай, Татьяна
         type: 'lesson',
         poster: null,
       },
@@ -136,7 +124,7 @@ export const useScheduleStore = defineStore('schedule', {
         endTime: '20:30',
         direction: 'Lady Style (соло)',
         level: 'Начинающие',
-        teachers: [{ name: 'Татьяна', photo: 'tatyana.jpg' }],
+        teacherIds: [7], // Татьяна
         type: 'lesson',
         poster: null,
       },
@@ -147,10 +135,7 @@ export const useScheduleStore = defineStore('schedule', {
         endTime: '22:30',
         direction: 'Бачата интенсив "Украшения в паре"',
         level: 'Для всех',
-        teachers: [
-          { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-          { name: 'Татьяна', photo: 'tatyana.jpg' }
-        ],
+        teacherIds: [5, 7], // Кеулемжай, Татьяна
         type: 'lesson',
         poster: null,
       },
@@ -171,7 +156,7 @@ export const useScheduleStore = defineStore('schedule', {
         endTime: '14:00',
         direction: 'Lady Style (соло)',
         level: 'Начинающие',
-        teachers: [{ name: 'Татьяна', photo: 'tatyana.jpg' }],
+        teacherIds: [7], // Татьяна
         type: 'lesson',
         poster: null,
       },
@@ -179,10 +164,13 @@ export const useScheduleStore = defineStore('schedule', {
     filters: {
       direction: '',
       level: '',
-    }
+    },
+    teachers: [
+      { id: 5, name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
+      { id: 7, name: 'Татьяна', photo: 'tatyana.jpg' },
+    ]
   }),
   getters: {
-    // Получаем занятия для конкретного дня
     getLessonsByDay() {
       return (day) => {
         return this.filteredLessons.filter((lesson) => lesson.day === day)
@@ -222,9 +210,23 @@ export const useScheduleStore = defineStore('schedule', {
       })
 
       return lessons
-    }
+    },
+    getTeacherById: (state) => (id) => {
+      return state.teachers.find(teacher => teacher.id === id)
+    },
+
+    getTeachersForLesson: (state) => (teacherIds) => {
+      if (!teacherIds || !Array.isArray(teacherIds)) return []
+      return teacherIds.map(id => state.teachers.find(t => t.id === id)).filter(Boolean)
+    },
   },
   actions: {
-
+    deleteLesson(id) {
+      this.lessons = this.lessons.filter((lesson) => lesson.id !== id)
+    },
+    updateLesson(updatedLesson) {
+      const index = this.lessons.findIndex(l => l.id === updatedLesson.id)
+      if (index !== -1) this.lessons[index] = updatedLesson
+    }
   },
 })
