@@ -92,7 +92,8 @@ const openLessonModal = (lesson) => {
 
 <template>
   <div class="schedule">
-    <div ref="filtersSection" class="sticky top-0 z-20 bg-gray-100 pb-2">
+    <!-- БЛОК ФИЛЬТРОВ (sticky) -->
+    <div ref="filtersSection" class="sticky top-0 z-20 bg-gray-100 py-2">
       <h2 class="text-center text-2xl font-semibold mb-4">Расписание занятий</h2>
       <div class="flex gap-2 justify-end items-center mb-4">
         <Filters :directions="uniqueDirections" :levels="uniqueLevels" v-model="filters" />
@@ -106,18 +107,20 @@ const openLessonModal = (lesson) => {
       </div>
     </div>
 
-    <!-- СЕТКА: Внешний контейнер -->
+    <!-- СЕТКА РАСПИСАНИЯ -->
     <div class="border border-t-0 border-gray-300">
-      <!-- ШАПКА С ДНЯМИ -->
+      <!-- ШАПКА С ДНЯМИ (sticky) -->
       <div
         class="sticky z-11 grid grid-cols-[80px_repeat(7,1fr)] bg-gray-100 border-t border-b border-gray-300"
         :style="{ top: `${filtersHeight}px` }"
       >
+        <!-- УГЛОВАЯ ЯЧЕЙКА "Время" -->
         <div
           class="p-3 font-semibold text-gray-700 border-r border-gray-300 text-center bg-gray-200/50"
         >
           Время
         </div>
+        <!-- ДНИ НЕДЕЛИ -->
         <div
           v-for="day in days"
           :key="day"
@@ -129,7 +132,7 @@ const openLessonModal = (lesson) => {
 
       <!-- ОСНОВНОЙ КОНТЕЙНЕР: временная сетка + занятия -->
       <div class="grid grid-cols-[80px_repeat(7,1fr)]">
-        <!-- Колонка с временными метками -->
+        <!-- КОЛОНКА С ВРЕМЕННЫМИ МЕТКАМИ -->
         <div class="bg-gray-100">
           <div
             v-for="time in timeSlots"
@@ -141,14 +144,14 @@ const openLessonModal = (lesson) => {
           </div>
         </div>
 
-        <!-- Колонки дней с занятиями -->
+        <!-- КОЛОНКИ ДНЕЙ С ЗАНЯТИЯМИ -->
         <div
           v-for="day in days"
           :key="day"
           class="relative bg-gray-100 border-r border-gray-300 last:border-r-0"
           :style="{ minHeight: `${timeSlots.length * SLOT_HEIGHT}px` }"
         >
-          <!-- Фоновая сетка -->
+          <!-- ФОНОВАЯ СЕТКА (серые линии) -->
           <div
             v-for="time in timeSlots"
             :key="time"
@@ -156,8 +159,8 @@ const openLessonModal = (lesson) => {
             :style="{ height: SLOT_HEIGHT + 'px' }"
           ></div>
 
-          <!-- Занятия поверх сетки -->
-          <template v-auto-animate v-for="lesson in store.getLessonsByDay(day)" :key="lesson.id">
+          <!-- КАРТОЧКИ ЗАНЯТИЙ -->
+          <template v-for="lesson in store.getLessonsByDay(day)" :key="lesson.id">
             <div
               class="absolute rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer border-l-4"
               :class="getDirectionClass(lesson.direction)"
@@ -228,6 +231,7 @@ const openLessonModal = (lesson) => {
       </div>
     </div>
 
+    <!-- МОДАЛКА ДЕТАЛЬНОЙ ИНФОРМАЦИИ -->
     <LessonModal :lesson="selectedLesson" :isOpen="isModalOpen" @close="isModalOpen = false" />
   </div>
 </template>
