@@ -49,7 +49,7 @@ export const useScheduleStore = defineStore('schedule', {
         level: 'Начинающие',
         teachers: [
           { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-          { name: 'Татьяна', photo: 'tatyana.jpg' },
+          { name: 'Татьяна', photo: 'tatyana.jpg' }
         ],
         type: 'lesson',
         poster: null,
@@ -74,7 +74,7 @@ export const useScheduleStore = defineStore('schedule', {
         level: 'Продолжающие',
         teachers: [
           { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-          { name: 'Татьяна', photo: 'tatyana.jpg' },
+          { name: 'Татьяна', photo: 'tatyana.jpg' }
         ],
         type: 'lesson',
         poster: null,
@@ -99,7 +99,7 @@ export const useScheduleStore = defineStore('schedule', {
         level: 'Начинающие',
         teachers: [
           { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-          { name: 'Татьяна', photo: 'tatyana.jpg' },
+          { name: 'Татьяна', photo: 'tatyana.jpg' }
         ],
         type: 'lesson',
         poster: null,
@@ -124,7 +124,7 @@ export const useScheduleStore = defineStore('schedule', {
         level: 'Продолжающие',
         teachers: [
           { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-          { name: 'Татьяна', photo: 'tatyana.jpg' },
+          { name: 'Татьяна', photo: 'tatyana.jpg' }
         ],
         type: 'lesson',
         poster: null,
@@ -149,7 +149,7 @@ export const useScheduleStore = defineStore('schedule', {
         level: 'Для всех',
         teachers: [
           { name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-          { name: 'Татьяна', photo: 'tatyana.jpg' },
+          { name: 'Татьяна', photo: 'tatyana.jpg' }
         ],
         type: 'lesson',
         poster: null,

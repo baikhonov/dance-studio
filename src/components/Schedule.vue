@@ -10,18 +10,24 @@ const filtersHeight = ref(0)
 
 const updateFiltersHeight = () => {
   if (filtersSection.value) {
-    // offsetHeight включает высоту элемента + padding + border
     filtersHeight.value = filtersSection.value.offsetHeight
   }
 }
 
-onMounted(() => {
+const windowWidth = ref(window.innerWidth)
+
+const updateWindowWidth = () => {
+  windowWidth.value = window.innerWidth
   updateFiltersHeight()
-  window.addEventListener('resize', updateFiltersHeight)
+}
+
+onMounted(() => {
+  updateWindowWidth()
+  window.addEventListener('resize', updateWindowWidth)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updateFiltersHeight)
+  window.removeEventListener('resize', updateWindowWidth)
 })
 
 const SLOT_HEIGHT = 120
@@ -59,7 +65,7 @@ const getLessonStyle = (lesson) => {
     left: '3px',
     right: '3px',
     height: `${height - 6}px`,
-    zIndex: 10,
+    zIndex: 1,
   }
 }
 
@@ -108,126 +114,130 @@ const openLessonModal = (lesson) => {
     </div>
 
     <!-- СЕТКА РАСПИСАНИЯ -->
-    <div class="border border-t-0 border-gray-300">
-      <!-- ШАПКА С ДНЯМИ (sticky) -->
-      <div
-        class="sticky z-11 grid grid-cols-[80px_repeat(7,minmax(110px,1fr))] bg-gray-100 border-t border-b border-gray-300"
-        :style="{ top: `${filtersHeight}px` }"
-      >
-        <!-- УГЛОВАЯ ЯЧЕЙКА "Время" -->
+    <div
+      class="overflow-x-auto md:overflow-visible max-h-screen md:max-h-none overflow-y-auto md:overflow-y-visible"
+    >
+      <div class="min-w-[800px] md:min-w-0 border-gray-300">
+        <!-- ШАПКА С ДНЯМИ (sticky) -->
         <div
-          class="p-3 font-semibold text-gray-700 border-r border-gray-300 text-center bg-gray-200/50"
+          class="sticky top-0 z-11 grid grid-cols-[80px_repeat(7,minmax(120px,1fr))] bg-gray-100"
+          :style="windowWidth >= 768 ? { top: `${filtersHeight}px` } : {}"
         >
-          Время
-        </div>
-        <!-- ДНИ НЕДЕЛИ -->
-        <div
-          v-for="day in days"
-          :key="day"
-          class="p-3 font-semibold text-gray-700 text-center border-r border-gray-300 last:border-r-0 bg-gray-200/50"
-        >
-          <span class="md:hidden">{{ day.slice(0, 3) }}</span>
-          <span class="hidden md:inline">{{ day }}</span>
-        </div>
-      </div>
-
-      <!-- ОСНОВНОЙ КОНТЕЙНЕР: временная сетка + занятия -->
-      <div class="grid grid-cols-[80px_repeat(7,minmax(110px,1fr))]">
-        <!-- КОЛОНКА С ВРЕМЕННЫМИ МЕТКАМИ -->
-        <div class="bg-gray-100">
+          <!-- УГЛОВАЯ ЯЧЕЙКА "Время" -->
           <div
-            v-for="time in timeSlots"
-            :key="time"
-            class="border-b border-r border-gray-300 text-sm p-2 text-gray-600 font-medium text-center"
-            :style="{ height: SLOT_HEIGHT + 'px' }"
+            class="sticky left-0 z-10 flex items-center justify-center p-2 md:p-3 font-semibold text-gray-700 border border-r-0 border-gray-300 text-center bg-gray-200 md:bg-gray-200/50"
           >
-            {{ time }}
+            Время
+          </div>
+          <!-- ДНИ НЕДЕЛИ -->
+          <div
+            v-for="day in days"
+            :key="day"
+            class="flex items-center justify-center p-2 md:p-3 font-semibold text-gray-700 text-center border border-r-0 border-gray-300 last:border-r bg-gray-200/50"
+          >
+            <span class="md:hidden">{{ day.slice(0, 11) }}</span>
+            <span class="hidden md:inline">{{ day }}</span>
           </div>
         </div>
 
-        <!-- КОЛОНКИ ДНЕЙ С ЗАНЯТИЯМИ -->
-        <div
-          v-for="day in days"
-          :key="day"
-          class="relative bg-gray-100 border-r border-gray-300 last:border-r-0"
-          :style="{ minHeight: `${timeSlots.length * SLOT_HEIGHT}px` }"
-        >
-          <!-- ФОНОВАЯ СЕТКА (серые линии) -->
-          <div
-            v-for="time in timeSlots"
-            :key="time"
-            class="border-b border-gray-300"
-            :style="{ height: SLOT_HEIGHT + 'px' }"
-          ></div>
-
-          <!-- КАРТОЧКИ ЗАНЯТИЙ -->
-          <template v-for="lesson in store.getLessonsByDay(day)" :key="lesson.id">
+        <!-- ОСНОВНОЙ КОНТЕЙНЕР: временная сетка + занятия -->
+        <div class="grid grid-cols-[80px_repeat(7,minmax(120px,1fr))]">
+          <!-- КОЛОНКА С ВРЕМЕННЫМИ МЕТКАМИ -->
+          <div class="sticky left-0 z-10 bg-gray-100">
             <div
-              class="absolute rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer border-l-4"
-              :class="getDirectionClass(lesson.direction)"
-              :style="getLessonStyle(lesson)"
-              @click="openLessonModal(lesson)"
+              v-for="time in timeSlots"
+              :key="time"
+              class="flex items-center justify-center border border-b-0 border-gray-300 text-sm p-2 md:p-3 text-gray-600 font-medium text-center"
+              :style="{ height: SLOT_HEIGHT + 'px' }"
             >
-              <!-- Контент занятия -->
-              <div class="h-full p-1.5 flex flex-col text-[10px] overflow-y-auto">
-                <!-- Название -->
-                <p
-                  class="shrink-0 font-bold text-xs leading-tight truncate text-gray-900"
-                  :title="lesson.direction"
-                >
-                  {{ lesson.direction }}
-                </p>
+              {{ time }}
+            </div>
+          </div>
 
-                <!-- Уровень -->
-                <p v-if="lesson.level" class="text-xs text-gray-700 mt-0.5 font-medium">
-                  {{ lesson.level }}
-                </p>
+          <!-- КОЛОНКИ ДНЕЙ С ЗАНЯТИЯМИ -->
+          <div
+            v-for="day in days"
+            :key="day"
+            class="relative bg-gray-100 border border-b-0 border-r-0 border-gray-300 last:border-r"
+            :style="{ minHeight: `${timeSlots.length * SLOT_HEIGHT}px` }"
+          >
+            <!-- ФОНОВАЯ СЕТКА (серые линии) -->
+            <div
+              v-for="time in timeSlots"
+              :key="time"
+              class="border-b border-gray-300"
+              :style="{ height: SLOT_HEIGHT + 'px' }"
+            ></div>
 
-                <!-- Время на полупрозрачном фоне -->
-                <div
-                  class="text-xs font-medium mt-1 bg-white/50 px-1 py-0.5 rounded inline-block self-start"
-                >
-                  {{ lesson.time }}—{{ lesson.endTime }}
-                </div>
-
-                <!-- Преподаватели -->
-                <div
-                  v-if="lesson.teachers && lesson.teachers.length > 0"
-                  class="flex items-center justify-between mt-1 pt-1 border-t border-white/50"
-                >
-                  <!-- Имена преподавателей -->
-                  <p class="text-xs text-gray-700 font-medium max-w-[60%] truncate">
-                    {{ lesson.teachers.map((t) => t.name).join(' и ') }}
+            <!-- КАРТОЧКИ ЗАНЯТИЙ -->
+            <template v-for="lesson in store.getLessonsByDay(day)" :key="lesson.id">
+              <div
+                class="absolute rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer border-l-2 md:border-l-4"
+                :class="getDirectionClass(lesson.direction)"
+                :style="getLessonStyle(lesson)"
+                @click="openLessonModal(lesson)"
+              >
+                <!-- Контент занятия -->
+                <div class="h-full p-1.5 flex flex-col text-[10px] overflow-y-auto">
+                  <!-- Название -->
+                  <p
+                    class="shrink-0 font-bold text-xs leading-tight truncate text-gray-900"
+                    :title="lesson.direction"
+                  >
+                    {{ lesson.direction }}
                   </p>
 
-                  <!-- Фотографии преподавателей -->
-                  <div class="flex shrink-0 -space-x-2 ml-1">
+                  <!-- Уровень -->
+                  <p v-if="lesson.level" class="text-xs text-gray-700 mt-0.5 font-medium">
+                    {{ lesson.level }}
+                  </p>
+
+                  <!-- Время на полупрозрачном фоне -->
+                  <div
+                    class="text-xs font-medium mt-1 bg-white/50 px-1 py-0.5 rounded inline-block self-start"
+                  >
+                    {{ lesson.time }}—{{ lesson.endTime }}
+                  </div>
+
+                  <!-- Преподаватели -->
+                  <div
+                    v-if="lesson.teachers && lesson.teachers.length > 0"
+                    class="flex items-center justify-between mt-1 pt-1 border-t border-white/50"
+                  >
+                    <!-- Имена преподавателей -->
+                    <p class="text-xs text-gray-700 font-medium max-w-[60%] truncate">
+                      {{ lesson.teachers.map((t) => t.name).join(' и ') }}
+                    </p>
+
+                    <!-- Фотографии преподавателей -->
+                    <div class="flex shrink-0 -space-x-4 md:-space-x-2 ml-1">
+                      <img
+                        v-for="(teacher, idx) in lesson.teachers"
+                        :key="teacher.name"
+                        :src="`/images/teachers/${teacher.photo}`"
+                        :alt="teacher.name"
+                        class="w-9 h-9 rounded-full border-1 md:border-2 border-white shadow-sm"
+                        :class="{ 'relative z-10': idx === 0 && lesson.teachers.length > 1 }"
+                        @error="$event.target.src = '/images/teachers/default-avatar.jpg'"
+                      />
+                    </div>
+                  </div>
+                  <!-- Постер мероприятия -->
+                  <div
+                    v-else-if="lesson.type === 'party'"
+                    class="flex items-center justify-end mt-1 pt-1 border-t border-white/50"
+                  >
                     <img
-                      v-for="(teacher, idx) in lesson.teachers"
-                      :key="teacher.name"
-                      :src="`/images/teachers/${teacher.photo}`"
-                      :alt="teacher.name"
-                      class="w-9 h-9 rounded-full border-2 border-white shadow-sm"
-                      :class="{ 'relative z-10': idx === 0 && lesson.teachers.length > 1 }"
-                      @error="$event.target.src = '/images/teachers/default-avatar.jpg'"
+                      v-if="lesson.poster"
+                      :src="`/images/posters/${lesson.poster}`"
+                      :alt="lesson.direction"
+                      class="w-9 h-9 rounded-full border-2 border-white shadow-sm object-cover"
                     />
                   </div>
                 </div>
-                <!-- Постер мероприятия -->
-                <div
-                  v-else-if="lesson.type === 'party'"
-                  class="flex items-center justify-end mt-1 pt-1 border-t border-white/50"
-                >
-                  <img
-                    v-if="lesson.poster"
-                    :src="`/images/posters/${lesson.poster}`"
-                    :alt="lesson.direction"
-                    class="w-9 h-9 rounded-full border-2 border-white shadow-sm object-cover"
-                  />
-                </div>
               </div>
-            </div>
-          </template>
+            </template>
+          </div>
         </div>
       </div>
     </div>
