@@ -83,11 +83,38 @@ const deleteLesson = () => {
   }
 }
 
+const hasConflict = () => {
+  const lessons = store.lessons
+  const current = editableLesson.value
+
+  return lessons.some((lesson) => {
+    // Пропускаем само редактируемое занятие
+    if (lesson.id === current.id) return false
+
+    // Проверяем только занятия в выбранный день
+    if (lesson.day !== current.day) return false
+
+    const start1 = current.time
+    const end1 = current.endTime
+    const start2 = lesson.time
+    const end2 = lesson.endTime
+
+    // Проверка пересечения интервалов
+    return start1 < end2 && end1 > start2
+  })
+}
+
 // Сохранение изменений
 const saveLesson = () => {
   // Проверка времени
   if (editableLesson.value.time >= editableLesson.value.endTime) {
     alert('Время начала должно быть раньше времени окончания')
+    return
+  }
+
+  // Проверка конфликта
+  if (hasConflict()) {
+    alert('Это время уже занято другим занятием в выбранный день')
     return
   }
 
@@ -114,21 +141,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleEscape)
 })
-
-// ============================================
-// 9. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-// ============================================
-
-// Определяем цвет полоски сверху модалки по направлению танца
-const getDirectionColor = (direction) => {
-  const lower = direction.toLowerCase()
-  if (lower.includes('lady')) return 'border-purple-600'
-  if (lower.includes('пар')) return 'border-orange-600'
-  if (lower.includes('растяжка')) return 'border-blue-600'
-  if (lower.includes('общее')) return 'border-teal-600'
-  if (lower.includes('party') || lower.includes('вечеринка')) return 'border-red-600'
-  return 'border-amber-600'
-}
 </script>
 
 <template>
@@ -151,9 +163,6 @@ const getDirectionColor = (direction) => {
               class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-hidden"
               @click.stop
             >
-              <!-- Цветная полоска сверху (как у карточек) -->
-              <div class="h-2 w-full" :class="getDirectionColor(lesson.direction)"></div>
-
               <!-- Контент с прокруткой -->
               <div class="overflow-y-auto p-6" style="max-height: calc(85vh - 8px)">
                 <template v-if="!isEditing">
