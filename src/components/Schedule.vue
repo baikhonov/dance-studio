@@ -83,8 +83,26 @@ const getLessonStyle = (lesson) => {
 let isModalOpen = ref(false)
 let selectedLesson = ref()
 
+const createEmptyLesson = () => {
+  return {
+    id: null,
+    day: '',
+    time: '',
+    endTime: '',
+    direction: '',
+    level: '',
+    teacherIds: [],
+    poster: null,
+    type: 'lesson',
+  }
+}
+
 const openLessonModal = (lesson) => {
-  selectedLesson.value = lesson
+  if (lesson) {
+    selectedLesson.value = lesson
+  } else {
+    selectedLesson.value = createEmptyLesson()
+  }
   isModalOpen.value = true
 }
 </script>
@@ -94,7 +112,14 @@ const openLessonModal = (lesson) => {
     <!-- БЛОК ФИЛЬТРОВ (sticky) -->
     <div ref="filtersSection" class="md:sticky md:top-0 z-20 bg-gray-100 py-2">
       <h2 class="text-center text-2xl font-semibold mb-4">Расписание занятий</h2>
-      <div class="flex flex-col md:flex-row gap-2 justify-end items-stretch md:items-center mb-4">
+      <div class="flex flex-col md:flex-row gap-2 justify-end items-center md:items-center mb-4">
+        <button
+          v-if="isAdmin"
+          @click="openLessonModal()"
+          class="px-4 py-2 mr-auto bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+        >
+          Добавить занятие
+        </button>
         <Filters :directions="uniqueDirections" :levels="uniqueLevels" v-model="filters" />
 
         <div

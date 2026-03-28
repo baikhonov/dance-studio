@@ -36,17 +36,38 @@ const selectedTeacherIds = ref([])
 // ============================================
 // 6. WATCH (следим за изменением пропсов)
 // ============================================
-// При открытии модалки с новым занятием — создаем копию для редактирования
 watch(
   () => props.lesson,
-  (newLesson) => {
-    if (newLesson) {
-      isEditing.value = false // Сбрасываем режим редактирования формы
-      editableLesson.value = JSON.parse(JSON.stringify(newLesson)) // Глубокая копия
+  (lesson) => {
+    if (lesson) {
+      const isNew = !lesson.id
+
+      if (isNew) {
+        // Для нового занятия — сразу режим редактирования
+        isEditing.value = true
+        // Создаём копию с значениями по умолчанию
+        editableLesson.value = {
+          id: null,
+          day: '',
+          time: '',
+          endTime: '',
+          direction: '',
+          level: '',
+          teacherIds: [],
+          type: 'lesson',
+          poster: null,
+        }
+      } else {
+        isEditing.value = false
+        editableLesson.value = JSON.parse(JSON.stringify(lesson))
+      }
+
+      // Синхронизируем выбранных преподавателей
+      selectedTeacherIds.value = [...(editableLesson.value.teacherIds || [])]
     }
   },
   { immediate: true },
-) // immediate = true — запускается сразу при монтировании
+)
 
 // При открытии модалки синхронизировать selectedTeacherIds с editableLesson.teacherIds
 watch(
@@ -119,7 +140,12 @@ const saveLesson = () => {
   }
 
   editableLesson.value.teacherIds = selectedTeacherIds.value
-  store.updateLesson(editableLesson.value)
+
+  if (editableLesson.value.id) {
+    store.updateLesson(editableLesson.value)
+  } else {
+    store.addLesson(editableLesson.value)
+  }
   emit('close')
 }
 

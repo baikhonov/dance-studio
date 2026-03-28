@@ -55,7 +55,7 @@ body {
 main {
   width: 100%;
   max-width: 1800px;
-  margin: 0 auto;
+  margin: 0 auto 30px;
 }
 footer {
   margin-top: auto;

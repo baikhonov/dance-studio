@@ -227,6 +227,13 @@ export const useScheduleStore = defineStore('schedule', {
     updateLesson(updatedLesson) {
       const index = this.lessons.findIndex(l => l.id === updatedLesson.id)
       if (index !== -1) this.lessons[index] = updatedLesson
+    },
+    addLesson(newLesson) {
+      const maxId = Math.max(...this.lessons.map(lesson => lesson.id))
+      this.lessons.push({
+        ...newLesson,
+        id: maxId + 1
+      })
     }
   },
 })
