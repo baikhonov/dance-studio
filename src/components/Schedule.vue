@@ -165,7 +165,7 @@ const openLessonModal = (lesson) => {
             <div
               v-for="time in timeSlots"
               :key="time"
-              class="flex items-center justify-center border border-b-0 border-gray-300 text-sm p-2 md:p-3 text-gray-600 font-medium text-center"
+              class="flex items-center justify-center border border-b-0 last:border-b border-gray-300 text-sm p-2 md:p-3 text-gray-600 font-medium text-center"
               :style="{ height: SLOT_HEIGHT + 'px' }"
             >
               {{ time }}

@@ -9,9 +9,7 @@ defineProps({
 </script>
 
 <template>
-  <main>
-    <Schedule :days="days" :timeSlots="timeSlots" :lessons="lessons" />
-  </main>
+  <Schedule :days="days" :timeSlots="timeSlots" :lessons="lessons" />
 </template>
 
 <style scoped></style>
