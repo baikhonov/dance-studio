@@ -250,7 +250,7 @@ const openLessonModal = (lesson) => {
                   </div>
                   <!-- Постер мероприятия -->
                   <div
-                    v-else-if="lesson.type === 'party'"
+                    v-else-if="lesson.type === 'event'"
                     class="flex items-center justify-end mt-1 pt-1 border-t border-white/50"
                   >
                     <img

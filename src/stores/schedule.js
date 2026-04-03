@@ -146,7 +146,7 @@ export const useScheduleStore = defineStore('schedule', {
         endTime: '23:00',
         direction: 'Вечеринка',
         level: 'Для всех',
-        type: 'party',
+        type: 'event',
         poster: 'party-bachatamania.webp',
       },
       {

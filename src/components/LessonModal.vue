@@ -80,6 +80,19 @@ watch(
   { immediate: true },
 )
 
+watch(
+  () => editableLesson.value?.type,
+  (newType, oldType) => {
+    if (newType === 'party') {
+      // При переключении на мероприятие — очищаем преподавателей
+      editableLesson.value.teacherIds = []
+      selectedTeacherIds.value = []
+    } else if (newType === 'lesson') {
+      // При переключении на занятие — очищаем постер
+      editableLesson.value.poster = null
+    }
+  },
+)
 // ============================================
 // 6. COMPUTED (вычисляемые значения)
 // ============================================
@@ -160,6 +173,15 @@ const handleEscape = (event) => {
   }
 }
 
+const handlePosterUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    // Пока сохраняем имя файла
+    editableLesson.value.poster = file.name
+    // В будущем: загрузка на сервер
+  }
+}
+
 onMounted(() => {
   window.addEventListener('keydown', handleEscape)
 })
@@ -234,7 +256,7 @@ onUnmounted(() => {
                     </div>
                   </div>
                   <!-- Постер мероприятия -->
-                  <div v-else-if="lesson.type === 'party' && lesson.poster">
+                  <div v-else-if="lesson.type === 'event' && lesson.poster">
                     <img
                       :src="`/images/posters/${lesson.poster}`"
                       :alt="lesson.direction"
@@ -325,8 +347,21 @@ onUnmounted(() => {
                       </select>
                     </div>
 
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Тип занятия</label
+                      >
+                      <select
+                        v-model="editableLesson.type"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="lesson">Занятие</option>
+                        <option value="event">Мероприятие</option>
+                      </select>
+                    </div>
+
                     <!-- Для занятия: выбор преподавателей -->
-                    <div v-if="editableLesson.type !== 'party'">
+                    <div v-if="editableLesson.type !== 'event'">
                       <label class="block text-sm font-medium text-gray-700 mb-2">
                         Преподаватели
                       </label>
@@ -356,13 +391,18 @@ onUnmounted(() => {
 
                     <!-- Для вечеринки: поле для постера -->
                     <div v-else>
+                      <img
+                        v-if="editableLesson.poster"
+                        :src="`/images/posters/${editableLesson.poster}`"
+                        class="mt-2 w-32 h-32 object-cover rounded"
+                      />
                       <label class="block text-sm font-medium text-gray-700 mb-1">
                         Постер (имя файла)
                       </label>
                       <input
-                        v-model="editableLesson.poster"
-                        type="text"
-                        placeholder="party-bachatamania.webp"
+                        type="file"
+                        accept="image/*"
+                        @change="handlePosterUpload"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
                       />
                     </div>
