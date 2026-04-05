@@ -241,7 +241,7 @@ onUnmounted(() => {
                       <div
                         v-for="teacherId in lesson.teacherIds"
                         :key="teacherId"
-                        class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 min-w-[180px]"
+                        class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 min-w-45"
                       >
                         <img
                           :src="`/images/teachers/${store.getTeacherById(teacherId).photo}`"

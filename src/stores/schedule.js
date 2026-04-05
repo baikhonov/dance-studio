@@ -234,6 +234,12 @@ export const useScheduleStore = defineStore('schedule', {
         ...newLesson,
         id: maxId + 1
       })
-    }
+    },
+    addTeacher(teacher) {
+      this.teachers.push(teacher)
+    },
+    deleteTeacher(id) {
+      this.teachers = this.teachers.filter((teacher) => teacher.id !== id)
+    },
   },
 })

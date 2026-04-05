@@ -36,7 +36,6 @@ const handleLogout = function () {
     </div>
   </header>
   <main>
-    <div></div>
     <RouterView />
   </main>
 
