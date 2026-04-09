@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { generateId } from "@/utils/generateId";
 
 export const useScheduleStore = defineStore('schedule', {
   state: () => ({
@@ -229,14 +230,18 @@ export const useScheduleStore = defineStore('schedule', {
       if (index !== -1) this.lessons[index] = updatedLesson
     },
     addLesson(newLesson) {
-      const maxId = Math.max(...this.lessons.map(lesson => lesson.id))
+      const maxId = generateId(this.lessons)
       this.lessons.push({
         ...newLesson,
-        id: maxId + 1
+        id: maxId
       })
     },
     addTeacher(teacher) {
-      this.teachers.push(teacher)
+      const maxId = generateId(this.teachers)
+      this.teachers.push({
+        ...teacher,
+        id: maxId
+      })
     },
     deleteTeacher(id) {
       this.teachers = this.teachers.filter((teacher) => teacher.id !== id)

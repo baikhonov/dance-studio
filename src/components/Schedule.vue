@@ -43,13 +43,12 @@ onUnmounted(() => {
 
 const SLOT_HEIGHT = 120
 
-const store = useScheduleStore()
-const { days, timeSlots, filters } = storeToRefs(store)
+const { days, timeSlots, filters } = storeToRefs(scheduleStore)
 
-const uniqueDirections = computed(() => store.uniqueDirections)
-const uniqueLevels = computed(() => store.uniqueLevels)
+const uniqueDirections = computed(() => scheduleStore.uniqueDirections)
+const uniqueLevels = computed(() => scheduleStore.uniqueLevels)
 
-const filteredLessons = computed(() => store.filteredLessons)
+const filteredLessons = computed(() => scheduleStore.filteredLessons)
 
 // Вспомогательная функция: время в минуты
 const timeToMinutes = (time) => {
@@ -62,7 +61,7 @@ const getLessonStyle = (lesson) => {
   const startMinutes = timeToMinutes(lesson.time)
   const endMinutes = timeToMinutes(lesson.endTime)
 
-  const firstSlotMinutes = timeToMinutes(store.timeSlots[0])
+  const firstSlotMinutes = timeToMinutes(scheduleStore.timeSlots[0])
 
   const minutesFromStart = startMinutes - firstSlotMinutes
   const top = (minutesFromStart / 60) * SLOT_HEIGHT
@@ -80,8 +79,8 @@ const getLessonStyle = (lesson) => {
   }
 }
 
-let isModalOpen = ref(false)
-let selectedLesson = ref()
+const isModalOpen = ref(false)
+const selectedLesson = ref()
 
 const createEmptyLesson = () => {
   return {
@@ -188,7 +187,7 @@ const openLessonModal = (lesson) => {
             ></div>
 
             <!-- КАРТОЧКИ ЗАНЯТИЙ -->
-            <template v-for="lesson in store.getLessonsByDay(day)" :key="lesson.id">
+            <template v-for="lesson in scheduleStore.getLessonsByDay(day)" :key="lesson.id">
               <div
                 class="absolute rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer border-l-2 md:border-l-4"
                 :class="getDirectionClass(lesson.direction)"

@@ -7,7 +7,7 @@ export const useUserStore = defineStore('user', () => {
   const isAdmin = computed(() => !!token.value)
 
   const login = (password) => {
-    if (password === '123') {
+    if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
       token.value = 'fake-jwt-token'
       localStorage.setItem('admin_token', token.value)
       return true

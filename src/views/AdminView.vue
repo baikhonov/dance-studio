@@ -16,10 +16,13 @@ const handlePhotoUpload = (event) => {
 }
 
 const createTeacher = () => {
+  if (newTeacherName.value.trim() === '') {
+    alert('Введите имя преподавателя')
+    return
+  }
   console.log('создаем учителя')
-  const maxId = Math.max(...teachers.value.map((teacher) => teacher.id))
+
   const newTeacher = {
-    id: maxId + 1,
     name: newTeacherName.value,
     photo: newTeacherPhoto.value,
   }

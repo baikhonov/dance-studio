@@ -1,12 +1,9 @@
 <script setup>
 import { RouterView, useRouter } from 'vue-router'
-import { useScheduleStore } from '@/stores/schedule'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 
-const scheduleStore = useScheduleStore()
 const userStore = useUserStore()
-const { days, timeSlots, lessons } = storeToRefs(scheduleStore)
 const { isAdmin } = storeToRefs(userStore)
 
 const router = useRouter()
