@@ -2,11 +2,14 @@
 import { ref } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 
 const schedule = useScheduleStore()
 const { teachers } = storeToRefs(schedule)
 const newTeacherName = ref('')
 const newTeacherPhoto = ref('')
+const isConfirmOpen = ref(false)
+const teacherToDelete = ref(null)
 
 const handlePhotoUpload = (event) => {
   const file = event.target.files[0]
@@ -32,9 +35,13 @@ const createTeacher = () => {
 }
 
 const deleteTeacher = (id) => {
-  if (confirm('Вы уверены, что хотите удалить преподавателя?')) {
-    schedule.deleteTeacher(id)
-  }
+  teacherToDelete.value = id
+  isConfirmOpen.value = true
+}
+
+const handleDeleteConfirm = () => {
+  schedule.deleteTeacher(teacherToDelete.value)
+  teacherToDelete.value = null
 }
 </script>
 
@@ -99,5 +106,13 @@ const deleteTeacher = (id) => {
         </div>
       </div>
     </div>
+
+    <ConfirmModal
+      :isOpen="isConfirmOpen"
+      :message="`Вы уверены, что хотите удалить преподавателя ${teachers.find(t => t.id === teacherToDelete)?.name}?`"
+      :cancelText="'Отмена'"
+      @confirm="handleDeleteConfirm"
+      @close="isConfirmOpen = false"
+    />
   </div>
 </template>

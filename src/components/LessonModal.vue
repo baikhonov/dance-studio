@@ -2,6 +2,7 @@
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 
 const props = defineProps({
   lesson: Object,
@@ -17,6 +18,9 @@ const { days } = storeToRefs(store)
 const isEditing = ref(false)
 const editableLesson = ref(null)
 const selectedTeacherIds = ref([])
+const isConfirmOpen = ref(false)
+const lessonToDelete = ref(null)
+const lessonNameToDelete = ref('')
 
 watch(
   () => props.lesson,
@@ -79,10 +83,17 @@ const enableEditing = () => {
 }
 
 const deleteLesson = () => {
-  if (confirm('Удалить занятие?')) {
-    store.deleteLesson(props.lesson.id)
-    emit('close')
-  }
+  lessonToDelete.value = editableLesson.value.id
+  lessonNameToDelete.value = editableLesson.value.direction
+  isConfirmOpen.value = true
+}
+
+const handleDeleteLesson = () => {
+  store.deleteLesson(lessonToDelete.value)
+  lessonToDelete.value = null
+  lessonNameToDelete.value = ''
+  isConfirmOpen.value = false
+  emit('close')
 }
 
 const hasConflict = () => {
@@ -129,10 +140,6 @@ const saveLesson = () => {
   }
   emit('close')
 }
-
-// ============================================
-// 8. ЖИЗНЕННЫЙ ЦИКЛ (хуки)
-// ============================================
 
 // Закрытие по клавише Escape
 const handleEscape = (event) => {
@@ -412,5 +419,15 @@ onUnmounted(() => {
         </div>
       </div>
     </Transition>
+
+
   </Teleport>
+
+  <ConfirmModal
+      :isOpen="isConfirmOpen"
+      :message="`Вы уверены, что хотите удалить ${lessonNameToDelete}?`"
+      :cancelText="'Отмена'"
+      @confirm="handleDeleteLesson"
+      @close="isConfirmOpen = false"
+    />
 </template>
