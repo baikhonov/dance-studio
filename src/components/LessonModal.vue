@@ -425,7 +425,7 @@ onUnmounted(() => {
 
   <ConfirmModal
       :isOpen="isConfirmOpen"
-      :message="`Вы уверены, что хотите удалить ${lessonNameToDelete}?`"
+      :message="`Вы уверены, что хотите удалить ${editableLesson.type === 'event' ? 'мероприятие' : 'занятие'} «${lessonNameToDelete}»?`"
       :cancelText="'Отмена'"
       @confirm="handleDeleteLesson"
       @close="isConfirmOpen = false"
