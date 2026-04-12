@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import HomeView from '../views/HomeView.vue'
-import LoginView from '../views/LoginView.vue'
-import AdminView from '../views/AdminView.vue'
 import { useUserStore } from '@/stores/user'
+
+const LoginView = () => import('../views/LoginView.vue')
+const AdminView = () => import('../views/AdminView.vue')
 
 
 

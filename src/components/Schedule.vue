@@ -12,9 +12,19 @@ const { isAdmin } = storeToRefs(userStore)
 
 const scheduleStore = useScheduleStore()
 
-const getTeachers = (teacherIds) => {
-  return scheduleStore.getTeachersForLesson(teacherIds)
-}
+const lessonsWithTeachers = computed(() => {
+  const result = {}
+
+  for (const day of days.value) {
+    const lessonsOfDay = scheduleStore.getLessonsByDay(day)
+    result[day] = lessonsOfDay.map((lesson) => ({
+      ...lesson,
+      teachers: scheduleStore.getTeachersForLesson(lesson.teacherIds),
+    }))
+  }
+
+  return result
+})
 
 const filtersSection = ref(null)
 const filtersHeight = ref(0)
@@ -187,7 +197,7 @@ const openLessonModal = (lesson) => {
             ></div>
 
             <!-- КАРТОЧКИ ЗАНЯТИЙ -->
-            <template v-for="lesson in scheduleStore.getLessonsByDay(day)" :key="lesson.id">
+            <template v-for="lesson in lessonsWithTeachers[day]" :key="lesson.id">
               <div
                 class="absolute rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer border-l-2 md:border-l-4"
                 :class="getDirectionClass(lesson.direction)"
@@ -218,30 +228,24 @@ const openLessonModal = (lesson) => {
 
                   <!-- Преподаватели -->
                   <div
-                    v-if="
-                      getTeachers(lesson.teacherIds) && getTeachers(lesson.teacherIds).length > 0
-                    "
+                    v-if="lesson.teachers && lesson.teachers.length > 0"
                     class="flex items-center justify-between mt-1 pt-1 border-t border-white/50"
                   >
                     <!-- Имена преподавателей -->
                     <p class="text-xs text-gray-700 font-medium max-w-[60%] truncate">
-                      {{
-                        getTeachers(lesson.teacherIds)
-                          .map((t) => t.name)
-                          .join(' и ')
-                      }}
+                      {{ lesson.teachers.map((t) => t.name).join(' и ') }}
                     </p>
 
                     <!-- Фотографии преподавателей -->
                     <div class="flex shrink-0 -space-x-4 md:-space-x-2 ml-1">
                       <img
-                        v-for="(teacher, idx) in getTeachers(lesson.teacherIds)"
+                        v-for="(teacher, idx) in lesson.teachers"
                         :key="teacher.name"
                         :src="`/images/teachers/${teacher.photo}`"
                         :alt="teacher.name"
                         class="w-9 h-9 rounded-full border-1 md:border-2 border-white shadow-sm"
                         :class="{
-                          'relative z-10': idx === 0 && getTeachers(lesson.teacherIds).length > 1,
+                          'relative z-10': idx === 0 && lesson.teachers.length > 1,
                         }"
                         @error="$event.target.src = '/images/teachers/default-avatar.jpg'"
                       />

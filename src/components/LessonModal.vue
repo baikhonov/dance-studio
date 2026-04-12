@@ -1,41 +1,23 @@
 <script setup>
-// ============================================
-// 1. ИМПОРТЫ
-// ============================================
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
 
-// ============================================
-// 2. PROPS (данные от родителя)
-// ============================================
 const props = defineProps({
-  lesson: Object, // Текущее занятие для просмотра/редактирования
-  isOpen: Boolean, // Открыта ли модалка
-  isAdmin: Boolean, // Режим админа на главной странице
+  lesson: Object,
+  isOpen: Boolean,
+  isAdmin: Boolean,
 })
 
-// ============================================
-// 3. EMITS (события для родителя)
-// ============================================
 const emit = defineEmits(['close'])
 
-// ============================================
-// 4. STORE (глобальное состояние)
-// ============================================
 const store = useScheduleStore()
-const { days } = storeToRefs(store) // Список дней недели из store
+const { days } = storeToRefs(store)
 
-// ============================================
-// 5. ЛОКАЛЬНОЕ СОСТОЯНИЕ (реактивные переменные)
-// ============================================
-const isEditing = ref(false) // Режим редактирования формы внутри модалки
-const editableLesson = ref(null) // Копия занятия для редактирования
+const isEditing = ref(false)
+const editableLesson = ref(null)
 const selectedTeacherIds = ref([])
 
-// ============================================
-// 6. WATCH (следим за изменением пропсов)
-// ============================================
 watch(
   () => props.lesson,
   (lesson) => {
@@ -43,9 +25,7 @@ watch(
       const isNew = !lesson.id
 
       if (isNew) {
-        // Для нового занятия — сразу режим редактирования
         isEditing.value = true
-        // Создаём копию с значениями по умолчанию
         editableLesson.value = {
           id: null,
           day: '',
@@ -62,14 +42,12 @@ watch(
         editableLesson.value = JSON.parse(JSON.stringify(lesson))
       }
 
-      // Синхронизируем выбранных преподавателей
       selectedTeacherIds.value = [...(editableLesson.value.teacherIds || [])]
     }
   },
   { immediate: true },
 )
 
-// При открытии модалки синхронизировать selectedTeacherIds с editableLesson.teacherIds
 watch(
   () => editableLesson.value,
   (newLesson) => {
@@ -83,37 +61,27 @@ watch(
 watch(
   () => editableLesson.value?.type,
   (newType, oldType) => {
-    if (newType === 'party') {
-      // При переключении на мероприятие — очищаем преподавателей
+    if (newType === 'event') {
       editableLesson.value.teacherIds = []
       selectedTeacherIds.value = []
     } else if (newType === 'lesson') {
-      // При переключении на занятие — очищаем постер
       editableLesson.value.poster = null
     }
   },
 )
-// ============================================
-// 6. COMPUTED (вычисляемые значения)
-// ============================================
+
 const lessonTeachers = computed(() => {
   if (!props.lesson?.teacherIds) return []
   return props.lesson.teacherIds.map((id) => store.getTeacherById(id)).filter(Boolean)
 })
-// ============================================
-// 7. МЕТОДЫ (функции-обработчики)
-// ============================================
-
-// Переключение в режим редактирования формы
 const enableEditing = () => {
   isEditing.value = true
 }
 
-// Удаление занятия
 const deleteLesson = () => {
   if (confirm('Удалить занятие?')) {
     store.deleteLesson(props.lesson.id)
-    emit('close') // Закрываем модалку после удаления
+    emit('close')
   }
 }
 
@@ -212,7 +180,7 @@ onUnmounted(() => {
               @click.stop
             >
               <!-- Контент с прокруткой -->
-              <div class="overflow-y-auto p-6" style="max-height: calc(85vh - 8px)">
+              <div class="overflow-y-auto p-6 pt-15" style="max-height: calc(85vh - 8px)">
                 <template v-if="!isEditing">
                   <!-- Заголовок -->
                   <h3 class="text-2xl font-bold text-gray-900 mb-3 pr-8">
@@ -426,7 +394,6 @@ onUnmounted(() => {
                 </template>
               </div>
 
-              <!-- Крестик в углу -->
               <button
                 @click="emit('close')"
                 class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
