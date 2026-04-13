@@ -2,6 +2,7 @@
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
+import AlertModal from '@/components/AlertModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import type { Lesson, NewLesson } from '@/types/lesson'
 
@@ -25,6 +26,8 @@ const isEditing = ref(false)
 const editableLesson = ref<LessonForm | null>(null)
 const selectedTeacherIds = ref<number[]>([])
 const isConfirmOpen = ref(false)
+const isAlertOpen = ref(false)
+const alertMessage = ref('')
 const lessonToDelete = ref<number | null>(null)
 const lessonNameToDelete = ref('')
 const deleteEntityLabel = computed(() =>
@@ -92,6 +95,11 @@ const lessonTeachers = computed(() => {
     .filter((teacher): teacher is Teacher => Boolean(teacher))
 })
 
+const showAlert = (message: string) => {
+  alertMessage.value = message
+  isAlertOpen.value = true
+}
+
 const setFallbackImage = (event: Event, fallbackSrc: string) => {
   const image = event.target as HTMLImageElement | null
   if (image) {
@@ -146,13 +154,13 @@ const saveLesson = () => {
 
   // Проверка времени
   if (editableLesson.value.time >= editableLesson.value.endTime) {
-    alert('Время начала должно быть раньше времени окончания')
+    showAlert('Время начала должно быть раньше времени окончания')
     return
   }
 
   // Проверка конфликта
   if (hasConflict()) {
-    alert('Это время уже занято другим занятием в выбранный день')
+    showAlert('Это время уже занято другим занятием в выбранный день')
     return
   }
 
@@ -179,6 +187,9 @@ const saveLesson = () => {
 // Закрытие по клавише Escape
 const handleEscape = (event: KeyboardEvent) => {
   if (event.key === 'Escape' && props.isOpen) {
+    if (isConfirmOpen.value || isAlertOpen.value) {
+      return
+    }
     emit('close')
   }
 }
@@ -461,10 +472,16 @@ onUnmounted(() => {
   </Teleport>
 
   <ConfirmModal
-      :isOpen="isConfirmOpen"
-      :message="`Вы уверены, что хотите удалить ${deleteEntityLabel} «${lessonNameToDelete}»?`"
-      :cancelText="'Отмена'"
-      @confirm="handleDeleteLesson"
-      @close="isConfirmOpen = false"
-    />
+    :isOpen="isConfirmOpen"
+    :message="`Вы уверены, что хотите удалить ${deleteEntityLabel} «${lessonNameToDelete}»?`"
+    :cancelText="'Отмена'"
+    @confirm="handleDeleteLesson"
+    @close="isConfirmOpen = false"
+  />
+
+  <AlertModal
+    :isOpen="isAlertOpen"
+    :message="alertMessage"
+    @close="isAlertOpen = false"
+  />
 </template>

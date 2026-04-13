@@ -6,25 +6,17 @@ const props = withDefaults(
     isOpen: boolean
     title?: string
     message: string
-    confirmText?: string
-    cancelText?: string
+    okText?: string
   }>(),
   {
-    title: 'Подтверждение',
-    confirmText: 'Да',
-    cancelText: 'Отмена',
+    title: 'Внимание',
+    okText: 'ОК',
   },
 )
 
 const emit = defineEmits<{
-  confirm: []
   close: []
 }>()
-
-const handleConfirm = () => {
-  emit('confirm')
-  emit('close')
-}
 
 const handleClose = () => {
   emit('close')
@@ -56,9 +48,9 @@ onUnmounted(() => {
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div v-if="isOpen" class="fixed inset-0 z-50">
+      <div v-if="isOpen" class="fixed inset-0 z-[60]">
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="handleClose"></div>
-        
+
         <div class="fixed inset-0 flex items-center justify-center p-4">
           <div
             class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
@@ -68,28 +60,29 @@ onUnmounted(() => {
               <h3 class="text-xl font-bold text-gray-900 mb-2">{{ title }}</h3>
               <p class="text-gray-600">{{ message }}</p>
             </div>
-            
+
             <div class="flex gap-3 p-6 pt-0">
               <button
-                @click="handleConfirm"
+                type="button"
+                @click="handleClose"
                 class="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
               >
-                {{ confirmText }}
-              </button>
-              <button
-                @click="handleClose"
-                class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                {{ cancelText }}
+                {{ okText }}
               </button>
             </div>
-            
+
             <button
+              type="button"
               @click="handleClose"
               class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>

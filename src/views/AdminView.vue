@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
+import AlertModal from '@/components/AlertModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import type { NewTeacher } from '@/types/lesson'
 
@@ -10,6 +11,8 @@ const { teachers } = storeToRefs(schedule)
 const newTeacherName = ref('')
 const newTeacherPhoto = ref('')
 const isConfirmOpen = ref(false)
+const isAlertOpen = ref(false)
+const alertMessage = ref('')
 const teacherToDelete = ref<number | null>(null)
 
 const handlePhotoUpload = (event: Event) => {
@@ -20,9 +23,14 @@ const handlePhotoUpload = (event: Event) => {
   }
 }
 
+const showAlert = (message: string) => {
+  alertMessage.value = message
+  isAlertOpen.value = true
+}
+
 const createTeacher = () => {
   if (newTeacherName.value.trim() === '') {
-    alert('Введите имя преподавателя')
+    showAlert('Введите имя преподавателя')
     return
   }
   console.log('создаем учителя')
@@ -123,6 +131,12 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
       :cancelText="'Отмена'"
       @confirm="handleDeleteConfirm"
       @close="isConfirmOpen = false"
+    />
+
+    <AlertModal
+      :isOpen="isAlertOpen"
+      :message="alertMessage"
+      @close="isAlertOpen = false"
     />
   </div>
 </template>
