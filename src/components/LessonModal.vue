@@ -65,6 +65,39 @@ watch(
 )
 
 watch(
+  () => props.isOpen,
+  (open) => {
+    if (!open) {
+      isEditing.value = false
+      isConfirmOpen.value = false
+      isAlertOpen.value = false
+      lessonToDelete.value = null
+      lessonNameToDelete.value = ''
+
+      const lesson = props.lesson
+      if (!lesson) return
+
+      if (!lesson.id) {
+        editableLesson.value = {
+          id: null,
+          day: '',
+          time: '',
+          endTime: '',
+          direction: '',
+          level: '',
+          teacherIds: [],
+          type: 'lesson',
+          poster: null,
+        }
+      } else {
+        editableLesson.value = JSON.parse(JSON.stringify(lesson)) as LessonForm
+      }
+      selectedTeacherIds.value = [...(editableLesson.value.teacherIds || [])]
+    }
+  },
+)
+
+watch(
   () => editableLesson.value,
   (newLesson) => {
     if (newLesson) {
