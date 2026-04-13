@@ -48,7 +48,7 @@ watch(
           time: '',
           endTime: '',
           directionId: directions.value[0]?.id ?? 0,
-          level: '',
+          levelId: null,
           teacherIds: [],
           type: 'lesson',
           poster: null,
@@ -84,7 +84,7 @@ watch(
           time: '',
           endTime: '',
           directionId: directions.value[0]?.id ?? 0,
-          level: '',
+          levelId: null,
           teacherIds: [],
           type: 'lesson',
           poster: null,
@@ -140,11 +140,14 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
   }
 }
 
-const getDisplayLevel = (level: string): string => {
-  return level.trim() ? level : 'Для всех'
-}
 const enableEditing = () => {
   isEditing.value = true
+}
+
+const onLessonLevelChange = (event: Event) => {
+  if (!editableLesson.value) return
+  const raw = (event.target as HTMLSelectElement).value
+  editableLesson.value.levelId = raw === '' ? null : Number(raw)
 }
 
 const deleteLesson = () => {
@@ -206,6 +209,14 @@ const saveLesson = () => {
     return
   }
 
+  if (
+    editableLesson.value.levelId !== null &&
+    !store.getLevelById(editableLesson.value.levelId)
+  ) {
+    showAlert('Выберите уровень из списка')
+    return
+  }
+
   editableLesson.value.teacherIds = selectedTeacherIds.value
 
   if (editableLesson.value.id !== null) {
@@ -216,7 +227,7 @@ const saveLesson = () => {
       time: editableLesson.value.time,
       endTime: editableLesson.value.endTime,
       directionId: editableLesson.value.directionId,
-      level: editableLesson.value.level,
+      levelId: editableLesson.value.levelId,
       teacherIds: editableLesson.value.teacherIds,
       type: editableLesson.value.type,
       poster: editableLesson.value.poster,
@@ -290,7 +301,7 @@ onUnmounted(() => {
                       {{ lesson.time }} — {{ lesson.endTime }}
                     </span>
                     <span class="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium">
-                      {{ getDisplayLevel(lesson.level) }}
+                      {{ store.getLevelNameById(lesson.levelId) }}
                     </span>
                   </div>
 
@@ -366,11 +377,12 @@ onUnmounted(() => {
                       </label>
                       <select
                         id="level"
-                        v-model="editableLesson.level"
+                        :value="editableLesson.levelId === null ? '' : editableLesson.levelId"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                        @change="onLessonLevelChange"
                       >
                         <option value="">Для всех</option>
-                        <option v-for="level in levels" :key="level.id" :value="level.name">
+                        <option v-for="level in levels" :key="level.id" :value="level.id">
                           {{ level.name }}
                         </option>
                       </select>

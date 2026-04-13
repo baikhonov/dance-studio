@@ -16,7 +16,7 @@ const userStore = useUserStore()
 const { isAdmin } = storeToRefs(userStore)
 
 const scheduleStore = useScheduleStore()
-const { days, timeSlots, filters, directions } = storeToRefs(scheduleStore)
+const { days, timeSlots, filters, directions, levels } = storeToRefs(scheduleStore)
 
 const lessonsWithTeachers = computed<Record<string, LessonCard[]>>(() => {
   const result: Record<string, LessonCard[]> = {}
@@ -59,8 +59,8 @@ onUnmounted(() => {
 
 const SLOT_HEIGHT = 120
 
-const uniqueLevels = computed(() => scheduleStore.uniqueLevels)
 const sortedDirections = computed(() => [...directions.value].sort((a, b) => a.name.localeCompare(b.name)))
+const sortedLevels = computed(() => [...levels.value].sort((a, b) => a.name.localeCompare(b.name)))
 
 const filteredLessons = computed(() => scheduleStore.filteredLessons)
 
@@ -104,7 +104,7 @@ const createEmptyLesson = (): LessonDraft => {
     time: '',
     endTime: '',
     directionId: defaultDirectionId,
-    level: '',
+    levelId: null,
     teacherIds: [],
     poster: null,
     type: 'lesson',
@@ -127,9 +127,6 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
   }
 }
 
-const getDisplayLevel = (level: string): string => {
-  return level.trim() ? level : 'Для всех'
-}
 </script>
 
 <template>
@@ -145,7 +142,7 @@ const getDisplayLevel = (level: string): string => {
         >
           Добавить занятие
         </button>
-        <Filters :directions="sortedDirections" :levels="uniqueLevels" v-model="filters" />
+        <Filters :directions="sortedDirections" :levels="sortedLevels" v-model="filters" />
 
         <div
           v-if="filters.direction || filters.level"
@@ -232,7 +229,7 @@ const getDisplayLevel = (level: string): string => {
 
                   <!-- Уровень -->
                   <p class="text-xs text-gray-700 mt-0.5 font-medium">
-                    {{ getDisplayLevel(lesson.level) }}
+                    {{ scheduleStore.getLevelNameById(lesson.levelId) }}
                   </p>
 
                   <!-- Время на полупрозрачном фоне -->

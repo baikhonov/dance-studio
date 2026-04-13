@@ -6,7 +6,7 @@ export interface Lesson {
   time: string
   endTime: string
   directionId: number
-  level: string
+  levelId: number | null
   teacherIds: number[]
   type: LessonType
   poster: string | null
@@ -30,7 +30,7 @@ export interface Teacher {
 
 export interface Filters {
   direction: number | null
-  level: string
+  level: number | null
 }
 
 export interface ScheduleState {
