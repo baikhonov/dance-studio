@@ -39,7 +39,7 @@ const handleLogout = () => {
   <footer class="my-6 text-center text-gray-600">© 2026 Школа танцев. Все права защищены.</footer>
 </template>
 
-<style>
+<style lang="scss">
 html {
   height: 100%;
 }
@@ -48,9 +48,13 @@ body {
   flex-direction: column;
   min-height: 100%;
   margin: 0;
-  padding: 10px;
+  padding: 20px;
   font-family: Arial, sans-serif;
   background: #f5f5f5;
+
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 }
 #app {
   flex-grow: 1;

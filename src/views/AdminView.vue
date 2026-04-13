@@ -65,68 +65,92 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
 </script>
 
 <template>
-  <div>
-    <h1 class="text-2xl font-bold mb-6">Администрирование</h1>
+  <div class="space-y-8">
+    <h1 class="text-2xl font-bold text-gray-900">Администрирование</h1>
 
-        <h2 class="text-xl font-semibold mb-4">Управление преподавателями</h2>
+    <div class="grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr] gap-6 xl:gap-8 items-start">
+      <section class="rounded-2xl border border-blue-100 bg-white p-4 md:p-5 shadow-sm">
+        <div class="flex flex-col gap-3 mb-4">
+          <div class="flex items-center gap-3">
+            <h2 class="text-xl font-semibold text-gray-900">Управление преподавателями</h2>
+            <span class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-blue-100 text-blue-700 whitespace-nowrap">
+              Всего: {{ teachers.length }}
+            </span>
+          </div>
+          <p class="text-sm text-gray-600">Состав и карточки преподавателей</p>
+        </div>
 
-    <div class="mb-8">
-      <button
-        type="button"
-        @click="openTeacherModal()"
-        class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
-      >
-        Добавить преподавателя
-      </button>
-    </div>
+        <button
+          type="button"
+          @click="openTeacherModal()"
+          class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+        >
+          Добавить преподавателя
+        </button>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      <div
-        v-for="teacher in teachers"
-        :key="teacher.id"
-        role="button"
-        tabindex="0"
-        :aria-label="`Карточка преподавателя ${teacher.name}`"
-        class="flex flex-col items-center p-4 bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-400"
-        @click="openTeacherModal(teacher)"
-        @keydown.enter="openTeacherModal(teacher)"
-        @keydown.space.prevent="openTeacherModal(teacher)"
-      >
-        <img
-          :src="`/images/teachers/${teacher.photo}`"
-          :alt="teacher.name"
-          class="w-full max-w-50 mb-3 object-cover pointer-events-none"
-          @error="setFallbackImage($event, '/images/teachers/default-avatar.jpg')"
-        />
-        <p class="font-semibold text-lg text-center">{{ teacher.name }}</p>
-      </div>
-    </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div
+            v-for="teacher in teachers"
+            :key="teacher.id"
+            role="button"
+            tabindex="0"
+            :aria-label="`Карточка преподавателя ${teacher.name}`"
+            class="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-200 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400"
+            @click="openTeacherModal(teacher)"
+            @keydown.enter="openTeacherModal(teacher)"
+            @keydown.space.prevent="openTeacherModal(teacher)"
+          >
+            <img
+              :src="`/images/teachers/${teacher.photo}`"
+              :alt="teacher.name"
+              class="w-14 h-14 rounded-full object-cover shrink-0 pointer-events-none"
+              @error="setFallbackImage($event, '/images/teachers/default-avatar.jpg')"
+            />
+            <p class="font-semibold text-base leading-tight text-gray-900">
+              {{ teacher.name }}
+            </p>
+          </div>
+        </div>
+      </section>
 
-    <h2 class="text-xl font-semibold mb-4">Управление направлениями</h2>
-    <div class="mb-8">
-      <button
-        type="button"
-        @click="openDirectionModal()"
-        class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
-      >
-        Добавить направление
-      </button>
-    </div>
+      <section class="rounded-2xl border border-emerald-100 bg-white p-4 md:p-5 shadow-sm">
+        <div class="flex flex-col gap-3 mb-4">
+          <div class="flex items-center gap-3">
+            <h2 class="text-xl font-semibold text-gray-900">Управление направлениями</h2>
+            <span
+              class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap"
+            >
+              Всего: {{ directions.length }}
+            </span>
+          </div>
+          <p class="text-sm text-gray-600">Справочник направлений для расписания</p>
+        </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-      <div
-        v-for="direction in directions"
-        :key="direction.id"
-        role="button"
-        tabindex="0"
-        :aria-label="`Карточка направления ${direction.name}`"
-        class="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-400"
-        @click="openDirectionModal(direction)"
-        @keydown.enter="openDirectionModal(direction)"
-        @keydown.space.prevent="openDirectionModal(direction)"
-      >
-        <p class="font-semibold text-lg text-center">{{ direction.name }}</p>
-      </div>
+        <button
+          type="button"
+          @click="openDirectionModal()"
+          class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+        >
+          Добавить направление
+        </button>
+
+        <ul class="space-y-2">
+          <li
+            v-for="direction in directions"
+            :key="direction.id"
+            role="button"
+            tabindex="0"
+            :aria-label="`Элемент направления ${direction.name}`"
+            class="min-h-11 px-3 py-2.5 bg-white border border-gray-200 rounded-lg flex items-center justify-between gap-3 hover:border-emerald-200 hover:bg-emerald-50/40 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            @click="openDirectionModal(direction)"
+            @keydown.enter="openDirectionModal(direction)"
+            @keydown.space.prevent="openDirectionModal(direction)"
+          >
+            <span class="font-medium text-gray-800 leading-tight">{{ direction.name }}</span>
+            <span class="text-emerald-600 text-sm font-semibold" aria-hidden="true">></span>
+          </li>
+        </ul>
+      </section>
     </div>
 
     <TeacherModal
