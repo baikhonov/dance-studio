@@ -1,26 +1,35 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
 import ConfirmModal from '@/components/ConfirmModal.vue'
+import type { Lesson } from '@/types/lesson'
 
-const props = defineProps({
-  lesson: Object,
-  isOpen: Boolean,
-  isAdmin: Boolean,
-})
+type LessonForm = Omit<Lesson, 'id'> & { id: number | null }
+type Teacher = { id: number; name: string; photo: string }
 
-const emit = defineEmits(['close'])
+const props = defineProps<{
+  lesson: Lesson | null
+  isOpen: boolean
+  isAdmin: boolean
+}>()
+
+const emit = defineEmits<{
+  close: []
+}>()
 
 const store = useScheduleStore()
 const { days } = storeToRefs(store)
 
 const isEditing = ref(false)
-const editableLesson = ref(null)
-const selectedTeacherIds = ref([])
+const editableLesson = ref<LessonForm | null>(null)
+const selectedTeacherIds = ref<number[]>([])
 const isConfirmOpen = ref(false)
-const lessonToDelete = ref(null)
+const lessonToDelete = ref<number | null>(null)
 const lessonNameToDelete = ref('')
+const deleteEntityLabel = computed(() =>
+  editableLesson.value?.type === 'event' ? 'мероприятие' : 'занятие',
+)
 
 watch(
   () => props.lesson,
@@ -43,7 +52,7 @@ watch(
         }
       } else {
         isEditing.value = false
-        editableLesson.value = JSON.parse(JSON.stringify(lesson))
+        editableLesson.value = JSON.parse(JSON.stringify(lesson)) as LessonForm
       }
 
       selectedTeacherIds.value = [...(editableLesson.value.teacherIds || [])]
@@ -64,7 +73,9 @@ watch(
 
 watch(
   () => editableLesson.value?.type,
-  (newType, oldType) => {
+  (newType) => {
+    if (!editableLesson.value) return
+
     if (newType === 'event') {
       editableLesson.value.teacherIds = []
       selectedTeacherIds.value = []
@@ -76,19 +87,30 @@ watch(
 
 const lessonTeachers = computed(() => {
   if (!props.lesson?.teacherIds) return []
-  return props.lesson.teacherIds.map((id) => store.getTeacherById(id)).filter(Boolean)
+  return props.lesson.teacherIds
+    .map((id) => store.getTeacherById(id))
+    .filter((teacher): teacher is Teacher => Boolean(teacher))
 })
+
+const setFallbackImage = (event: Event, fallbackSrc: string) => {
+  const image = event.target as HTMLImageElement | null
+  if (image) {
+    image.src = fallbackSrc
+  }
+}
 const enableEditing = () => {
   isEditing.value = true
 }
 
 const deleteLesson = () => {
+  if (!editableLesson.value) return
   lessonToDelete.value = editableLesson.value.id
   lessonNameToDelete.value = editableLesson.value.direction
   isConfirmOpen.value = true
 }
 
 const handleDeleteLesson = () => {
+  if (lessonToDelete.value === null) return
   store.deleteLesson(lessonToDelete.value)
   lessonToDelete.value = null
   lessonNameToDelete.value = ''
@@ -99,6 +121,7 @@ const handleDeleteLesson = () => {
 const hasConflict = () => {
   const lessons = store.lessons
   const current = editableLesson.value
+  if (!current) return false
 
   return lessons.some((lesson) => {
     // Пропускаем само редактируемое занятие
@@ -119,6 +142,8 @@ const hasConflict = () => {
 
 // Сохранение изменений
 const saveLesson = () => {
+  if (!editableLesson.value) return
+
   // Проверка времени
   if (editableLesson.value.time >= editableLesson.value.endTime) {
     alert('Время начала должно быть раньше времени окончания')
@@ -142,14 +167,16 @@ const saveLesson = () => {
 }
 
 // Закрытие по клавише Escape
-const handleEscape = (event) => {
+const handleEscape = (event: KeyboardEvent) => {
   if (event.key === 'Escape' && props.isOpen) {
     emit('close')
   }
 }
 
-const handlePosterUpload = (event) => {
-  const file = event.target.files[0]
+const handlePosterUpload = (event: Event) => {
+  if (!editableLesson.value) return
+  const target = event.target as HTMLInputElement | null
+  const file = target?.files?.[0]
   if (file) {
     // Пока сохраняем имя файла
     editableLesson.value.poster = file.name
@@ -188,7 +215,7 @@ onUnmounted(() => {
             >
               <!-- Контент с прокруткой -->
               <div class="overflow-y-auto p-6 pt-15" style="max-height: calc(85vh - 8px)">
-                <template v-if="!isEditing">
+                <template v-if="lesson && !isEditing">
                   <!-- Заголовок -->
                   <h3 class="text-2xl font-bold text-gray-900 mb-3 pr-8">
                     {{ lesson.direction }}
@@ -208,24 +235,24 @@ onUnmounted(() => {
                   </div>
 
                   <!-- Преподаватели -->
-                  <div v-if="lesson.teacherIds && lesson.teacherIds.length > 0" class="mb-6">
+                  <div v-if="lessonTeachers.length > 0" class="mb-6">
                     <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                      {{ lesson.teacherIds.length > 1 ? 'Преподаватели' : 'Преподаватель' }}
+                      {{ lessonTeachers.length > 1 ? 'Преподаватели' : 'Преподаватель' }}
                     </h4>
                     <div class="flex flex-wrap gap-4">
                       <div
-                        v-for="teacherId in lesson.teacherIds"
-                        :key="teacherId"
+                        v-for="teacher in lessonTeachers"
+                        :key="teacher.id"
                         class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 min-w-45"
                       >
                         <img
-                          :src="`/images/teachers/${store.getTeacherById(teacherId).photo}`"
-                          :alt="store.getTeacherById(teacherId).name"
+                          :src="`/images/teachers/${teacher.photo}`"
+                          :alt="teacher.name"
                           class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
-                          @error="$event.target.src = '/images/teachers/default-avatar.jpg'"
+                          @error="setFallbackImage($event, '/images/teachers/default-avatar.jpg')"
                         />
                         <p class="font-semibold text-gray-800">
-                          {{ store.getTeacherById(teacherId).name }}
+                          {{ teacher.name }}
                         </p>
                       </div>
                     </div>
@@ -236,7 +263,7 @@ onUnmounted(() => {
                       :src="`/images/posters/${lesson.poster}`"
                       :alt="lesson.direction"
                       class="w-full mx-auto rounded-lg shadow-md"
-                      @error="$event.target.src = '/images/events/default-party.jpg'"
+                      @error="setFallbackImage($event, '/images/events/default-party.jpg')"
                     />
                   </div>
                   <!-- Кнопки действий (только если глобальный режим редактирования) -->
@@ -255,7 +282,7 @@ onUnmounted(() => {
                     </button>
                   </div>
                 </template>
-                <template v-else>
+                <template v-else-if="editableLesson">
                   <form @submit.prevent="saveLesson" class="space-y-4">
                     <div>
                       <label for="direction" class="block text-sm font-medium text-gray-700 mb-1">
@@ -425,7 +452,7 @@ onUnmounted(() => {
 
   <ConfirmModal
       :isOpen="isConfirmOpen"
-      :message="`Вы уверены, что хотите удалить ${editableLesson.type === 'event' ? 'мероприятие' : 'занятие'} «${lessonNameToDelete}»?`"
+      :message="`Вы уверены, что хотите удалить ${deleteEntityLabel} «${lessonNameToDelete}»?`"
       :cancelText="'Отмена'"
       @confirm="handleDeleteLesson"
       @close="isConfirmOpen = false"
