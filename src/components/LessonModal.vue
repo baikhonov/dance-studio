@@ -231,11 +231,11 @@ onUnmounted(() => {
           <div class="fixed inset-0 flex items-center justify-center p-4">
             <!-- Модальное окно -->
             <div
-              class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-hidden"
+              class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden"
               @click.stop
             >
               <!-- Контент с прокруткой -->
-              <div class="overflow-y-auto p-6 pt-15" style="max-height: calc(85vh - 8px)">
+              <div class="overflow-y-auto p-6" style="max-height: calc(90vh - 8px)">
                 <template v-if="lesson && !isEditing">
                   <!-- Заголовок -->
                   <h3 class="text-2xl font-bold text-gray-900 mb-3 pr-8">
@@ -451,7 +451,7 @@ onUnmounted(() => {
 
               <button
                 @click="emit('close')"
-                class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
