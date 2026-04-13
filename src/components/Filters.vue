@@ -1,15 +1,17 @@
 <script setup lang="ts">
+import type { Direction } from '@/types/lesson'
 import type { Filters as ScheduleFilters } from '@/types/lesson'
 
 defineProps<{
-  directions: string[]
+  directions: Direction[]
   levels: string[]
 }>()
 
 const filters = defineModel<ScheduleFilters>({ required: true })
 
 function updateDirection(event: Event) {
-  const value = (event.target as HTMLSelectElement | null)?.value ?? ''
+  const rawValue = (event.target as HTMLSelectElement | null)?.value ?? ''
+  const value = rawValue ? Number(rawValue) : null
   filters.value = {
     ...filters.value,
     direction: value,
@@ -25,7 +27,7 @@ function updateLevel(event: Event) {
 }
 
 const resetFilters = () => {
-  filters.value = { direction: '', level: '' }
+  filters.value = { direction: null, level: '' }
 }
 </script>
 
@@ -37,8 +39,8 @@ const resetFilters = () => {
       @change="updateDirection"
     >
       <option value="">Все направления</option>
-      <option v-for="direction in directions" :key="direction" :value="direction">
-        {{ direction }}
+      <option v-for="direction in directions" :key="direction.id" :value="direction.id">
+        {{ direction.name }}
       </option>
     </select>
     <select

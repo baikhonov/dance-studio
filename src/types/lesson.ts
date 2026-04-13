@@ -5,11 +5,16 @@ export interface Lesson {
   day: string
   time: string
   endTime: string
-  direction: string
+  directionId: number
   level: string
   teacherIds: number[]
   type: LessonType
   poster: string | null
+}
+
+export interface Direction {
+  id: number
+  name: string
 }
 
 export interface Teacher {
@@ -19,7 +24,7 @@ export interface Teacher {
 }
 
 export interface Filters {
-  direction: string
+  direction: number | null
   level: string
 }
 
@@ -32,4 +37,5 @@ export interface ScheduleState {
 }
 
 export type NewLesson = Omit<Lesson, 'id'>
+export type NewDirection = Omit<Direction, 'id'>
 export type NewTeacher = Omit<Teacher, 'id'>

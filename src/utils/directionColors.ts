@@ -8,8 +8,8 @@ export const directionStyles: Record<string, string> = {
   вечеринка: 'border-red-600 bg-red-100 hover:bg-red-200',
 }
 
-export const getDirectionClass = (direction: string): string => {
-  const lower = direction.toLowerCase()
+export const getDirectionClass = (directionName: string | null | undefined): string => {
+  const lower = directionName?.toLowerCase().trim() ?? ''
   for (const [key, value] of Object.entries(directionStyles)) {
     if (lower.includes(key)) return value
   }

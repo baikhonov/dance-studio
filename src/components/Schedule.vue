@@ -16,7 +16,7 @@ const userStore = useUserStore()
 const { isAdmin } = storeToRefs(userStore)
 
 const scheduleStore = useScheduleStore()
-const { days, timeSlots, filters } = storeToRefs(scheduleStore)
+const { days, timeSlots, filters, directions } = storeToRefs(scheduleStore)
 
 const lessonsWithTeachers = computed<Record<string, LessonCard[]>>(() => {
   const result: Record<string, LessonCard[]> = {}
@@ -59,8 +59,8 @@ onUnmounted(() => {
 
 const SLOT_HEIGHT = 120
 
-const uniqueDirections = computed(() => scheduleStore.uniqueDirections)
 const uniqueLevels = computed(() => scheduleStore.uniqueLevels)
+const sortedDirections = computed(() => [...directions.value].sort((a, b) => a.name.localeCompare(b.name)))
 
 const filteredLessons = computed(() => scheduleStore.filteredLessons)
 
@@ -97,12 +97,13 @@ const isModalOpen = ref(false)
 const selectedLesson = ref<Lesson | LessonDraft | null>(null)
 
 const createEmptyLesson = (): LessonDraft => {
+  const defaultDirectionId = directions.value[0]?.id ?? 0
   return {
     id: null,
     day: '',
     time: '',
     endTime: '',
-    direction: '',
+    directionId: defaultDirectionId,
     level: '',
     teacherIds: [],
     poster: null,
@@ -140,7 +141,7 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
         >
           Добавить занятие
         </button>
-        <Filters :directions="uniqueDirections" :levels="uniqueLevels" v-model="filters" />
+        <Filters :directions="sortedDirections" :levels="uniqueLevels" v-model="filters" />
 
         <div
           v-if="filters.direction || filters.level"
@@ -211,7 +212,7 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
             <template v-for="lesson in lessonsWithTeachers[day]" :key="lesson.id">
               <div
                 class="absolute rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer border-l-2 md:border-l-4"
-                :class="getDirectionClass(lesson.direction)"
+                :class="getDirectionClass(scheduleStore.getDirectionNameById(lesson.directionId))"
                 :style="getLessonStyle(lesson)"
                 @click="openLessonModal(lesson)"
               >
@@ -220,9 +221,9 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
                   <!-- Название -->
                   <p
                     class="shrink-0 font-bold text-xs leading-tight truncate text-gray-900"
-                    :title="lesson.direction"
+                    :title="scheduleStore.getDirectionNameById(lesson.directionId)"
                   >
-                    {{ lesson.direction }}
+                    {{ scheduleStore.getDirectionNameById(lesson.directionId) }}
                   </p>
 
                   <!-- Уровень -->
@@ -270,7 +271,7 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
                     <img
                       v-if="lesson.poster"
                       :src="`/images/posters/${lesson.poster}`"
-                      :alt="lesson.direction"
+                      :alt="scheduleStore.getDirectionNameById(lesson.directionId)"
                       class="w-9 h-9 rounded-full border-2 border-white shadow-sm object-cover"
                     />
                   </div>

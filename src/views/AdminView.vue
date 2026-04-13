@@ -3,15 +3,19 @@ import { ref } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
 import TeacherModal from '@/components/TeacherModal.vue'
-import type { NewTeacher, Teacher } from '@/types/lesson'
+import DirectionModal from '@/components/DirectionModal.vue'
+import type { Direction, NewDirection, NewTeacher, Teacher } from '@/types/lesson'
 
 type TeacherDraft = NewTeacher & { id: null }
+type DirectionDraft = NewDirection & { id: null }
 
 const schedule = useScheduleStore()
-const { teachers } = storeToRefs(schedule)
+const { teachers, directions } = storeToRefs(schedule)
 
 const isTeacherModalOpen = ref(false)
 const selectedTeacher = ref<Teacher | TeacherDraft | null>(null)
+const isDirectionModalOpen = ref(false)
+const selectedDirection = ref<Direction | DirectionDraft | null>(null)
 
 const createEmptyTeacher = (): TeacherDraft => ({
   id: null,
@@ -28,9 +32,28 @@ const openTeacherModal = (teacher?: Teacher | TeacherDraft) => {
   isTeacherModalOpen.value = true
 }
 
+const createEmptyDirection = (): DirectionDraft => ({
+  id: null,
+  name: '',
+})
+
+const openDirectionModal = (direction?: Direction | DirectionDraft) => {
+  if (direction) {
+    selectedDirection.value = direction
+  } else {
+    selectedDirection.value = createEmptyDirection()
+  }
+  isDirectionModalOpen.value = true
+}
+
 const closeTeacherModal = () => {
   isTeacherModalOpen.value = false
   selectedTeacher.value = null
+}
+
+const closeDirectionModal = () => {
+  isDirectionModalOpen.value = false
+  selectedDirection.value = null
 }
 
 const setFallbackImage = (event: Event, fallbackSrc: string) => {
@@ -44,7 +67,8 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
 <template>
   <div>
     <h1 class="text-2xl font-bold mb-6">Администрирование</h1>
-    <h2 class="text-xl font-semibold mb-4">Управление преподавателями</h2>
+
+        <h2 class="text-xl font-semibold mb-4">Управление преподавателями</h2>
 
     <div class="mb-8">
       <button
@@ -78,10 +102,43 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
       </div>
     </div>
 
+    <h2 class="text-xl font-semibold mb-4">Управление направлениями</h2>
+    <div class="mb-8">
+      <button
+        type="button"
+        @click="openDirectionModal()"
+        class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+      >
+        Добавить направление
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+      <div
+        v-for="direction in directions"
+        :key="direction.id"
+        role="button"
+        tabindex="0"
+        :aria-label="`Карточка направления ${direction.name}`"
+        class="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-400"
+        @click="openDirectionModal(direction)"
+        @keydown.enter="openDirectionModal(direction)"
+        @keydown.space.prevent="openDirectionModal(direction)"
+      >
+        <p class="font-semibold text-lg text-center">{{ direction.name }}</p>
+      </div>
+    </div>
+
     <TeacherModal
       :is-open="isTeacherModalOpen"
       :teacher="selectedTeacher"
       @close="closeTeacherModal"
+    />
+
+    <DirectionModal
+      :is-open="isDirectionModalOpen"
+      :direction="selectedDirection"
+      @close="closeDirectionModal"
     />
   </div>
 </template>

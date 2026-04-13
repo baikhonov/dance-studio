@@ -20,7 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const store = useScheduleStore()
-const { days } = storeToRefs(store)
+const { days, directions } = storeToRefs(store)
 
 const isEditing = ref(false)
 const editableLesson = ref<LessonForm | null>(null)
@@ -47,7 +47,7 @@ watch(
           day: '',
           time: '',
           endTime: '',
-          direction: '',
+          directionId: directions.value[0]?.id ?? 0,
           level: '',
           teacherIds: [],
           type: 'lesson',
@@ -83,7 +83,7 @@ watch(
           day: '',
           time: '',
           endTime: '',
-          direction: '',
+          directionId: directions.value[0]?.id ?? 0,
           level: '',
           teacherIds: [],
           type: 'lesson',
@@ -146,7 +146,7 @@ const enableEditing = () => {
 const deleteLesson = () => {
   if (!editableLesson.value) return
   lessonToDelete.value = editableLesson.value.id
-  lessonNameToDelete.value = editableLesson.value.direction
+  lessonNameToDelete.value = store.getDirectionNameById(editableLesson.value.directionId)
   isConfirmOpen.value = true
 }
 
@@ -197,6 +197,11 @@ const saveLesson = () => {
     return
   }
 
+  if (!store.getDirectionById(editableLesson.value.directionId)) {
+    showAlert('Выберите направление из списка')
+    return
+  }
+
   editableLesson.value.teacherIds = selectedTeacherIds.value
 
   if (editableLesson.value.id !== null) {
@@ -206,7 +211,7 @@ const saveLesson = () => {
       day: editableLesson.value.day,
       time: editableLesson.value.time,
       endTime: editableLesson.value.endTime,
-      direction: editableLesson.value.direction,
+      directionId: editableLesson.value.directionId,
       level: editableLesson.value.level,
       teacherIds: editableLesson.value.teacherIds,
       type: editableLesson.value.type,
@@ -272,7 +277,7 @@ onUnmounted(() => {
                 <template v-if="lesson && !isEditing">
                   <!-- Заголовок -->
                   <h3 class="text-2xl font-bold text-gray-900 mb-3 pr-8">
-                    {{ lesson.direction }}
+                    {{ store.getDirectionNameById(lesson.directionId) }}
                   </h3>
 
                   <!-- Время и уровень в одной строке -->
@@ -315,7 +320,7 @@ onUnmounted(() => {
                   <div v-else-if="lesson.type === 'event' && lesson.poster">
                     <img
                       :src="`/images/posters/${lesson.poster}`"
-                      :alt="lesson.direction"
+                      :alt="store.getDirectionNameById(lesson.directionId)"
                       class="w-full mx-auto rounded-lg shadow-md"
                       @error="setFallbackImage($event, '/images/events/default-party.jpg')"
                     />
@@ -342,13 +347,16 @@ onUnmounted(() => {
                       <label for="direction" class="block text-sm font-medium text-gray-700 mb-1">
                         Направление
                       </label>
-                      <input
+                      <select
                         id="direction"
-                        v-model="editableLesson.direction"
-                        type="text"
+                        v-model.number="editableLesson.directionId"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
                         required
-                      />
+                      >
+                        <option v-for="direction in directions" :key="direction.id" :value="direction.id">
+                          {{ direction.name }}
+                        </option>
+                      </select>
                     </div>
 
                     <div>

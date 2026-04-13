@@ -1,7 +1,15 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { generateId } from '@/utils/generateId'
-import type { Filters, Lesson, NewLesson, NewTeacher, Teacher } from '@/types/lesson'
+import type {
+  Direction,
+  Filters,
+  Lesson,
+  NewDirection,
+  NewLesson,
+  NewTeacher,
+  Teacher,
+} from '@/types/lesson'
 
 export const useScheduleStore = defineStore('schedule', () => {
   const days = ref<string[]>([
@@ -38,7 +46,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       day: 'Понедельник',
       time: '19:30',
       endTime: '20:30',
-      direction: 'Lady Style (соло)',
+      directionId: 1,
       level: 'Продолжающие',
       teacherIds: [7],
       type: 'lesson',
@@ -49,7 +57,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       day: 'Понедельник',
       time: '20:30',
       endTime: '21:30',
-      direction: 'Бачата в паре',
+      directionId: 2,
       level: 'Начинающие',
       teacherIds: [5, 7],
       type: 'lesson',
@@ -60,7 +68,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       day: 'Вторник',
       time: '19:30',
       endTime: '20:30',
-      direction: 'Общее хорео (соло)',
+      directionId: 3,
       level: 'Для всех',
       teacherIds: [5],
       type: 'lesson',
@@ -71,7 +79,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       day: 'Вторник',
       time: '20:30',
       endTime: '21:30',
-      direction: 'Бачата в паре',
+      directionId: 2,
       level: 'Продолжающие',
       teacherIds: [5, 7],
       type: 'lesson',
@@ -82,7 +90,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       day: 'Среда',
       time: '19:30',
       endTime: '20:30',
-      direction: 'Lady Style (соло)',
+      directionId: 1,
       level: 'Продолжающие',
       teacherIds: [7],
       type: 'lesson',
@@ -93,7 +101,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       day: 'Среда',
       time: '20:30',
       endTime: '21:30',
-      direction: 'Бачата в паре',
+      directionId: 2,
       level: 'Начинающие',
       teacherIds: [5, 7],
       type: 'lesson',
@@ -104,7 +112,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       day: 'Четверг',
       time: '19:30',
       endTime: '20:30',
-      direction: 'Общее хорео (соло)',
+      directionId: 3,
       level: 'Для всех',
       teacherIds: [5],
       type: 'lesson',
@@ -115,7 +123,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       day: 'Четверг',
       time: '20:30',
       endTime: '21:30',
-      direction: 'Бачата в паре',
+      directionId: 2,
       level: 'Продолжающие',
       teacherIds: [5, 7],
       type: 'lesson',
@@ -126,7 +134,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       day: 'Пятница',
       time: '19:30',
       endTime: '20:30',
-      direction: 'Lady Style (соло)',
+      directionId: 1,
       level: 'Начинающие',
       teacherIds: [7],
       type: 'lesson',
@@ -137,7 +145,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       day: 'Пятница',
       time: '20:30',
       endTime: '22:30',
-      direction: 'Бачата интенсив "Украшения в паре"',
+      directionId: 4,
       level: 'Для всех',
       teacherIds: [5, 7],
       type: 'lesson',
@@ -148,7 +156,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       day: 'Суббота',
       time: '20:00',
       endTime: '23:00',
-      direction: 'Вечеринка',
+      directionId: 5,
       level: 'Для всех',
       teacherIds: [],
       type: 'event',
@@ -159,7 +167,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       day: 'Воскресенье',
       time: '13:00',
       endTime: '14:00',
-      direction: 'Lady Style (соло)',
+      directionId: 1,
       level: 'Начинающие',
       teacherIds: [7],
       type: 'lesson',
@@ -168,9 +176,17 @@ export const useScheduleStore = defineStore('schedule', () => {
   ])
 
   const filters = ref<Filters>({
-    direction: '',
+    direction: null,
     level: '',
   })
+
+  const directions = ref<Direction[]>([
+    { id: 1, name: 'Lady Style (соло)' },
+    { id: 2, name: 'Бачата в паре' },
+    { id: 3, name: 'Общее хорео (соло)' },
+    { id: 4, name: 'Бачата интенсив "Украшения в паре"' },
+    { id: 5, name: 'Вечеринка' },
+  ])
 
   const teachers = ref<Teacher[]>([
     { id: 5, name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
@@ -178,8 +194,10 @@ export const useScheduleStore = defineStore('schedule', () => {
   ])
 
   const uniqueDirections = computed(() => {
-    const dirs = [...new Set(lessons.value.map((lesson) => lesson.direction).filter(Boolean))]
-    return dirs.sort()
+    return [...directions.value]
+      .map((direction) => direction.name)
+      .filter(Boolean)
+      .sort()
   })
 
   const uniqueLevels = computed(() => {
@@ -192,8 +210,8 @@ export const useScheduleStore = defineStore('schedule', () => {
   const filteredLessons = computed(() => {
     return lessons.value.filter((lesson) => {
       let matchDirection = true
-      if (filters.value.direction) {
-        matchDirection = lesson.direction.toLowerCase() === filters.value.direction.toLowerCase()
+      if (filters.value.direction !== null) {
+        matchDirection = lesson.directionId === filters.value.direction
       }
 
       let matchLevel = true
@@ -213,6 +231,14 @@ export const useScheduleStore = defineStore('schedule', () => {
 
   const getTeacherById = (id: number): Teacher | undefined => {
     return teachers.value.find((teacher) => teacher.id === id)
+  }
+
+  const getDirectionById = (id: number): Direction | undefined => {
+    return directions.value.find((direction) => direction.id === id)
+  }
+
+  const getDirectionNameById = (id: number): string => {
+    return getDirectionById(id)?.name ?? 'Без направления'
   }
 
   const getTeachersForLesson = (teacherIds: number[] = []): Teacher[] => {
@@ -260,17 +286,43 @@ export const useScheduleStore = defineStore('schedule', () => {
     teachers.value = teachers.value.filter((teacher) => teacher.id !== id)
   }
 
+  const addDirection = (direction: NewDirection) => {
+    const maxId = generateId(directions.value)
+    directions.value.push({
+      ...direction,
+      id: maxId,
+    })
+  }
+
+  const updateDirection = (updated: Direction) => {
+    const index = directions.value.findIndex((direction) => direction.id === updated.id)
+    if (index !== -1) {
+      directions.value[index] = { ...updated }
+    }
+  }
+
+  const deleteDirection = (id: number) => {
+    directions.value = directions.value.filter((direction) => direction.id !== id)
+    lessons.value = lessons.value.filter((lesson) => lesson.directionId !== id)
+    if (filters.value.direction === id) {
+      filters.value.direction = null
+    }
+  }
+
   return {
     days,
     timeSlots,
     lessons,
     filters,
+    directions,
     teachers,
     uniqueDirections,
     uniqueLevels,
     filteredLessons,
     getLessonsByDay,
     getTeacherById,
+    getDirectionById,
+    getDirectionNameById,
     getTeachersForLesson,
     deleteLesson,
     updateLesson,
@@ -278,5 +330,8 @@ export const useScheduleStore = defineStore('schedule', () => {
     addTeacher,
     updateTeacher,
     deleteTeacher,
+    addDirection,
+    updateDirection,
+    deleteDirection,
   }
 })
