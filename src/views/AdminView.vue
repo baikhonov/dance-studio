@@ -100,7 +100,9 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
         <div class="flex flex-col gap-3 mb-4">
           <div class="flex items-center gap-3">
             <h2 class="text-xl font-semibold text-gray-900">Управление преподавателями</h2>
-            <span class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-blue-100 text-blue-700 whitespace-nowrap">
+            <span
+              class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-blue-100 text-blue-700 whitespace-nowrap"
+            >
               Всего: {{ teachers.length }}
             </span>
           </div>
@@ -140,84 +142,86 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
         </div>
       </section>
 
-      <section class="rounded-2xl border border-emerald-100 bg-white p-4 md:p-5 shadow-sm">
-        <div class="flex flex-col gap-3 mb-4">
-          <div class="flex items-center gap-3">
-            <h2 class="text-xl font-semibold text-gray-900">Управление направлениями</h2>
-            <span
-              class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap"
-            >
-              Всего: {{ directions.length }}
-            </span>
+      <div class="flex flex-col gap-6 xl:gap-8">
+        <section class="rounded-2xl border border-emerald-100 bg-white p-4 md:p-5 shadow-sm">
+          <div class="flex flex-col gap-3 mb-4">
+            <div class="flex items-center gap-3">
+              <h2 class="text-xl font-semibold text-gray-900">Управление направлениями</h2>
+              <span
+                class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap"
+              >
+                Всего: {{ directions.length }}
+              </span>
+            </div>
+            <p class="text-sm text-gray-600">Справочник направлений для расписания</p>
           </div>
-          <p class="text-sm text-gray-600">Справочник направлений для расписания</p>
-        </div>
 
-        <button
-          type="button"
-          @click="openDirectionModal()"
-          class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600"
-        >
-          Добавить направление
-        </button>
-
-        <ul class="space-y-2">
-          <li
-            v-for="direction in directions"
-            :key="direction.id"
-            role="button"
-            tabindex="0"
-            :aria-label="`Элемент направления ${direction.name}`"
-            class="min-h-11 px-3 py-2.5 bg-white border border-gray-200 rounded-lg flex items-center justify-between gap-3 hover:border-emerald-200 hover:bg-emerald-50/40 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400"
-            @click="openDirectionModal(direction)"
-            @keydown.enter="openDirectionModal(direction)"
-            @keydown.space.prevent="openDirectionModal(direction)"
+          <button
+            type="button"
+            @click="openDirectionModal()"
+            class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600"
           >
-            <span class="font-medium text-gray-800 leading-tight">{{ direction.name }}</span>
-            <span class="text-emerald-600 text-sm font-semibold" aria-hidden="true">></span>
-          </li>
-        </ul>
-      </section>
-    </div>
+            Добавить направление
+          </button>
 
-    <section class="rounded-2xl border border-violet-100 bg-white p-4 md:p-5 shadow-sm">
-      <div class="flex flex-col gap-3 mb-4">
-        <div class="flex items-center gap-3">
-          <h2 class="text-xl font-semibold text-gray-900">Управление уровнями</h2>
-          <span
-            class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-violet-100 text-violet-700 whitespace-nowrap"
+          <ul class="space-y-2">
+            <li
+              v-for="direction in directions"
+              :key="direction.id"
+              role="button"
+              tabindex="0"
+              :aria-label="`Элемент направления ${direction.name}`"
+              class="min-h-11 px-3 py-2.5 bg-white border border-gray-200 rounded-lg flex items-center justify-between gap-3 hover:border-emerald-200 hover:bg-emerald-50/40 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              @click="openDirectionModal(direction)"
+              @keydown.enter="openDirectionModal(direction)"
+              @keydown.space.prevent="openDirectionModal(direction)"
+            >
+              <span class="font-medium text-gray-800 leading-tight">{{ direction.name }}</span>
+              <span class="text-emerald-600 text-sm font-semibold" aria-hidden="true">></span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="rounded-2xl border border-violet-100 bg-white p-4 md:p-5 shadow-sm">
+          <div class="flex flex-col gap-3 mb-4">
+            <div class="flex items-center gap-3">
+              <h2 class="text-xl font-semibold text-gray-900">Управление уровнями</h2>
+              <span
+                class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-violet-100 text-violet-700 whitespace-nowrap"
+              >
+                Всего: {{ managedLevels.length }}
+              </span>
+            </div>
+            <p class="text-sm text-gray-600">Единый справочник уровней занятий</p>
+          </div>
+
+          <button
+            type="button"
+            @click="openLevelModal()"
+            class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600"
           >
-            Всего: {{ managedLevels.length }}
-          </span>
-        </div>
-        <p class="text-sm text-gray-600">Единый справочник уровней занятий</p>
+            Добавить уровень
+          </button>
+
+          <ul class="space-y-2">
+            <li
+              v-for="level in managedLevels"
+              :key="level.id"
+              role="button"
+              tabindex="0"
+              :aria-label="`Элемент уровня ${level.name}`"
+              class="min-h-11 px-3 py-2.5 bg-white border border-gray-200 rounded-lg flex items-center justify-between gap-3 hover:border-violet-200 hover:bg-violet-50/40 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-400"
+              @click="openLevelModal(level)"
+              @keydown.enter="openLevelModal(level)"
+              @keydown.space.prevent="openLevelModal(level)"
+            >
+              <span class="font-medium text-gray-800 leading-tight">{{ level.name }}</span>
+              <span class="text-violet-600 text-sm font-semibold" aria-hidden="true">></span>
+            </li>
+          </ul>
+        </section>
       </div>
-
-      <button
-        type="button"
-        @click="openLevelModal()"
-        class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600"
-      >
-        Добавить уровень
-      </button>
-
-      <ul class="space-y-2">
-        <li
-          v-for="level in managedLevels"
-          :key="level.id"
-          role="button"
-          tabindex="0"
-          :aria-label="`Элемент уровня ${level.name}`"
-          class="min-h-11 px-3 py-2.5 bg-white border border-gray-200 rounded-lg flex items-center justify-between gap-3 hover:border-violet-200 hover:bg-violet-50/40 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-400"
-          @click="openLevelModal(level)"
-          @keydown.enter="openLevelModal(level)"
-          @keydown.space.prevent="openLevelModal(level)"
-        >
-          <span class="font-medium text-gray-800 leading-tight">{{ level.name }}</span>
-          <span class="text-violet-600 text-sm font-semibold" aria-hidden="true">></span>
-        </li>
-      </ul>
-    </section>
+    </div>
 
     <TeacherModal
       :is-open="isTeacherModalOpen"
@@ -231,10 +235,6 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
       @close="closeDirectionModal"
     />
 
-    <LevelModal
-      :is-open="isLevelModalOpen"
-      :level="selectedLevel"
-      @close="closeLevelModal"
-    />
+    <LevelModal :is-open="isLevelModalOpen" :level="selectedLevel" @close="closeLevelModal" />
   </div>
 </template>
