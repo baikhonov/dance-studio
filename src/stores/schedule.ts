@@ -4,14 +4,23 @@ import { generateId } from '@/utils/generateId'
 import type {
   Direction,
   Filters,
+  Level,
   Lesson,
   NewDirection,
   NewLesson,
+  NewLevel,
   NewTeacher,
   Teacher,
 } from '@/types/lesson'
 
 export const useScheduleStore = defineStore('schedule', () => {
+  const FOR_ALL_LEVEL = 'для всех'
+  const normalizeLevel = (level: string | null | undefined): string => (level ?? '').trim().toLowerCase()
+  const normalizeLevelForLogic = (level: string | null | undefined): string => {
+    const normalized = normalizeLevel(level)
+    return normalized === '' ? FOR_ALL_LEVEL : normalized
+  }
+
   const days = ref<string[]>([
     'Понедельник',
     'Вторник',
@@ -69,7 +78,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       time: '19:30',
       endTime: '20:30',
       directionId: 3,
-      level: 'Для всех',
+      level: '',
       teacherIds: [5],
       type: 'lesson',
       poster: null,
@@ -113,7 +122,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       time: '19:30',
       endTime: '20:30',
       directionId: 3,
-      level: 'Для всех',
+      level: '',
       teacherIds: [5],
       type: 'lesson',
       poster: null,
@@ -146,7 +155,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       time: '20:30',
       endTime: '22:30',
       directionId: 4,
-      level: 'Для всех',
+      level: '',
       teacherIds: [5, 7],
       type: 'lesson',
       poster: null,
@@ -157,7 +166,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       time: '20:00',
       endTime: '23:00',
       directionId: 5,
-      level: 'Для всех',
+      level: '',
       teacherIds: [],
       type: 'event',
       poster: 'party-bachatamania.webp',
@@ -193,6 +202,11 @@ export const useScheduleStore = defineStore('schedule', () => {
     { id: 7, name: 'Татьяна', photo: 'tatyana.jpg' },
   ])
 
+  const levels = ref<Level[]>([
+    { id: 1, name: 'Начинающие' },
+    { id: 2, name: 'Продолжающие' },
+  ])
+
   const uniqueDirections = computed(() => {
     return [...directions.value]
       .map((direction) => direction.name)
@@ -201,8 +215,8 @@ export const useScheduleStore = defineStore('schedule', () => {
   })
 
   const uniqueLevels = computed(() => {
-    const levels = [...new Set(lessons.value.map((lesson) => lesson.level).filter(Boolean))]
-    return levels.filter(
+    const availableLevels = [...new Set(levels.value.map((level) => level.name).filter(Boolean))]
+    return availableLevels.filter(
       (level) => level.toLowerCase() !== 'для всех' && level.toLowerCase() !== 'все уровни',
     )
   })
@@ -216,9 +230,9 @@ export const useScheduleStore = defineStore('schedule', () => {
 
       let matchLevel = true
       if (filters.value.level) {
-        const lessonLevel = lesson.level?.toLowerCase()
-        const selectedLevel = filters.value.level.toLowerCase()
-        matchLevel = lessonLevel === selectedLevel || lessonLevel === 'для всех'
+        const lessonLevel = normalizeLevelForLogic(lesson.level)
+        const selectedLevel = normalizeLevel(filters.value.level)
+        matchLevel = lessonLevel === selectedLevel || lessonLevel === FOR_ALL_LEVEL
       }
 
       return matchDirection && matchLevel
@@ -254,7 +268,7 @@ export const useScheduleStore = defineStore('schedule', () => {
   const updateLesson = (updatedLesson: Lesson) => {
     const index = lessons.value.findIndex((lesson) => lesson.id === updatedLesson.id)
     if (index !== -1) {
-      lessons.value[index] = updatedLesson
+      lessons.value[index] = { ...updatedLesson, level: (updatedLesson.level ?? '').trim() }
     }
   }
 
@@ -263,6 +277,7 @@ export const useScheduleStore = defineStore('schedule', () => {
     lessons.value.push({
       ...newLesson,
       id: maxId,
+      level: (newLesson.level ?? '').trim(),
       teacherIds: newLesson.teacherIds ?? [],
     })
   }
@@ -309,6 +324,40 @@ export const useScheduleStore = defineStore('schedule', () => {
     }
   }
 
+  const addLevel = (level: NewLevel) => {
+    const maxId = generateId(levels.value)
+    levels.value.push({
+      ...level,
+      id: maxId,
+    })
+  }
+
+  const updateLevel = (updated: Level) => {
+    const index = levels.value.findIndex((level) => level.id === updated.id)
+    if (index !== -1) {
+      levels.value[index] = { ...updated }
+    }
+  }
+
+  const deleteLevel = (id: number) => {
+    const levelToDelete = levels.value.find((level) => level.id === id)
+    if (!levelToDelete) return
+
+    const normalizedName = levelToDelete.name.trim().toLowerCase()
+    levels.value = levels.value.filter((level) => level.id !== id)
+    lessons.value = lessons.value.map((lesson) => {
+      const lessonLevel = lesson.level.trim().toLowerCase()
+      if (lessonLevel === normalizedName) {
+        return { ...lesson, level: '' }
+      }
+      return lesson
+    })
+
+    if (filters.value.level.trim().toLowerCase() === normalizedName) {
+      filters.value.level = ''
+    }
+  }
+
   return {
     days,
     timeSlots,
@@ -316,6 +365,7 @@ export const useScheduleStore = defineStore('schedule', () => {
     filters,
     directions,
     teachers,
+    levels,
     uniqueDirections,
     uniqueLevels,
     filteredLessons,
@@ -333,5 +383,8 @@ export const useScheduleStore = defineStore('schedule', () => {
     addDirection,
     updateDirection,
     deleteDirection,
+    addLevel,
+    updateLevel,
+    deleteLevel,
   }
 })

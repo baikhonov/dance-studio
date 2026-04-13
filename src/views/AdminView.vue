@@ -1,21 +1,29 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
 import TeacherModal from '@/components/TeacherModal.vue'
 import DirectionModal from '@/components/DirectionModal.vue'
-import type { Direction, NewDirection, NewTeacher, Teacher } from '@/types/lesson'
+import LevelModal from '@/components/LevelModal.vue'
+import type { Direction, Level, NewDirection, NewLevel, NewTeacher, Teacher } from '@/types/lesson'
 
 type TeacherDraft = NewTeacher & { id: null }
 type DirectionDraft = NewDirection & { id: null }
+type LevelDraft = NewLevel & { id: null }
 
 const schedule = useScheduleStore()
-const { teachers, directions } = storeToRefs(schedule)
+const { teachers, directions, levels } = storeToRefs(schedule)
+const SYSTEM_LEVEL_ALIASES = ['для всех', 'все уровни']
+const managedLevels = computed(() =>
+  levels.value.filter((level) => !SYSTEM_LEVEL_ALIASES.includes(level.name.trim().toLowerCase())),
+)
 
 const isTeacherModalOpen = ref(false)
 const selectedTeacher = ref<Teacher | TeacherDraft | null>(null)
 const isDirectionModalOpen = ref(false)
 const selectedDirection = ref<Direction | DirectionDraft | null>(null)
+const isLevelModalOpen = ref(false)
+const selectedLevel = ref<Level | LevelDraft | null>(null)
 
 const createEmptyTeacher = (): TeacherDraft => ({
   id: null,
@@ -46,6 +54,20 @@ const openDirectionModal = (direction?: Direction | DirectionDraft) => {
   isDirectionModalOpen.value = true
 }
 
+const createEmptyLevel = (): LevelDraft => ({
+  id: null,
+  name: '',
+})
+
+const openLevelModal = (level?: Level | LevelDraft) => {
+  if (level) {
+    selectedLevel.value = level
+  } else {
+    selectedLevel.value = createEmptyLevel()
+  }
+  isLevelModalOpen.value = true
+}
+
 const closeTeacherModal = () => {
   isTeacherModalOpen.value = false
   selectedTeacher.value = null
@@ -54,6 +76,11 @@ const closeTeacherModal = () => {
 const closeDirectionModal = () => {
   isDirectionModalOpen.value = false
   selectedDirection.value = null
+}
+
+const closeLevelModal = () => {
+  isLevelModalOpen.value = false
+  selectedLevel.value = null
 }
 
 const setFallbackImage = (event: Event, fallbackSrc: string) => {
@@ -153,6 +180,45 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
       </section>
     </div>
 
+    <section class="rounded-2xl border border-violet-100 bg-white p-4 md:p-5 shadow-sm">
+      <div class="flex flex-col gap-3 mb-4">
+        <div class="flex items-center gap-3">
+          <h2 class="text-xl font-semibold text-gray-900">Управление уровнями</h2>
+          <span
+            class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-violet-100 text-violet-700 whitespace-nowrap"
+          >
+            Всего: {{ managedLevels.length }}
+          </span>
+        </div>
+        <p class="text-sm text-gray-600">Единый справочник уровней занятий</p>
+      </div>
+
+      <button
+        type="button"
+        @click="openLevelModal()"
+        class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+      >
+        Добавить уровень
+      </button>
+
+      <ul class="space-y-2">
+        <li
+          v-for="level in managedLevels"
+          :key="level.id"
+          role="button"
+          tabindex="0"
+          :aria-label="`Элемент уровня ${level.name}`"
+          class="min-h-11 px-3 py-2.5 bg-white border border-gray-200 rounded-lg flex items-center justify-between gap-3 hover:border-violet-200 hover:bg-violet-50/40 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-400"
+          @click="openLevelModal(level)"
+          @keydown.enter="openLevelModal(level)"
+          @keydown.space.prevent="openLevelModal(level)"
+        >
+          <span class="font-medium text-gray-800 leading-tight">{{ level.name }}</span>
+          <span class="text-violet-600 text-sm font-semibold" aria-hidden="true">></span>
+        </li>
+      </ul>
+    </section>
+
     <TeacherModal
       :is-open="isTeacherModalOpen"
       :teacher="selectedTeacher"
@@ -163,6 +229,12 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
       :is-open="isDirectionModalOpen"
       :direction="selectedDirection"
       @close="closeDirectionModal"
+    />
+
+    <LevelModal
+      :is-open="isLevelModalOpen"
+      :level="selectedLevel"
+      @close="closeLevelModal"
     />
   </div>
 </template>

@@ -20,7 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const store = useScheduleStore()
-const { days, directions } = storeToRefs(store)
+const { days, directions, levels } = storeToRefs(store)
 
 const isEditing = ref(false)
 const editableLesson = ref<LessonForm | null>(null)
@@ -138,6 +138,10 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
   if (image) {
     image.src = fallbackSrc
   }
+}
+
+const getDisplayLevel = (level: string): string => {
+  return level.trim() ? level : 'Для всех'
 }
 const enableEditing = () => {
   isEditing.value = true
@@ -285,11 +289,8 @@ onUnmounted(() => {
                     <span class="bg-gray-100 px-3 py-1 rounded-full text-gray-700 font-medium">
                       {{ lesson.time }} — {{ lesson.endTime }}
                     </span>
-                    <span
-                      v-if="lesson.level"
-                      class="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium"
-                    >
-                      {{ lesson.level }}
+                    <span class="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium">
+                      {{ getDisplayLevel(lesson.level) }}
                     </span>
                   </div>
 
@@ -363,12 +364,16 @@ onUnmounted(() => {
                       <label for="level" class="block text-sm font-medium text-gray-700 mb-1">
                         Уровень
                       </label>
-                      <input
+                      <select
                         id="level"
                         v-model="editableLesson.level"
-                        type="text"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-                      />
+                      >
+                        <option value="">Для всех</option>
+                        <option v-for="level in levels" :key="level.id" :value="level.name">
+                          {{ level.name }}
+                        </option>
+                      </select>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">

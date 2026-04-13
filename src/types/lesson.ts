@@ -17,6 +17,11 @@ export interface Direction {
   name: string
 }
 
+export interface Level {
+  id: number
+  name: string
+}
+
 export interface Teacher {
   id: number
   name: string
@@ -38,4 +43,5 @@ export interface ScheduleState {
 
 export type NewLesson = Omit<Lesson, 'id'>
 export type NewDirection = Omit<Direction, 'id'>
+export type NewLevel = Omit<Level, 'id'>
 export type NewTeacher = Omit<Teacher, 'id'>

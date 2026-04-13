@@ -126,6 +126,10 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
     image.src = fallbackSrc
   }
 }
+
+const getDisplayLevel = (level: string): string => {
+  return level.trim() ? level : 'Для всех'
+}
 </script>
 
 <template>
@@ -227,8 +231,8 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
                   </p>
 
                   <!-- Уровень -->
-                  <p v-if="lesson.level" class="text-xs text-gray-700 mt-0.5 font-medium">
-                    {{ lesson.level }}
+                  <p class="text-xs text-gray-700 mt-0.5 font-medium">
+                    {{ getDisplayLevel(lesson.level) }}
                   </p>
 
                   <!-- Время на полупрозрачном фоне -->
