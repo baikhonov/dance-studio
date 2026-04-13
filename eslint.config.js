@@ -23,6 +23,15 @@ export default defineConfig([
     },
   },
   {
+    name: 'server/node',
+    files: ['server/**/*.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+  {
     files: ['**/*.vue'],
     languageOptions: {
       parser: vueParser,
