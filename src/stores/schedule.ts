@@ -249,6 +249,13 @@ export const useScheduleStore = defineStore('schedule', () => {
     })
   }
 
+  const updateTeacher = (updated: Teacher) => {
+    const index = teachers.value.findIndex((t) => t.id === updated.id)
+    if (index !== -1) {
+      teachers.value[index] = { ...updated }
+    }
+  }
+
   const deleteTeacher = (id: number) => {
     teachers.value = teachers.value.filter((teacher) => teacher.id !== id)
   }
@@ -269,6 +276,7 @@ export const useScheduleStore = defineStore('schedule', () => {
     updateLesson,
     addLesson,
     addTeacher,
+    updateTeacher,
     deleteTeacher,
   }
 })

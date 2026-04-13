@@ -2,57 +2,35 @@
 import { ref } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
-import AlertModal from '@/components/AlertModal.vue'
-import ConfirmModal from '@/components/ConfirmModal.vue'
-import type { NewTeacher } from '@/types/lesson'
+import TeacherModal from '@/components/TeacherModal.vue'
+import type { NewTeacher, Teacher } from '@/types/lesson'
+
+type TeacherDraft = NewTeacher & { id: null }
 
 const schedule = useScheduleStore()
 const { teachers } = storeToRefs(schedule)
-const newTeacherName = ref('')
-const newTeacherPhoto = ref('')
-const isConfirmOpen = ref(false)
-const isAlertOpen = ref(false)
-const alertMessage = ref('')
-const teacherToDelete = ref<number | null>(null)
 
-const handlePhotoUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement | null
-  const file = target?.files?.[0]
-  if (file) {
-    newTeacherPhoto.value = file.name
+const isTeacherModalOpen = ref(false)
+const selectedTeacher = ref<Teacher | TeacherDraft | null>(null)
+
+const createEmptyTeacher = (): TeacherDraft => ({
+  id: null,
+  name: '',
+  photo: '',
+})
+
+const openTeacherModal = (teacher?: Teacher | TeacherDraft) => {
+  if (teacher) {
+    selectedTeacher.value = teacher
+  } else {
+    selectedTeacher.value = createEmptyTeacher()
   }
+  isTeacherModalOpen.value = true
 }
 
-const showAlert = (message: string) => {
-  alertMessage.value = message
-  isAlertOpen.value = true
-}
-
-const createTeacher = () => {
-  if (newTeacherName.value.trim() === '') {
-    showAlert('Введите имя преподавателя')
-    return
-  }
-  console.log('создаем учителя')
-
-  const newTeacher: NewTeacher = {
-    name: newTeacherName.value,
-    photo: newTeacherPhoto.value,
-  }
-  schedule.addTeacher(newTeacher)
-  newTeacherName.value = ''
-  newTeacherPhoto.value = ''
-}
-
-const deleteTeacher = (id: number) => {
-  teacherToDelete.value = id
-  isConfirmOpen.value = true
-}
-
-const handleDeleteConfirm = () => {
-  if (teacherToDelete.value === null) return
-  schedule.deleteTeacher(teacherToDelete.value)
-  teacherToDelete.value = null
+const closeTeacherModal = () => {
+  isTeacherModalOpen.value = false
+  selectedTeacher.value = null
 }
 
 const setFallbackImage = (event: Event, fallbackSrc: string) => {
@@ -68,75 +46,42 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
     <h1 class="text-2xl font-bold mb-6">Администрирование</h1>
     <h2 class="text-xl font-semibold mb-4">Управление преподавателями</h2>
 
-    <form class="flex flex-col items-start gap-4 mb-8">
-      <label class="flex-1">
-        Имя преподавателя
-        <input
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
-          v-model="newTeacherName"
-          type="text"
-        />
-      </label>
-      <label class="flex-1">
-        Фото преподавателя
-        <input
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
-          type="file"
-          @change="handlePhotoUpload"
-        />
-      </label>
+    <div class="mb-8">
       <button
-        class="px-6 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
-        type="submit"
-        @click.prevent="createTeacher"
+        type="button"
+        @click="openTeacherModal()"
+        class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
       >
-        Отправить
+        Добавить преподавателя
       </button>
-    </form>
+    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       <div
         v-for="teacher in teachers"
         :key="teacher.id"
-        class="flex flex-col items-center p-4 bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
+        role="button"
+        tabindex="0"
+        :aria-label="`Карточка преподавателя ${teacher.name}`"
+        class="flex flex-col items-center p-4 bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-400"
+        @click="openTeacherModal(teacher)"
+        @keydown.enter="openTeacherModal(teacher)"
+        @keydown.space.prevent="openTeacherModal(teacher)"
       >
         <img
           :src="`/images/teachers/${teacher.photo}`"
           :alt="teacher.name"
-          class="w-full max-w-50 mb-3 object-cover"
+          class="w-full max-w-50 mb-3 object-cover pointer-events-none"
           @error="setFallbackImage($event, '/images/teachers/default-avatar.jpg')"
         />
-        <div>
-          <p class="font-semibold text-lg text-center mb-2">{{ teacher.name }}</p>
-          <div class="flex gap-2">
-            <button
-              class="flex-1 px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition"
-            >
-              Редактировать
-            </button>
-            <button
-              class="flex-1 px-3 py-1 bg-red-50 text-red-600 rounded hover:bg-red-100 transition"
-              @click="deleteTeacher(teacher.id)"
-            >
-              Удалить
-            </button>
-          </div>
-        </div>
+        <p class="font-semibold text-lg text-center">{{ teacher.name }}</p>
       </div>
     </div>
 
-    <ConfirmModal
-      :isOpen="isConfirmOpen"
-      :message="`Вы уверены, что хотите удалить преподавателя ${teachers.find(t => t.id === teacherToDelete)?.name}?`"
-      :cancelText="'Отмена'"
-      @confirm="handleDeleteConfirm"
-      @close="isConfirmOpen = false"
-    />
-
-    <AlertModal
-      :isOpen="isAlertOpen"
-      :message="alertMessage"
-      @close="isAlertOpen = false"
+    <TeacherModal
+      :is-open="isTeacherModalOpen"
+      :teacher="selectedTeacher"
+      @close="closeTeacherModal"
     />
   </div>
 </template>
