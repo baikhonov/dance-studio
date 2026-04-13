@@ -1,18 +1,20 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
 import ConfirmModal from '@/components/ConfirmModal.vue'
+import type { NewTeacher } from '@/types/lesson'
 
 const schedule = useScheduleStore()
 const { teachers } = storeToRefs(schedule)
 const newTeacherName = ref('')
 const newTeacherPhoto = ref('')
 const isConfirmOpen = ref(false)
-const teacherToDelete = ref(null)
+const teacherToDelete = ref<number | null>(null)
 
-const handlePhotoUpload = (event) => {
-  const file = event.target.files[0]
+const handlePhotoUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement | null
+  const file = target?.files?.[0]
   if (file) {
     newTeacherPhoto.value = file.name
   }
@@ -25,7 +27,7 @@ const createTeacher = () => {
   }
   console.log('создаем учителя')
 
-  const newTeacher = {
+  const newTeacher: NewTeacher = {
     name: newTeacherName.value,
     photo: newTeacherPhoto.value,
   }
@@ -34,14 +36,22 @@ const createTeacher = () => {
   newTeacherPhoto.value = ''
 }
 
-const deleteTeacher = (id) => {
+const deleteTeacher = (id: number) => {
   teacherToDelete.value = id
   isConfirmOpen.value = true
 }
 
 const handleDeleteConfirm = () => {
+  if (teacherToDelete.value === null) return
   schedule.deleteTeacher(teacherToDelete.value)
   teacherToDelete.value = null
+}
+
+const setFallbackImage = (event: Event, fallbackSrc: string) => {
+  const image = event.target as HTMLImageElement | null
+  if (image) {
+    image.src = fallbackSrc
+  }
 }
 </script>
 
@@ -86,7 +96,7 @@ const handleDeleteConfirm = () => {
           :src="`/images/teachers/${teacher.photo}`"
           :alt="teacher.name"
           class="w-full max-w-50 mb-3 object-cover"
-          @error="$event.target.src = '/images/teachers/default-avatar.jpg'"
+          @error="setFallbackImage($event, '/images/teachers/default-avatar.jpg')"
         />
         <div>
           <p class="font-semibold text-lg text-center mb-2">{{ teacher.name }}</p>

@@ -3,13 +3,13 @@ import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
 import ConfirmModal from '@/components/ConfirmModal.vue'
-import type { Lesson } from '@/types/lesson'
+import type { Lesson, NewLesson } from '@/types/lesson'
 
 type LessonForm = Omit<Lesson, 'id'> & { id: number | null }
 type Teacher = { id: number; name: string; photo: string }
 
 const props = defineProps<{
-  lesson: Lesson | null
+  lesson: LessonForm | Lesson | null
   isOpen: boolean
   isAdmin: boolean
 }>()
@@ -158,10 +158,20 @@ const saveLesson = () => {
 
   editableLesson.value.teacherIds = selectedTeacherIds.value
 
-  if (editableLesson.value.id) {
-    store.updateLesson(editableLesson.value)
+  if (editableLesson.value.id !== null) {
+    store.updateLesson(editableLesson.value as Lesson)
   } else {
-    store.addLesson(editableLesson.value)
+    const newLesson: NewLesson = {
+      day: editableLesson.value.day,
+      time: editableLesson.value.time,
+      endTime: editableLesson.value.endTime,
+      direction: editableLesson.value.direction,
+      level: editableLesson.value.level,
+      teacherIds: editableLesson.value.teacherIds,
+      type: editableLesson.value.type,
+      poster: editableLesson.value.poster,
+    }
+    store.addLesson(newLesson)
   }
   emit('close')
 }

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { RouterView, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
@@ -8,7 +8,7 @@ const { isAdmin } = storeToRefs(userStore)
 
 const router = useRouter()
 
-const handleLogout = function () {
+const handleLogout = () => {
   userStore.logout()
   router.push('/')
 }

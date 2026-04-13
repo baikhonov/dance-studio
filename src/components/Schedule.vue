@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import Filters from '@/components/Filters.vue'
 import LessonModal from '@/components/LessonModal.vue'
 import { useScheduleStore } from '@/stores/schedule'
@@ -6,14 +6,20 @@ import { useUserStore } from '@/stores/user'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getDirectionClass } from '@/utils/directionColors'
+import type { CSSProperties } from 'vue'
+import type { Lesson, NewLesson, Teacher } from '@/types/lesson'
+
+type LessonCard = Lesson & { teachers: Teacher[] }
+type LessonDraft = NewLesson & { id: null }
 
 const userStore = useUserStore()
 const { isAdmin } = storeToRefs(userStore)
 
 const scheduleStore = useScheduleStore()
+const { days, timeSlots, filters } = storeToRefs(scheduleStore)
 
-const lessonsWithTeachers = computed(() => {
-  const result = {}
+const lessonsWithTeachers = computed<Record<string, LessonCard[]>>(() => {
+  const result: Record<string, LessonCard[]> = {}
 
   for (const day of days.value) {
     const lessonsOfDay = scheduleStore.getLessonsByDay(day)
@@ -26,7 +32,7 @@ const lessonsWithTeachers = computed(() => {
   return result
 })
 
-const filtersSection = ref(null)
+const filtersSection = ref<HTMLElement | null>(null)
 const filtersHeight = ref(0)
 
 const updateFiltersHeight = () => {
@@ -53,21 +59,19 @@ onUnmounted(() => {
 
 const SLOT_HEIGHT = 120
 
-const { days, timeSlots, filters } = storeToRefs(scheduleStore)
-
 const uniqueDirections = computed(() => scheduleStore.uniqueDirections)
 const uniqueLevels = computed(() => scheduleStore.uniqueLevels)
 
 const filteredLessons = computed(() => scheduleStore.filteredLessons)
 
 // Вспомогательная функция: время в минуты
-const timeToMinutes = (time) => {
+const timeToMinutes = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number)
   return hours * 60 + minutes
 }
 
 // Вычисляем стиль для занятия
-const getLessonStyle = (lesson) => {
+const getLessonStyle = (lesson: Lesson): CSSProperties => {
   const startMinutes = timeToMinutes(lesson.time)
   const endMinutes = timeToMinutes(lesson.endTime)
 
@@ -90,9 +94,9 @@ const getLessonStyle = (lesson) => {
 }
 
 const isModalOpen = ref(false)
-const selectedLesson = ref()
+const selectedLesson = ref<Lesson | LessonDraft | null>(null)
 
-const createEmptyLesson = () => {
+const createEmptyLesson = (): LessonDraft => {
   return {
     id: null,
     day: '',
@@ -106,13 +110,20 @@ const createEmptyLesson = () => {
   }
 }
 
-const openLessonModal = (lesson) => {
+const openLessonModal = (lesson?: Lesson | LessonDraft) => {
   if (lesson) {
     selectedLesson.value = lesson
   } else {
     selectedLesson.value = createEmptyLesson()
   }
   isModalOpen.value = true
+}
+
+const setFallbackImage = (event: Event, fallbackSrc: string) => {
+  const image = event.target as HTMLImageElement | null
+  if (image) {
+    image.src = fallbackSrc
+  }
 }
 </script>
 
@@ -247,7 +258,7 @@ const openLessonModal = (lesson) => {
                         :class="{
                           'relative z-10': idx === 0 && lesson.teachers.length > 1,
                         }"
-                        @error="$event.target.src = '/images/teachers/default-avatar.jpg'"
+                        @error="setFallbackImage($event, '/images/teachers/default-avatar.jpg')"
                       />
                     </div>
                   </div>

@@ -1,24 +1,23 @@
-<script setup>
-const props = defineProps({
-  directions: Array,
-  levels: Array,
-})
+<script setup lang="ts">
+import type { Filters as ScheduleFilters } from '@/types/lesson'
 
-const filters = defineModel({
-  type: Object,
-  required: true,
-})
+defineProps<{
+  directions: string[]
+  levels: string[]
+}>()
 
-function updateDirection(event) {
-  const value = event.target.value
+const filters = defineModel<ScheduleFilters>({ required: true })
+
+function updateDirection(event: Event) {
+  const value = (event.target as HTMLSelectElement | null)?.value ?? ''
   filters.value = {
     ...filters.value,
     direction: value,
   }
 }
 
-function updateLevel(event) {
-  const value = event.target.value
+function updateLevel(event: Event) {
+  const value = (event.target as HTMLSelectElement | null)?.value ?? ''
   filters.value = {
     ...filters.value,
     level: value,

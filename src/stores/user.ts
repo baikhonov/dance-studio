@@ -1,12 +1,11 @@
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 
 export const useUserStore = defineStore('user', () => {
-  const token = ref(localStorage.getItem('admin_token') || null)
+  const token = ref<string | null>(localStorage.getItem('admin_token'))
+  const isAdmin = computed(() => Boolean(token.value))
 
-  const isAdmin = computed(() => !!token.value)
-
-  const login = (password) => {
+  const login = (password: string): boolean => {
     if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
       token.value = 'fake-jwt-token'
       localStorage.setItem('admin_token', token.value)

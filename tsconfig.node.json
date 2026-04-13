@@ -6,13 +6,12 @@
     "moduleResolution": "Bundler",
     "composite": true,
     "skipLibCheck": true,
-    "allowJs": true,
     "noEmit": true,
     "types": [
       "node"
     ]
   },
   "include": [
-    "vite.config.*"
+    "vite.config.ts"
   ]
 }

@@ -1,27 +1,25 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 
-const props = defineProps({
-  isOpen: Boolean,
-  title: {
-    type: String,
-    default: 'Подтверждение'
+const props = withDefaults(
+  defineProps<{
+    isOpen: boolean
+    title?: string
+    message: string
+    confirmText?: string
+    cancelText?: string
+  }>(),
+  {
+    title: 'Подтверждение',
+    confirmText: 'Да',
+    cancelText: 'Отмена',
   },
-  message: {
-    type: String,
-    required: true
-  },
-  confirmText: {
-    type: String,
-    default: 'Да'
-  },
-  cancelText: {
-    type: String,
-    default: 'Отмена'
-  }
-})
+)
 
-const emit = defineEmits(['confirm', 'close'])
+const emit = defineEmits<{
+  confirm: []
+  close: []
+}>()
 
 const handleConfirm = () => {
   emit('confirm')
@@ -32,7 +30,7 @@ const handleClose = () => {
   emit('close')
 }
 
-const handleEscape = (event) => {
+const handleEscape = (event: KeyboardEvent) => {
   if (event.key === 'Escape' && props.isOpen) {
     handleClose()
   }

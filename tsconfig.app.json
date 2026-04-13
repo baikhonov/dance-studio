@@ -8,13 +8,11 @@
       "@/*": [
         "./src/*"
       ]
-    },
-    "allowJs": true
+    }
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/**/*.vue",
-    "src/**/*.js"
+    "src/**/*.vue"
   ]
 }
