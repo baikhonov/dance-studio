@@ -72,7 +72,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateWindowWidth)
 })
 
-const SLOT_HEIGHT = 120
+const SLOT_HEIGHT = 110
 const COMPRESSED_SLOT_HEIGHT = 32
 
 const sortedDirections = computed(() => [...directions.value].sort((a, b) => a.name.localeCompare(b.name)))
@@ -232,10 +232,10 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
 
     <!-- СЕТКА РАСПИСАНИЯ -->
     <div class="max-h-[75dvh] overflow-x-auto overflow-y-auto md:max-h-none md:overflow-visible">
-      <div class="min-w-[800px] md:min-w-0 border-gray-300">
+      <div class="mx-auto min-w-[850px] md:min-w-0 md:max-w-[1400px] border-gray-300">
         <!-- ШАПКА С ДНЯМИ (sticky) -->
         <div
-          class="sticky top-0 z-30 grid grid-cols-[80px_repeat(7,minmax(120px,1fr))] bg-gray-100 shadow-sm"
+          class="sticky top-0 z-30 grid grid-cols-[80px_repeat(7,minmax(110px,1fr))] bg-gray-100 shadow-sm"
           :style="windowWidth >= 768 ? { top: `${scheduleHeaderTop}px` } : {}"
         >
           <!-- УГЛОВАЯ ЯЧЕЙКА "Время" -->
@@ -256,7 +256,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
         </div>
 
         <!-- ОСНОВНОЙ КОНТЕЙНЕР: временная сетка + занятия -->
-        <div class="grid grid-cols-[80px_repeat(7,minmax(120px,1fr))]">
+        <div class="grid grid-cols-[80px_repeat(7,minmax(110px,1fr))]">
           <!-- КОЛОНКА С ВРЕМЕННЫМИ МЕТКАМИ -->
           <div class="sticky left-0 z-10 bg-gray-100 md:static">
             <div
