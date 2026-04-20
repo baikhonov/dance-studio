@@ -232,7 +232,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
 
     <!-- СЕТКА РАСПИСАНИЯ -->
     <div class="max-h-[75dvh] overflow-x-auto overflow-y-auto md:max-h-none md:overflow-visible">
-      <div class="mx-auto min-w-[850px] md:min-w-0 md:max-w-[1400px] border-gray-300">
+      <div class="mx-auto min-w-[850px] md:min-w-0 md:max-w-[1280px] border-gray-300">
         <!-- ШАПКА С ДНЯМИ (sticky) -->
         <div
           class="sticky top-0 z-30 grid grid-cols-[80px_repeat(7,minmax(110px,1fr))] bg-gray-100 shadow-sm"

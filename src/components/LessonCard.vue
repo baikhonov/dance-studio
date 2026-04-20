@@ -85,7 +85,7 @@ const formatTeacherNames = (teachers: Teacher[]): string =>
         class="flex items-center justify-end mt-0.5 pt-0.5"
       >
         <img
-          :src="resolvePosterUrl(lesson.poster)"
+          :src="resolvePosterUrl(lesson.poster ?? '')"
           :alt="directionName"
           class="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover"
           @error="setFallbackImage($event, DEFAULT_EVENT_POSTER)"
