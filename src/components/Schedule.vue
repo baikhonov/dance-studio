@@ -88,6 +88,13 @@ const timeToMinutes = (time: string): number => {
 }
 
 const timeSlotMinutes = computed(() => timeSlots.value.map((time) => timeToMinutes(time)))
+const slotDurations = computed(() =>
+  timeSlotMinutes.value.map((slotStart, index, slots) => {
+    const nextSlotStart = slots[index + 1]
+    const fallbackInterval = index > 0 ? slotStart - slots[index - 1] : 60
+    return (nextSlotStart ?? slotStart + fallbackInterval) - slotStart
+  }),
+)
 
 const slotHasLessons = computed(() =>
   timeSlotMinutes.value.map((slotStart, index, slots) => {
@@ -103,31 +110,94 @@ const slotHasLessons = computed(() =>
   }),
 )
 
-const timeSlotHeights = computed(() =>
-  timeSlots.value.map((_, index) => {
-    if (filteredLessons.value.length === 0) {
-      return SLOT_HEIGHT
+type TimelineSegment = {
+  startMinutes: number
+  endMinutes: number
+  height: number
+}
+
+type TimeRow = {
+  key: string
+  label: string
+  height: number
+}
+
+const timelineSegments = computed<TimelineSegment[]>(() => {
+  const segments: TimelineSegment[] = []
+  const minutes = timeSlotMinutes.value
+  const durations = slotDurations.value
+  const hasLessons = slotHasLessons.value
+
+  let index = 0
+  while (index < minutes.length) {
+    const startMinutes = minutes[index]
+
+    if (hasLessons[index]) {
+      const endMinutes = startMinutes + durations[index]
+      segments.push({
+        startMinutes,
+        endMinutes,
+        height: SLOT_HEIGHT,
+      })
+      index += 1
+      continue
     }
 
-    return slotHasLessons.value[index] ? SLOT_HEIGHT : COMPRESSED_SLOT_HEIGHT
+    let endIndex = index
+    while (endIndex + 1 < minutes.length && !hasLessons[endIndex + 1]) {
+      endIndex += 1
+    }
+
+    const endMinutes = minutes[endIndex] + durations[endIndex]
+    segments.push({
+      startMinutes,
+      endMinutes,
+      height: COMPRESSED_SLOT_HEIGHT,
+    })
+    index = endIndex + 1
+  }
+
+  return segments
+})
+
+const toTimeLabel = (minutes: number): string => {
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`
+}
+
+const timeRows = computed<TimeRow[]>(() =>
+  timelineSegments.value.map((segment) => {
+    const duration = segment.endMinutes - segment.startMinutes
+    const label =
+      duration > 60
+        ? `${toTimeLabel(segment.startMinutes)}-${toTimeLabel(segment.endMinutes)}`
+        : toTimeLabel(segment.startMinutes)
+
+    return {
+      key: `${segment.startMinutes}-${segment.endMinutes}`,
+      label,
+      height: segment.height,
+    }
   }),
 )
 
-const totalGridHeight = computed(() => timeSlotHeights.value.reduce((sum, height) => sum + height, 0))
+const totalGridHeight = computed(() => timeRows.value.reduce((sum, row) => sum + row.height, 0))
 
 const getMinutesOffset = (targetMinutes: number): number => {
-  if (timeSlotMinutes.value.length === 0 || timeSlotHeights.value.length === 0) {
+  const segments = timelineSegments.value
+  if (segments.length === 0) {
     return 0
   }
 
   let offset = 0
-  const lastIndex = timeSlotMinutes.value.length - 1
+  const lastIndex = segments.length - 1
 
   for (let index = 0; index < lastIndex; index += 1) {
-    const slotStart = timeSlotMinutes.value[index]
-    const slotEnd = timeSlotMinutes.value[index + 1]
+    const slotStart = segments[index].startMinutes
+    const slotEnd = segments[index].endMinutes
     const intervalMinutes = slotEnd - slotStart
-    const slotHeight = timeSlotHeights.value[index]
+    const slotHeight = segments[index].height
 
     if (targetMinutes <= slotStart) {
       return offset
@@ -141,10 +211,10 @@ const getMinutesOffset = (targetMinutes: number): number => {
     offset += slotHeight
   }
 
-  const lastSlotStart = timeSlotMinutes.value[lastIndex]
-  const fallbackInterval =
-    lastIndex > 0 ? timeSlotMinutes.value[lastIndex] - timeSlotMinutes.value[lastIndex - 1] : 60
-  const lastSlotHeight = timeSlotHeights.value[lastIndex] ?? SLOT_HEIGHT
+  const lastSegment = segments[lastIndex]
+  const lastSlotStart = lastSegment.startMinutes
+  const fallbackInterval = lastSegment.endMinutes - lastSegment.startMinutes || 60
+  const lastSlotHeight = lastSegment.height
   const minutesAfterLastSlot = Math.max(targetMinutes - lastSlotStart, 0)
 
   return offset + (minutesAfterLastSlot / fallbackInterval) * lastSlotHeight
@@ -232,10 +302,10 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
 
     <!-- СЕТКА РАСПИСАНИЯ -->
     <div class="max-h-[75dvh] overflow-x-auto overflow-y-auto md:max-h-none md:overflow-visible">
-      <div class="mx-auto min-w-[850px] md:min-w-0 md:max-w-[1280px] border-gray-300">
+      <div class="mx-auto min-w-[870px] md:min-w-0 md:max-w-[1280px] border-gray-300">
         <!-- ШАПКА С ДНЯМИ (sticky) -->
         <div
-          class="sticky top-0 z-30 grid grid-cols-[80px_repeat(7,minmax(110px,1fr))] bg-gray-100 shadow-sm"
+          class="sticky top-0 z-30 grid grid-cols-[100px_repeat(7,minmax(110px,1fr))] bg-gray-100 shadow-sm"
           :style="windowWidth >= 768 ? { top: `${scheduleHeaderTop}px` } : {}"
         >
           <!-- УГЛОВАЯ ЯЧЕЙКА "Время" -->
@@ -256,16 +326,16 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
         </div>
 
         <!-- ОСНОВНОЙ КОНТЕЙНЕР: временная сетка + занятия -->
-        <div class="grid grid-cols-[80px_repeat(7,minmax(110px,1fr))]">
+        <div class="grid grid-cols-[100px_repeat(7,minmax(110px,1fr))]">
           <!-- КОЛОНКА С ВРЕМЕННЫМИ МЕТКАМИ -->
           <div class="sticky left-0 z-10 bg-gray-100 md:static">
             <div
-              v-for="(time, index) in timeSlots"
-              :key="time"
-              class="flex items-center justify-center border border-b-0 last:border-b border-gray-300 text-sm p-2 md:p-3 text-gray-600 font-medium text-center"
-              :style="{ height: `${timeSlotHeights[index] ?? SLOT_HEIGHT}px` }"
+              v-for="row in timeRows"
+              :key="row.key"
+              class="flex items-center justify-center whitespace-nowrap border border-b-0 last:border-b border-gray-300 text-sm p-2 md:p-3 text-gray-600 font-medium text-center"
+              :style="{ height: `${row.height}px` }"
             >
-              {{ time }}
+              {{ row.label }}
             </div>
           </div>
 
@@ -278,10 +348,10 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
           >
             <!-- ФОНОВАЯ СЕТКА (серые линии) -->
             <div
-              v-for="(time, index) in timeSlots"
-              :key="time"
+              v-for="row in timeRows"
+              :key="row.key"
               class="border-b border-gray-300"
-              :style="{ height: `${timeSlotHeights[index] ?? SLOT_HEIGHT}px` }"
+              :style="{ height: `${row.height}px` }"
             ></div>
 
             <!-- КАРТОЧКИ ЗАНЯТИЙ -->
