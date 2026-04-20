@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 import TeacherModal from '@/components/TeacherModal.vue'
 import DirectionModal from '@/components/DirectionModal.vue'
 import LevelModal from '@/components/LevelModal.vue'
+import { DEFAULT_TEACHER_AVATAR, resolveTeacherPhotoUrl } from '@/utils/assets'
 import type { Direction, Level, NewDirection, NewLevel, NewTeacher, Teacher } from '@/types/lesson'
 
 type TeacherDraft = NewTeacher & { id: null }
@@ -134,10 +135,10 @@ onMounted(() => {
             @keydown.space.prevent="openTeacherModal(teacher)"
           >
             <img
-              :src="`/images/teachers/${teacher.photo}`"
+              :src="resolveTeacherPhotoUrl(teacher.photo)"
               :alt="teacher.name"
               class="w-14 h-14 rounded-full object-cover shrink-0 pointer-events-none"
-              @error="setFallbackImage($event, '/images/teachers/default-avatar.jpg')"
+              @error="setFallbackImage($event, DEFAULT_TEACHER_AVATAR)"
             />
             <p class="font-semibold text-base leading-tight text-gray-900">
               {{ teacher.name }}

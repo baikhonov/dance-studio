@@ -4,6 +4,13 @@ import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
 import AlertModal from '@/components/AlertModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
+import { uploadPoster } from '@/api/uploads'
+import {
+  DEFAULT_EVENT_POSTER,
+  DEFAULT_TEACHER_AVATAR,
+  resolvePosterUrl,
+  resolveTeacherPhotoUrl,
+} from '@/utils/assets'
 import type { Lesson, NewLesson } from '@/types/lesson'
 
 type LessonForm = Omit<Lesson, 'id'> & { id: number | null }
@@ -255,14 +262,17 @@ const handleEscape = (event: KeyboardEvent) => {
   }
 }
 
-const handlePosterUpload = (event: Event) => {
+const handlePosterUpload = async (event: Event) => {
   if (!editableLesson.value) return
   const target = event.target as HTMLInputElement | null
   const file = target?.files?.[0]
   if (file) {
-    // Пока сохраняем имя файла
-    editableLesson.value.poster = file.name
-    // В будущем: загрузка на сервер
+    try {
+      const uploaded = await uploadPoster(file)
+      editableLesson.value.poster = uploaded.path
+    } catch {
+      showAlert('Не удалось загрузить постер')
+    }
   }
 }
 
@@ -325,10 +335,10 @@ onUnmounted(() => {
                         class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 min-w-45"
                       >
                         <img
-                          :src="`/images/teachers/${teacher.photo}`"
+                          :src="resolveTeacherPhotoUrl(teacher.photo)"
                           :alt="teacher.name"
                           class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
-                          @error="setFallbackImage($event, '/images/teachers/default-avatar.jpg')"
+                          @error="setFallbackImage($event, DEFAULT_TEACHER_AVATAR)"
                         />
                         <p class="font-semibold text-gray-800">
                           {{ teacher.name }}
@@ -337,12 +347,12 @@ onUnmounted(() => {
                     </div>
                   </div>
                   <!-- Постер мероприятия -->
-                  <div v-else-if="lesson.type === 'event' && lesson.poster">
+                  <div v-else-if="lesson.type === 'event'">
                     <img
-                      :src="`/images/posters/${lesson.poster}`"
+                      :src="resolvePosterUrl(lesson.poster)"
                       :alt="store.getDirectionNameById(lesson.directionId)"
                       class="w-full mx-auto rounded-lg shadow-md"
-                      @error="setFallbackImage($event, '/images/events/default-party.jpg')"
+                      @error="setFallbackImage($event, DEFAULT_EVENT_POSTER)"
                     />
                   </div>
                   <!-- Кнопки действий (только если глобальный режим редактирования) -->
@@ -469,7 +479,7 @@ onUnmounted(() => {
                             class="rounded border-gray-300 text-amber-500 focus:ring-amber-400"
                           />
                           <img
-                            :src="`/images/teachers/${teacher.photo}`"
+                            :src="resolveTeacherPhotoUrl(teacher.photo)"
                             :alt="teacher.name"
                             class="w-6 h-6 rounded-full object-cover"
                           />
@@ -482,7 +492,7 @@ onUnmounted(() => {
                     <div v-else>
                       <img
                         v-if="editableLesson.poster"
-                        :src="`/images/posters/${editableLesson.poster}`"
+                        :src="resolvePosterUrl(editableLesson.poster)"
                         class="mt-2 w-32 h-32 object-cover rounded"
                       />
                       <label class="block text-sm font-medium text-gray-700 mb-1">

@@ -6,6 +6,12 @@ import { useUserStore } from '@/stores/user'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getDirectionClass } from '@/utils/directionColors'
+import {
+  DEFAULT_EVENT_POSTER,
+  DEFAULT_TEACHER_AVATAR,
+  resolvePosterUrl,
+  resolveTeacherPhotoUrl,
+} from '@/utils/assets'
 import type { CSSProperties } from 'vue'
 import type { Lesson, NewLesson, Teacher } from '@/types/lesson'
 
@@ -255,13 +261,13 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
                       <img
                         v-for="(teacher, idx) in lesson.teachers"
                         :key="teacher.name"
-                        :src="`/images/teachers/${teacher.photo}`"
+                        :src="resolveTeacherPhotoUrl(teacher.photo)"
                         :alt="teacher.name"
                         class="w-9 h-9 rounded-full border-1 md:border-2 border-white shadow-sm"
                         :class="{
                           'relative z-10': idx === 0 && lesson.teachers.length > 1,
                         }"
-                        @error="setFallbackImage($event, '/images/teachers/default-avatar.jpg')"
+                        @error="setFallbackImage($event, DEFAULT_TEACHER_AVATAR)"
                       />
                     </div>
                   </div>
@@ -271,10 +277,10 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
                     class="flex items-center justify-end mt-1 pt-1 border-t border-white/50"
                   >
                     <img
-                      v-if="lesson.poster"
-                      :src="`/images/posters/${lesson.poster}`"
+                      :src="resolvePosterUrl(lesson.poster)"
                       :alt="scheduleStore.getDirectionNameById(lesson.directionId)"
                       class="w-9 h-9 rounded-full border-2 border-white shadow-sm object-cover"
+                      @error="setFallbackImage($event, DEFAULT_EVENT_POSTER)"
                     />
                   </div>
                 </div>

@@ -5,6 +5,7 @@ import { directionsRouter } from './directions.js'
 import { lessonsRouter } from './lessons.js'
 import { levelsRouter } from './levels.js'
 import { teachersRouter } from './teachers.js'
+import { uploadsRouter } from './uploads.js'
 
 const apiRouter = Router()
 
@@ -15,6 +16,7 @@ apiRouter.use('/lessons', lessonsRouter)
 apiRouter.use('/teachers', teachersRouter)
 apiRouter.use('/directions', directionsRouter)
 apiRouter.use('/levels', levelsRouter)
+apiRouter.use('/uploads', uploadsRouter)
 
 apiRouter.use((_req, res) => {
   res.status(404).json({ error: 'API route not found' })

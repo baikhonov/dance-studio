@@ -3,6 +3,8 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import AlertModal from '@/components/AlertModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
+import { uploadTeacherPhoto } from '@/api/uploads'
+import { DEFAULT_TEACHER_AVATAR, resolveTeacherPhotoUrl } from '@/utils/assets'
 import type { NewTeacher, Teacher } from '@/types/lesson'
 
 type TeacherDraft = NewTeacher & { id: null }
@@ -112,12 +114,17 @@ const saveTeacher = async () => {
   }
 }
 
-const handlePhotoUpload = (event: Event) => {
+const handlePhotoUpload = async (event: Event) => {
   if (!editableTeacher.value) return
   const target = event.target as HTMLInputElement | null
   const file = target?.files?.[0]
   if (file) {
-    editableTeacher.value.photo = file.name
+    try {
+      const uploaded = await uploadTeacherPhoto(file)
+      editableTeacher.value.photo = uploaded.path
+    } catch {
+      showAlert('Не удалось загрузить фото')
+    }
   }
 }
 
@@ -163,10 +170,10 @@ onUnmounted(() => {
                   </h3>
                   <div class="flex justify-center mb-6">
                     <img
-                      :src="`/images/teachers/${teacher.photo}`"
+                      :src="resolveTeacherPhotoUrl(teacher.photo)"
                       :alt="teacher.name"
                       class="w-40 h-40 rounded-lg object-cover border-2 border-gray-100 shadow-md"
-                      @error="setFallbackImage($event, '/images/teachers/default-avatar.jpg')"
+                      @error="setFallbackImage($event, DEFAULT_TEACHER_AVATAR)"
                     />
                   </div>
                   <div class="flex gap-2 mt-4 pt-4 border-t border-gray-200">
@@ -214,10 +221,10 @@ onUnmounted(() => {
                       />
                       <img
                         v-if="editableTeacher.photo"
-                        :src="`/images/teachers/${editableTeacher.photo}`"
+                        :src="resolveTeacherPhotoUrl(editableTeacher.photo)"
                         alt=""
                         class="mt-2 w-24 h-24 object-cover rounded-lg border border-gray-200"
-                        @error="setFallbackImage($event, '/images/teachers/default-avatar.jpg')"
+                        @error="setFallbackImage($event, DEFAULT_TEACHER_AVATAR)"
                       />
                     </div>
                     <div class="flex gap-3 pt-4">

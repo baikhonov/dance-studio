@@ -42,3 +42,14 @@ npm run build
 ```sh
 npm run lint
 ```
+
+## Legacy Image Path Cleanup
+
+If your database still contains old image file names from `public/images` (for example `party.webp` or `teacher.jpg`), run this one-time command to normalize them to empty values and use built-in fallback placeholders:
+
+```sh
+cd server
+npm run db:normalize-assets
+```
+
+Use this after pulling the upload/fallback changes to avoid requests to removed `/images/*` paths.
