@@ -1,4 +1,5 @@
-const API_BASE = '/api'
+import { API_BASE_URL } from '@/config/runtime'
+
 export const AUTH_UNAUTHORIZED_EVENT = 'auth:unauthorized'
 
 type RequestOptions = {
@@ -17,7 +18,7 @@ export class ApiError extends Error {
 
 export const apiRequest = async <T>(path: string, options: RequestOptions = {}): Promise<T> => {
   const token = localStorage.getItem('admin_token')
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
     method: options.method ?? 'GET',
     headers: {
       'Content-Type': 'application/json',

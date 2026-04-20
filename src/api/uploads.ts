@@ -1,3 +1,5 @@
+import { API_BASE_URL } from '@/config/runtime'
+
 type UploadResponse = {
   path: string
   url: string
@@ -8,7 +10,7 @@ const uploadFile = async (endpoint: '/teacher-photo' | '/poster', file: File): P
   const formData = new FormData()
   formData.append('file', file)
 
-  const response = await fetch(`/api/uploads${endpoint}`, {
+  const response = await fetch(`${API_BASE_URL}/uploads${endpoint}`, {
     method: 'POST',
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     body: formData,

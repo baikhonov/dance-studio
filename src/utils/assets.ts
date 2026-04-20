@@ -1,3 +1,5 @@
+import { UPLOADS_BASE_URL } from '@/config/runtime'
+
 const isAbsoluteUrl = (value: string) => /^https?:\/\//i.test(value)
 
 const toDataUri = (svg: string) => `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
@@ -22,13 +24,13 @@ export const DEFAULT_EVENT_POSTER = toDataUri(
 export const resolveTeacherPhotoUrl = (photo: string): string => {
   if (!photo) return DEFAULT_TEACHER_AVATAR
   if (isAbsoluteUrl(photo)) return photo
-  if (photo.includes('/')) return `/uploads/${photo}`
+  if (photo.includes('/')) return `${UPLOADS_BASE_URL}/${photo}`
   return DEFAULT_TEACHER_AVATAR
 }
 
 export const resolvePosterUrl = (poster: string): string => {
   if (!poster) return DEFAULT_EVENT_POSTER
   if (isAbsoluteUrl(poster)) return poster
-  if (poster.includes('/')) return `/uploads/${poster}`
+  if (poster.includes('/')) return `${UPLOADS_BASE_URL}/${poster}`
   return DEFAULT_EVENT_POSTER
 }
