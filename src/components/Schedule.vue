@@ -199,17 +199,17 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
   <div class="schedule">
     <!-- БЛОК ФИЛЬТРОВ (sticky) -->
     <div ref="filtersSection" class="md:sticky md:top-0 z-20 bg-gray-100 py-2">
-      <div class="mb-2 max-md:mb-0">
+      <div class="mb-2 max-md:mb-0 md:flex md:items-start md:gap-2">
         <button
           v-if="isAdmin"
           @click="openLessonModal()"
-          class="mb-2 w-full md:mb-0 md:mr-auto md:w-auto px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+          class="mb-2 w-full md:mb-0 md:w-auto md:shrink-0 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
         >
           Добавить занятие
         </button>
 
         <div
-          class="flex flex-row flex-nowrap items-center gap-2 pb-1 md:pb-0 md:justify-end"
+          class="flex flex-row flex-nowrap items-center gap-2 pb-1 md:pb-0 md:flex-1 md:justify-end"
         >
           <div class="min-w-0 flex-1 md:flex-none">
             <Filters
