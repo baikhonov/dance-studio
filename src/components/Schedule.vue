@@ -73,11 +73,13 @@ onUnmounted(() => {
 })
 
 const SLOT_HEIGHT = 120
+const COMPRESSED_SLOT_HEIGHT = 32
 
 const sortedDirections = computed(() => [...directions.value].sort((a, b) => a.name.localeCompare(b.name)))
 const sortedLevels = computed(() => [...levels.value].sort((a, b) => a.name.localeCompare(b.name)))
 
 const filteredLessons = computed(() => scheduleStore.filteredLessons)
+const isDesktop = computed(() => windowWidth.value >= 768)
 
 // Вспомогательная функция: время в минуты
 const timeToMinutes = (time: string): number => {
@@ -85,18 +87,74 @@ const timeToMinutes = (time: string): number => {
   return hours * 60 + minutes
 }
 
-// Вычисляем стиль для занятия
+const timeSlotMinutes = computed(() => timeSlots.value.map((time) => timeToMinutes(time)))
+
+const slotHasLessons = computed(() =>
+  timeSlotMinutes.value.map((slotStart, index, slots) => {
+    const nextSlotStart = slots[index + 1]
+    const fallbackInterval = index > 0 ? slotStart - slots[index - 1] : 60
+    const slotEnd = nextSlotStart ?? slotStart + fallbackInterval
+
+    return filteredLessons.value.some((lesson) => {
+      const lessonStart = timeToMinutes(lesson.time)
+      const lessonEnd = timeToMinutes(lesson.endTime)
+      return lessonStart < slotEnd && lessonEnd > slotStart
+    })
+  }),
+)
+
+const timeSlotHeights = computed(() =>
+  timeSlots.value.map((_, index) => {
+    if (!isDesktop.value || filteredLessons.value.length === 0) {
+      return SLOT_HEIGHT
+    }
+
+    return slotHasLessons.value[index] ? SLOT_HEIGHT : COMPRESSED_SLOT_HEIGHT
+  }),
+)
+
+const totalGridHeight = computed(() => timeSlotHeights.value.reduce((sum, height) => sum + height, 0))
+
+const getMinutesOffset = (targetMinutes: number): number => {
+  if (timeSlotMinutes.value.length === 0 || timeSlotHeights.value.length === 0) {
+    return 0
+  }
+
+  let offset = 0
+  const lastIndex = timeSlotMinutes.value.length - 1
+
+  for (let index = 0; index < lastIndex; index += 1) {
+    const slotStart = timeSlotMinutes.value[index]
+    const slotEnd = timeSlotMinutes.value[index + 1]
+    const intervalMinutes = slotEnd - slotStart
+    const slotHeight = timeSlotHeights.value[index]
+
+    if (targetMinutes <= slotStart) {
+      return offset
+    }
+
+    if (targetMinutes < slotEnd) {
+      const filledMinutes = targetMinutes - slotStart
+      return offset + (filledMinutes / intervalMinutes) * slotHeight
+    }
+
+    offset += slotHeight
+  }
+
+  const lastSlotStart = timeSlotMinutes.value[lastIndex]
+  const fallbackInterval =
+    lastIndex > 0 ? timeSlotMinutes.value[lastIndex] - timeSlotMinutes.value[lastIndex - 1] : 60
+  const lastSlotHeight = timeSlotHeights.value[lastIndex] ?? SLOT_HEIGHT
+  const minutesAfterLastSlot = Math.max(targetMinutes - lastSlotStart, 0)
+
+  return offset + (minutesAfterLastSlot / fallbackInterval) * lastSlotHeight
+}
+
 const getLessonStyle = (lesson: Lesson): CSSProperties => {
   const startMinutes = timeToMinutes(lesson.time)
   const endMinutes = timeToMinutes(lesson.endTime)
-
-  const firstSlotMinutes = timeToMinutes(scheduleStore.timeSlots[0])
-
-  const minutesFromStart = startMinutes - firstSlotMinutes
-  const top = (minutesFromStart / 60) * SLOT_HEIGHT
-
-  const durationHours = (endMinutes - startMinutes) / 60
-  const height = durationHours * SLOT_HEIGHT
+  const top = getMinutesOffset(startMinutes)
+  const height = getMinutesOffset(endMinutes) - top
 
   return {
     position: 'absolute',
@@ -202,10 +260,10 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
           <!-- КОЛОНКА С ВРЕМЕННЫМИ МЕТКАМИ -->
           <div class="sticky left-0 z-10 bg-gray-100 md:static">
             <div
-              v-for="time in timeSlots"
+              v-for="(time, index) in timeSlots"
               :key="time"
               class="flex items-center justify-center border border-b-0 last:border-b border-gray-300 text-sm p-2 md:p-3 text-gray-600 font-medium text-center"
-              :style="{ height: SLOT_HEIGHT + 'px' }"
+              :style="{ height: `${timeSlotHeights[index] ?? SLOT_HEIGHT}px` }"
             >
               {{ time }}
             </div>
@@ -216,14 +274,14 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
             v-for="day in days"
             :key="day"
             class="relative bg-gray-100 border border-b-0 border-r-0 border-gray-300 last:border-r"
-            :style="{ minHeight: `${timeSlots.length * SLOT_HEIGHT}px` }"
+            :style="{ minHeight: `${totalGridHeight}px` }"
           >
             <!-- ФОНОВАЯ СЕТКА (серые линии) -->
             <div
-              v-for="time in timeSlots"
+              v-for="(time, index) in timeSlots"
               :key="time"
               class="border-b border-gray-300"
-              :style="{ height: SLOT_HEIGHT + 'px' }"
+              :style="{ height: `${timeSlotHeights[index] ?? SLOT_HEIGHT}px` }"
             ></div>
 
             <!-- КАРТОЧКИ ЗАНЯТИЙ -->
