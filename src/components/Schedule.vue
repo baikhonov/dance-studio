@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import Filters from '@/components/Filters.vue'
 import LessonModal from '@/components/LessonModal.vue'
+import LessonCard from '@/components/LessonCard.vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { useUserStore } from '@/stores/user'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getDirectionClass } from '@/utils/directionColors'
-import {
-  DEFAULT_EVENT_POSTER,
-  DEFAULT_TEACHER_AVATAR,
-  resolvePosterUrl,
-  resolveTeacherPhotoUrl,
-} from '@/utils/assets'
 import type { CSSProperties } from 'vue'
 import type { Lesson, NewLesson, Teacher } from '@/types/lesson'
 
-type LessonCard = Lesson & { teachers: Teacher[] }
+type LessonCard = Lesson & {
+  teachers: Teacher[]
+  directionName: string
+  levelName: string
+  directionClass: string
+}
 type LessonDraft = NewLesson & { id: null }
 
 const userStore = useUserStore()
@@ -29,10 +29,17 @@ const lessonsWithTeachers = computed<Record<string, LessonCard[]>>(() => {
 
   for (const day of days.value) {
     const lessonsOfDay = scheduleStore.getLessonsByDay(day)
-    result[day] = lessonsOfDay.map((lesson) => ({
-      ...lesson,
-      teachers: scheduleStore.getTeachersForLesson(lesson.teacherIds),
-    }))
+    result[day] = lessonsOfDay.map((lesson) => {
+      const directionName = scheduleStore.getDirectionNameById(lesson.directionId)
+
+      return {
+        ...lesson,
+        teachers: scheduleStore.getTeachersForLesson(lesson.teacherIds),
+        directionName,
+        levelName: scheduleStore.getLevelNameById(lesson.levelId),
+        directionClass: getDirectionClass(directionName),
+      }
+    })
   }
 
   return result
@@ -127,13 +134,6 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
   isModalOpen.value = true
 }
 
-const setFallbackImage = (event: Event, fallbackSrc: string) => {
-  const image = event.target as HTMLImageElement | null
-  if (image) {
-    image.src = fallbackSrc
-  }
-}
-
 </script>
 
 <template>
@@ -218,73 +218,14 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
 
             <!-- КАРТОЧКИ ЗАНЯТИЙ -->
             <template v-for="lesson in lessonsWithTeachers[day]" :key="lesson.id">
-              <div
-                class="absolute rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer border-l-2 md:border-l-4"
-                :class="getDirectionClass(scheduleStore.getDirectionNameById(lesson.directionId))"
-                :style="getLessonStyle(lesson)"
-                @click="openLessonModal(lesson)"
-              >
-                <!-- Контент занятия -->
-                <div class="h-full p-1.5 flex flex-col text-[10px] overflow-y-auto">
-                  <!-- Название -->
-                  <p
-                    class="shrink-0 font-bold text-xs leading-tight truncate text-gray-900"
-                    :title="scheduleStore.getDirectionNameById(lesson.directionId)"
-                  >
-                    {{ scheduleStore.getDirectionNameById(lesson.directionId) }}
-                  </p>
-
-                  <!-- Уровень -->
-                  <p class="text-xs text-gray-700 mt-0.5 font-medium">
-                    {{ scheduleStore.getLevelNameById(lesson.levelId) }}
-                  </p>
-
-                  <!-- Время на полупрозрачном фоне -->
-                  <div
-                    class="text-xs font-medium mt-1 bg-white/50 px-1 py-0.5 rounded inline-block self-start"
-                  >
-                    {{ lesson.time }}—{{ lesson.endTime }}
-                  </div>
-
-                  <!-- Преподаватели -->
-                  <div
-                    v-if="lesson.teachers && lesson.teachers.length > 0"
-                    class="flex items-center justify-between mt-1 pt-1 border-t border-white/50"
-                  >
-                    <!-- Имена преподавателей -->
-                    <p class="text-xs text-gray-700 font-medium max-w-[60%] truncate">
-                      {{ lesson.teachers.map((t) => t.name).join(' и ') }}
-                    </p>
-
-                    <!-- Фотографии преподавателей -->
-                    <div class="flex shrink-0 -space-x-4 md:-space-x-2 ml-1">
-                      <img
-                        v-for="(teacher, idx) in lesson.teachers"
-                        :key="teacher.name"
-                        :src="resolveTeacherPhotoUrl(teacher.photo)"
-                        :alt="teacher.name"
-                        class="w-9 h-9 rounded-full border-1 md:border-2 border-white shadow-sm"
-                        :class="{
-                          'relative z-10': idx === 0 && lesson.teachers.length > 1,
-                        }"
-                        @error="setFallbackImage($event, DEFAULT_TEACHER_AVATAR)"
-                      />
-                    </div>
-                  </div>
-                  <!-- Постер мероприятия -->
-                  <div
-                    v-else-if="lesson.type === 'event'"
-                    class="flex items-center justify-end mt-1 pt-1 border-t border-white/50"
-                  >
-                    <img
-                      :src="resolvePosterUrl(lesson.poster)"
-                      :alt="scheduleStore.getDirectionNameById(lesson.directionId)"
-                      class="w-9 h-9 rounded-full border-2 border-white shadow-sm object-cover"
-                      @error="setFallbackImage($event, DEFAULT_EVENT_POSTER)"
-                    />
-                  </div>
-                </div>
-              </div>
+              <LessonCard
+                :lesson="lesson"
+                :direction-name="lesson.directionName"
+                :level-name="lesson.levelName"
+                :direction-class="lesson.directionClass"
+                :card-style="getLessonStyle(lesson)"
+                @select="openLessonModal(lesson)"
+              />
             </template>
           </div>
         </div>
@@ -302,7 +243,7 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
 </template>
 
 <style scoped>
-/* Для скролла внутри длинных занятий */
+/* Для скролла в основном контейнере расписания */
 .overflow-y-auto {
   scrollbar-width: thin;
   scrollbar-color: #999 #e0e0e0;
@@ -319,10 +260,5 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
 .overflow-y-auto::-webkit-scrollbar-thumb {
   background: #999;
   border-radius: 4px;
-}
-
-/* Улучшаем читаемость текста на цветном фоне */
-.text-gray-900 {
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 </style>
