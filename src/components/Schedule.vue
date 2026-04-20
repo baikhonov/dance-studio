@@ -55,6 +55,7 @@ const updateFiltersHeight = () => {
 }
 
 const windowWidth = ref(window.innerWidth)
+const scheduleHeaderTop = computed(() => Math.max(filtersHeight.value - 1, 0))
 
 const updateWindowWidth = () => {
   windowWidth.value = window.innerWidth
@@ -140,39 +141,43 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
   <div class="schedule">
     <!-- БЛОК ФИЛЬТРОВ (sticky) -->
     <div ref="filtersSection" class="md:sticky md:top-0 z-20 bg-gray-100 py-2">
-      <h2 class="text-center text-2xl font-semibold mb-4">Расписание занятий</h2>
-      <div class="flex flex-col md:flex-row gap-2 justify-end items-center md:items-center mb-4">
+      <div class="mb-2">
         <button
           v-if="isAdmin"
           @click="openLessonModal()"
-          class="px-4 py-2 mr-auto bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+          class="mb-2 w-full md:mb-0 md:mr-auto md:w-auto px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
         >
           Добавить занятие
         </button>
-        <Filters :directions="sortedDirections" :levels="sortedLevels" v-model="filters" />
 
         <div
-          v-if="filters.direction || filters.level"
-          class="text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full text-center"
+          class="flex flex-row flex-nowrap items-center gap-2 pb-1 md:pb-0 md:justify-end"
         >
-          Найдено: {{ filteredLessons.length }}
+          <div class="min-w-0 flex-1 md:flex-none">
+            <Filters :directions="sortedDirections" :levels="sortedLevels" v-model="filters" />
+          </div>
+
+          <div
+            v-if="filters.direction || filters.level"
+            class="shrink-0 text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full text-center"
+          >
+            Найдено: {{ filteredLessons.length }}
+          </div>
         </div>
       </div>
     </div>
 
     <!-- СЕТКА РАСПИСАНИЯ -->
-    <div
-      class="overflow-x-auto md:overflow-visible max-h-screen md:max-h-none overflow-y-auto md:overflow-y-visible"
-    >
+    <div class="max-h-[75dvh] overflow-x-auto overflow-y-auto md:max-h-none md:overflow-visible">
       <div class="min-w-[800px] md:min-w-0 border-gray-300">
         <!-- ШАПКА С ДНЯМИ (sticky) -->
         <div
-          class="sticky top-0 z-11 grid grid-cols-[80px_repeat(7,minmax(120px,1fr))] bg-gray-100"
-          :style="windowWidth >= 768 ? { top: `${filtersHeight}px` } : {}"
+          class="sticky top-0 z-30 grid grid-cols-[80px_repeat(7,minmax(120px,1fr))] bg-gray-100 shadow-sm"
+          :style="windowWidth >= 768 ? { top: `${scheduleHeaderTop}px` } : {}"
         >
           <!-- УГЛОВАЯ ЯЧЕЙКА "Время" -->
           <div
-            class="sticky left-0 z-10 flex items-center justify-center p-2 md:p-3 font-semibold text-gray-700 border border-r-0 border-gray-300 text-center bg-gray-200 md:bg-gray-200/50"
+            class="sticky left-0 z-20 flex items-center justify-center p-2 md:p-3 font-semibold text-gray-700 border border-r border-gray-300 text-center bg-gray-200 md:border-r-0 md:bg-gray-200/50"
           >
             Время
           </div>
@@ -180,7 +185,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
           <div
             v-for="day in days"
             :key="day"
-            class="flex items-center justify-center p-2 md:p-3 font-semibold text-gray-700 text-center border border-r-0 border-gray-300 last:border-r bg-gray-200/50"
+            class="flex items-center justify-center p-2 md:p-3 font-semibold text-gray-700 text-center border border-r-0 border-gray-300 last:border-r bg-gray-200 md:bg-gray-200/50"
           >
             <span class="md:hidden">{{ day.slice(0, 11) }}</span>
             <span class="hidden md:inline">{{ day }}</span>
@@ -190,7 +195,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
         <!-- ОСНОВНОЙ КОНТЕЙНЕР: временная сетка + занятия -->
         <div class="grid grid-cols-[80px_repeat(7,minmax(120px,1fr))]">
           <!-- КОЛОНКА С ВРЕМЕННЫМИ МЕТКАМИ -->
-          <div class="sticky left-0 z-10 bg-gray-100">
+          <div class="sticky left-0 z-10 bg-gray-100 md:static">
             <div
               v-for="time in timeSlots"
               :key="time"
