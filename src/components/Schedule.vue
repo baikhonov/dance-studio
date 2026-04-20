@@ -105,7 +105,7 @@ const slotHasLessons = computed(() =>
 
 const timeSlotHeights = computed(() =>
   timeSlots.value.map((_, index) => {
-    if (!isDesktop.value || filteredLessons.value.length === 0) {
+    if (filteredLessons.value.length === 0) {
       return SLOT_HEIGHT
     }
 
