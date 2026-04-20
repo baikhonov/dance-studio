@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { AUTH_UNAUTHORIZED_EVENT } from '@/api/http'
 import { RouterView, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
+import { onMounted, onUnmounted } from 'vue'
 
 const userStore = useUserStore()
 const { isAdmin } = storeToRefs(userStore)
@@ -12,6 +14,19 @@ const handleLogout = () => {
   userStore.logout()
   router.push('/')
 }
+
+const handleUnauthorized = () => {
+  userStore.logout()
+  router.push('/login')
+}
+
+onMounted(() => {
+  window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized)
+})
+
+onUnmounted(() => {
+  window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized)
+})
 </script>
 
 <template>

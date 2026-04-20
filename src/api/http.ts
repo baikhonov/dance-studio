@@ -1,4 +1,5 @@
 const API_BASE = '/api'
+export const AUTH_UNAUTHORIZED_EVENT = 'auth:unauthorized'
 
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
@@ -31,6 +32,9 @@ export const apiRequest = async <T>(path: string, options: RequestOptions = {}):
 
   const data = (await response.json().catch(() => null)) as { error?: string } | null
   if (!response.ok) {
+    if (response.status === 401 && token) {
+      window.dispatchEvent(new Event(AUTH_UNAUTHORIZED_EVENT))
+    }
     throw new ApiError(data?.error ?? 'Request failed', response.status)
   }
   return data as T
