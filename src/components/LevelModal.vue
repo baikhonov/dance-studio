@@ -65,16 +65,20 @@ const requestDeleteLevel = () => {
   isConfirmOpen.value = true
 }
 
-const handleDeleteConfirm = () => {
+const handleDeleteConfirm = async () => {
   if (levelToDelete.value === null) return
-  store.deleteLevel(levelToDelete.value)
-  levelToDelete.value = null
-  levelNameToDelete.value = ''
-  isConfirmOpen.value = false
-  emit('close')
+  try {
+    await store.deleteLevel(levelToDelete.value)
+    levelToDelete.value = null
+    levelNameToDelete.value = ''
+    isConfirmOpen.value = false
+    emit('close')
+  } catch {
+    showAlert('Не удалось удалить уровень')
+  }
 }
 
-const saveLevel = () => {
+const saveLevel = async () => {
   if (!editableLevel.value) return
 
   const normalizedName = editableLevel.value.name.trim()
@@ -100,13 +104,17 @@ const saveLevel = () => {
     return
   }
 
-  if (editableLevel.value.id !== null) {
-    store.updateLevel({ id: editableLevel.value.id, name: normalizedName })
-  } else {
-    store.addLevel({ name: normalizedName })
-  }
+  try {
+    if (editableLevel.value.id !== null) {
+      await store.updateLevel({ id: editableLevel.value.id, name: normalizedName })
+    } else {
+      await store.addLevel({ name: normalizedName })
+    }
 
-  emit('close')
+    emit('close')
+  } catch {
+    showAlert('Не удалось сохранить уровень')
+  }
 }
 
 const handleEscape = (event: KeyboardEvent) => {

@@ -49,6 +49,7 @@ const updateWindowWidth = () => {
 }
 
 onMounted(() => {
+  void scheduleStore.ensureLoaded()
   updateWindowWidth()
   window.addEventListener('resize', updateWindowWidth)
 })

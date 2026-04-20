@@ -64,16 +64,20 @@ const requestDeleteDirection = () => {
   isConfirmOpen.value = true
 }
 
-const handleDeleteConfirm = () => {
+const handleDeleteConfirm = async () => {
   if (directionToDelete.value === null) return
-  store.deleteDirection(directionToDelete.value)
-  directionToDelete.value = null
-  directionNameToDelete.value = ''
-  isConfirmOpen.value = false
-  emit('close')
+  try {
+    await store.deleteDirection(directionToDelete.value)
+    directionToDelete.value = null
+    directionNameToDelete.value = ''
+    isConfirmOpen.value = false
+    emit('close')
+  } catch {
+    showAlert('Не удалось удалить направление')
+  }
 }
 
-const saveDirection = () => {
+const saveDirection = async () => {
   if (!editableDirection.value) return
 
   const normalizedName = editableDirection.value.name.trim()
@@ -94,13 +98,17 @@ const saveDirection = () => {
     return
   }
 
-  if (editableDirection.value.id !== null) {
-    store.updateDirection({ id: editableDirection.value.id, name: normalizedName })
-  } else {
-    store.addDirection({ name: normalizedName })
-  }
+  try {
+    if (editableDirection.value.id !== null) {
+      await store.updateDirection({ id: editableDirection.value.id, name: normalizedName })
+    } else {
+      await store.addDirection({ name: normalizedName })
+    }
 
-  emit('close')
+    emit('close')
+  } catch {
+    showAlert('Не удалось сохранить направление')
+  }
 }
 
 const handleEscape = (event: KeyboardEvent) => {

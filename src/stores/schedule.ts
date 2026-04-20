@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { generateId } from '@/utils/generateId'
+import * as scheduleApi from '@/api/schedule'
 import type {
   Direction,
   Filters,
@@ -42,163 +42,17 @@ export const useScheduleStore = defineStore('schedule', () => {
     '23:00',
   ])
 
-  const lessons = ref<Lesson[]>([
-    {
-      id: 1,
-      day: 'Понедельник',
-      time: '19:30',
-      endTime: '20:30',
-      directionId: 1,
-      levelId: 2,
-      teacherIds: [7],
-      type: 'lesson',
-      poster: null,
-    },
-    {
-      id: 2,
-      day: 'Понедельник',
-      time: '20:30',
-      endTime: '21:30',
-      directionId: 2,
-      levelId: 1,
-      teacherIds: [5, 7],
-      type: 'lesson',
-      poster: null,
-    },
-    {
-      id: 3,
-      day: 'Вторник',
-      time: '19:30',
-      endTime: '20:30',
-      directionId: 3,
-      levelId: null,
-      teacherIds: [5],
-      type: 'lesson',
-      poster: null,
-    },
-    {
-      id: 4,
-      day: 'Вторник',
-      time: '20:30',
-      endTime: '21:30',
-      directionId: 2,
-      levelId: 2,
-      teacherIds: [5, 7],
-      type: 'lesson',
-      poster: null,
-    },
-    {
-      id: 5,
-      day: 'Среда',
-      time: '19:30',
-      endTime: '20:30',
-      directionId: 1,
-      levelId: 2,
-      teacherIds: [7],
-      type: 'lesson',
-      poster: null,
-    },
-    {
-      id: 6,
-      day: 'Среда',
-      time: '20:30',
-      endTime: '21:30',
-      directionId: 2,
-      levelId: 1,
-      teacherIds: [5, 7],
-      type: 'lesson',
-      poster: null,
-    },
-    {
-      id: 7,
-      day: 'Четверг',
-      time: '19:30',
-      endTime: '20:30',
-      directionId: 3,
-      levelId: null,
-      teacherIds: [5],
-      type: 'lesson',
-      poster: null,
-    },
-    {
-      id: 8,
-      day: 'Четверг',
-      time: '20:30',
-      endTime: '21:30',
-      directionId: 2,
-      levelId: 2,
-      teacherIds: [5, 7],
-      type: 'lesson',
-      poster: null,
-    },
-    {
-      id: 9,
-      day: 'Пятница',
-      time: '19:30',
-      endTime: '20:30',
-      directionId: 1,
-      levelId: 1,
-      teacherIds: [7],
-      type: 'lesson',
-      poster: null,
-    },
-    {
-      id: 10,
-      day: 'Пятница',
-      time: '20:30',
-      endTime: '22:30',
-      directionId: 4,
-      levelId: null,
-      teacherIds: [5, 7],
-      type: 'lesson',
-      poster: null,
-    },
-    {
-      id: 19,
-      day: 'Суббота',
-      time: '20:00',
-      endTime: '23:00',
-      directionId: 5,
-      levelId: null,
-      teacherIds: [],
-      type: 'event',
-      poster: 'party-bachatamania.webp',
-    },
-    {
-      id: 20,
-      day: 'Воскресенье',
-      time: '13:00',
-      endTime: '14:00',
-      directionId: 1,
-      levelId: 1,
-      teacherIds: [7],
-      type: 'lesson',
-      poster: null,
-    },
-  ])
+  const lessons = ref<Lesson[]>([])
+  const directions = ref<Direction[]>([])
+  const teachers = ref<Teacher[]>([])
+  const levels = ref<Level[]>([])
+  const isLoaded = ref(false)
+  const isLoading = ref(false)
 
   const filters = ref<Filters>({
     direction: null,
     level: null,
   })
-
-  const directions = ref<Direction[]>([
-    { id: 1, name: 'Lady Style (соло)' },
-    { id: 2, name: 'Бачата в паре' },
-    { id: 3, name: 'Общее хорео (соло)' },
-    { id: 4, name: 'Бачата интенсив "Украшения в паре"' },
-    { id: 5, name: 'Вечеринка' },
-  ])
-
-  const teachers = ref<Teacher[]>([
-    { id: 5, name: 'Кеулемжай', photo: 'keulemzhai.jpg' },
-    { id: 7, name: 'Татьяна', photo: 'tatyana.jpg' },
-  ])
-
-  const levels = ref<Level[]>([
-    { id: 1, name: 'Начинающие' },
-    { id: 2, name: 'Продолжающие' },
-  ])
 
   const uniqueDirections = computed(() => {
     return [...directions.value]
@@ -216,8 +70,7 @@ export const useScheduleStore = defineStore('schedule', () => {
 
       let matchLevel = true
       if (filters.value.level !== null) {
-        matchLevel =
-          lesson.levelId === null || lesson.levelId === filters.value.level
+        matchLevel = lesson.levelId === null || lesson.levelId === filters.value.level
       }
 
       return matchDirection && matchLevel
@@ -255,65 +108,103 @@ export const useScheduleStore = defineStore('schedule', () => {
       .filter((teacher): teacher is Teacher => Boolean(teacher))
   }
 
-  const deleteLesson = (id: number) => {
+  const loadData = async () => {
+    isLoading.value = true
+    try {
+      const [lessonsData, directionsData, teachersData, levelsData] = await Promise.all([
+        scheduleApi.getLessons(),
+        scheduleApi.getDirections(),
+        scheduleApi.getTeachers(),
+        scheduleApi.getLevels(),
+      ])
+      lessons.value = lessonsData
+      directions.value = directionsData
+      teachers.value = teachersData
+      levels.value = levelsData
+      isLoaded.value = true
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const ensureLoaded = async () => {
+    if (!isLoaded.value && !isLoading.value) {
+      await loadData()
+    }
+  }
+
+  const deleteLesson = async (id: number) => {
+    await scheduleApi.deleteLesson(id)
     lessons.value = lessons.value.filter((lesson) => lesson.id !== id)
   }
 
-  const updateLesson = (updatedLesson: Lesson) => {
-    const index = lessons.value.findIndex((lesson) => lesson.id === updatedLesson.id)
+  const updateLesson = async (updatedLesson: Lesson) => {
+    const updated = await scheduleApi.updateLesson(updatedLesson.id, {
+      day: updatedLesson.day,
+      time: updatedLesson.time,
+      endTime: updatedLesson.endTime,
+      directionId: updatedLesson.directionId,
+      levelId: updatedLesson.levelId ?? null,
+      teacherIds: updatedLesson.teacherIds,
+      type: updatedLesson.type,
+      poster: updatedLesson.poster,
+    })
+
+    const index = lessons.value.findIndex((lesson) => lesson.id === updated.id)
     if (index !== -1) {
-      lessons.value[index] = {
-        ...updatedLesson,
-        levelId: updatedLesson.levelId ?? null,
-      }
+      lessons.value[index] = updated
     }
   }
 
-  const addLesson = (newLesson: NewLesson) => {
-    const maxId = generateId(lessons.value)
-    lessons.value.push({
+  const addLesson = async (newLesson: NewLesson) => {
+    const created = await scheduleApi.createLesson({
       ...newLesson,
-      id: maxId,
       levelId: newLesson.levelId ?? null,
       teacherIds: newLesson.teacherIds ?? [],
     })
+    lessons.value.push(created)
   }
 
-  const addTeacher = (teacher: NewTeacher) => {
-    const maxId = generateId(teachers.value)
-    teachers.value.push({
-      ...teacher,
-      id: maxId,
+  const addTeacher = async (teacher: NewTeacher) => {
+    const created = await scheduleApi.createTeacher(teacher)
+    teachers.value.push(created)
+  }
+
+  const updateTeacher = async (updated: Teacher) => {
+    const saved = await scheduleApi.updateTeacher(updated.id, {
+      name: updated.name,
+      photo: updated.photo,
     })
-  }
-
-  const updateTeacher = (updated: Teacher) => {
-    const index = teachers.value.findIndex((t) => t.id === updated.id)
+    const index = teachers.value.findIndex((t) => t.id === saved.id)
     if (index !== -1) {
-      teachers.value[index] = { ...updated }
+      teachers.value[index] = saved
     }
   }
 
-  const deleteTeacher = (id: number) => {
+  const deleteTeacher = async (id: number) => {
+    await scheduleApi.deleteTeacher(id)
     teachers.value = teachers.value.filter((teacher) => teacher.id !== id)
+    lessons.value = lessons.value.map((lesson) => ({
+      ...lesson,
+      teacherIds: lesson.teacherIds.filter((teacherId) => teacherId !== id),
+    }))
   }
 
-  const addDirection = (direction: NewDirection) => {
-    const maxId = generateId(directions.value)
-    directions.value.push({
-      ...direction,
-      id: maxId,
-    })
+  const addDirection = async (direction: NewDirection) => {
+    const created = await scheduleApi.createDirection(direction)
+    directions.value.push(created)
   }
 
-  const updateDirection = (updated: Direction) => {
-    const index = directions.value.findIndex((direction) => direction.id === updated.id)
+  const updateDirection = async (updated: Direction) => {
+    const saved = await scheduleApi.updateDirection(updated.id, { name: updated.name })
+    const index = directions.value.findIndex((direction) => direction.id === saved.id)
     if (index !== -1) {
-      directions.value[index] = { ...updated }
+      directions.value[index] = saved
     }
   }
 
-  const deleteDirection = (id: number) => {
+  const deleteDirection = async (id: number) => {
+    await scheduleApi.deleteDirection(id)
     directions.value = directions.value.filter((direction) => direction.id !== id)
     lessons.value = lessons.value.filter((lesson) => lesson.directionId !== id)
     if (filters.value.direction === id) {
@@ -321,29 +212,23 @@ export const useScheduleStore = defineStore('schedule', () => {
     }
   }
 
-  const addLevel = (level: NewLevel) => {
-    const maxId = generateId(levels.value)
-    levels.value.push({
-      ...level,
-      id: maxId,
-    })
+  const addLevel = async (level: NewLevel) => {
+    const created = await scheduleApi.createLevel(level)
+    levels.value.push(created)
   }
 
-  const updateLevel = (updated: Level) => {
-    const index = levels.value.findIndex((level) => level.id === updated.id)
+  const updateLevel = async (updated: Level) => {
+    const saved = await scheduleApi.updateLevel(updated.id, { name: updated.name })
+    const index = levels.value.findIndex((level) => level.id === saved.id)
     if (index !== -1) {
-      levels.value[index] = { ...updated }
+      levels.value[index] = saved
     }
   }
 
-  const deleteLevel = (id: number) => {
-    if (!levels.value.some((level) => level.id === id)) return
-
+  const deleteLevel = async (id: number) => {
+    await scheduleApi.deleteLevel(id)
     levels.value = levels.value.filter((level) => level.id !== id)
-    lessons.value = lessons.value.map((lesson) =>
-      lesson.levelId === id ? { ...lesson, levelId: null } : lesson,
-    )
-
+    lessons.value = lessons.value.map((lesson) => (lesson.levelId === id ? { ...lesson, levelId: null } : lesson))
     if (filters.value.level === id) {
       filters.value.level = null
     }
@@ -359,6 +244,10 @@ export const useScheduleStore = defineStore('schedule', () => {
     levels,
     uniqueDirections,
     filteredLessons,
+    isLoaded,
+    isLoading,
+    loadData,
+    ensureLoaded,
     getLessonsByDay,
     getTeacherById,
     getDirectionById,

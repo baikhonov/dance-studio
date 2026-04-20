@@ -75,16 +75,20 @@ const requestDeleteTeacher = () => {
   isConfirmOpen.value = true
 }
 
-const handleDeleteConfirm = () => {
+const handleDeleteConfirm = async () => {
   if (teacherToDelete.value === null) return
-  store.deleteTeacher(teacherToDelete.value)
-  teacherToDelete.value = null
-  teacherNameToDelete.value = ''
-  isConfirmOpen.value = false
-  emit('close')
+  try {
+    await store.deleteTeacher(teacherToDelete.value)
+    teacherToDelete.value = null
+    teacherNameToDelete.value = ''
+    isConfirmOpen.value = false
+    emit('close')
+  } catch {
+    showAlert('Не удалось удалить преподавателя')
+  }
 }
 
-const saveTeacher = () => {
+const saveTeacher = async () => {
   if (!editableTeacher.value) return
 
   if (editableTeacher.value.name.trim() === '') {
@@ -92,16 +96,20 @@ const saveTeacher = () => {
     return
   }
 
-  if (editableTeacher.value.id !== null) {
-    store.updateTeacher(editableTeacher.value as Teacher)
-  } else {
-    const newTeacher: NewTeacher = {
-      name: editableTeacher.value.name,
-      photo: editableTeacher.value.photo,
+  try {
+    if (editableTeacher.value.id !== null) {
+      await store.updateTeacher(editableTeacher.value as Teacher)
+    } else {
+      const newTeacher: NewTeacher = {
+        name: editableTeacher.value.name,
+        photo: editableTeacher.value.photo,
+      }
+      await store.addTeacher(newTeacher)
     }
-    store.addTeacher(newTeacher)
+    emit('close')
+  } catch {
+    showAlert('Не удалось сохранить преподавателя')
   }
-  emit('close')
 }
 
 const handlePhotoUpload = (event: Event) => {

@@ -8,8 +8,8 @@ const userStore = useUserStore()
 const password = ref('')
 const error = ref('')
 
-const login = () => {
-  if (userStore.login(password.value)) {
+const login = async () => {
+  if (await userStore.login(password.value)) {
     router.push('/')
   } else {
     error.value = 'Неверный пароль'

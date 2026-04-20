@@ -157,13 +157,17 @@ const deleteLesson = () => {
   isConfirmOpen.value = true
 }
 
-const handleDeleteLesson = () => {
+const handleDeleteLesson = async () => {
   if (lessonToDelete.value === null) return
-  store.deleteLesson(lessonToDelete.value)
-  lessonToDelete.value = null
-  lessonNameToDelete.value = ''
-  isConfirmOpen.value = false
-  emit('close')
+  try {
+    await store.deleteLesson(lessonToDelete.value)
+    lessonToDelete.value = null
+    lessonNameToDelete.value = ''
+    isConfirmOpen.value = false
+    emit('close')
+  } catch {
+    showAlert('Не удалось удалить занятие')
+  }
 }
 
 const hasConflict = () => {
@@ -189,7 +193,7 @@ const hasConflict = () => {
 }
 
 // Сохранение изменений
-const saveLesson = () => {
+const saveLesson = async () => {
   if (!editableLesson.value) return
 
   // Проверка времени
@@ -219,22 +223,26 @@ const saveLesson = () => {
 
   editableLesson.value.teacherIds = selectedTeacherIds.value
 
-  if (editableLesson.value.id !== null) {
-    store.updateLesson(editableLesson.value as Lesson)
-  } else {
-    const newLesson: NewLesson = {
-      day: editableLesson.value.day,
-      time: editableLesson.value.time,
-      endTime: editableLesson.value.endTime,
-      directionId: editableLesson.value.directionId,
-      levelId: editableLesson.value.levelId,
-      teacherIds: editableLesson.value.teacherIds,
-      type: editableLesson.value.type,
-      poster: editableLesson.value.poster,
+  try {
+    if (editableLesson.value.id !== null) {
+      await store.updateLesson(editableLesson.value as Lesson)
+    } else {
+      const newLesson: NewLesson = {
+        day: editableLesson.value.day,
+        time: editableLesson.value.time,
+        endTime: editableLesson.value.endTime,
+        directionId: editableLesson.value.directionId,
+        levelId: editableLesson.value.levelId,
+        teacherIds: editableLesson.value.teacherIds,
+        type: editableLesson.value.type,
+        poster: editableLesson.value.poster,
+      }
+      await store.addLesson(newLesson)
     }
-    store.addLesson(newLesson)
+    emit('close')
+  } catch {
+    showAlert('Не удалось сохранить занятие')
   }
-  emit('close')
 }
 
 // Закрытие по клавише Escape

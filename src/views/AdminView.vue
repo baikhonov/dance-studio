@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
 import TeacherModal from '@/components/TeacherModal.vue'
@@ -89,6 +89,10 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
     image.src = fallbackSrc
   }
 }
+
+onMounted(() => {
+  void schedule.ensureLoaded()
+})
 </script>
 
 <template>
