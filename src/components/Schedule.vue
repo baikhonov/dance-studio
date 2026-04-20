@@ -141,7 +141,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
   <div class="schedule">
     <!-- БЛОК ФИЛЬТРОВ (sticky) -->
     <div ref="filtersSection" class="md:sticky md:top-0 z-20 bg-gray-100 py-2">
-      <div class="mb-2">
+      <div class="mb-2 max-md:mb-0">
         <button
           v-if="isAdmin"
           @click="openLessonModal()"
@@ -154,12 +154,17 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
           class="flex flex-row flex-nowrap items-center gap-2 pb-1 md:pb-0 md:justify-end"
         >
           <div class="min-w-0 flex-1 md:flex-none">
-            <Filters :directions="sortedDirections" :levels="sortedLevels" v-model="filters" />
+            <Filters
+              :directions="sortedDirections"
+              :levels="sortedLevels"
+              :filtered-count="filteredLessons.length"
+              v-model="filters"
+            />
           </div>
 
           <div
             v-if="filters.direction || filters.level"
-            class="shrink-0 text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full text-center"
+            class="hidden md:block shrink-0 text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full text-center"
           >
             Найдено: {{ filteredLessons.length }}
           </div>

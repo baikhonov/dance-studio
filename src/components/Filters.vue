@@ -4,6 +4,7 @@ import type { Direction, Filters as ScheduleFilters, Level } from '@/types/lesso
 defineProps<{
   directions: Direction[]
   levels: Level[]
+  filteredCount?: number
 }>()
 
 const filters = defineModel<ScheduleFilters>({ required: true })
@@ -32,33 +33,49 @@ const resetFilters = () => {
 </script>
 
 <template>
-  <div class="filters flex flex-row flex-nowrap items-center gap-2 w-full md:w-auto">
-    <select
-      class="min-w-0 flex-1 md:flex-none md:w-auto md:max-w-[200px] px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer"
-      :value="filters.direction"
-      @change="updateDirection"
-    >
-      <option value="">Все направления</option>
-      <option v-for="direction in directions" :key="direction.id" :value="direction.id">
-        {{ direction.name }}
-      </option>
-    </select>
-    <select
-      class="min-w-0 flex-1 md:flex-none md:w-auto md:max-w-[200px] px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer"
-      :value="filters.level"
-      @change="updateLevel"
-    >
-      <option value="">Все уровни</option>
-      <option v-for="level in levels" :key="level.id" :value="level.id">
-        {{ level.name }}
-      </option>
-    </select>
-    <button
+  <div class="filters w-full md:w-auto">
+    <div class="flex flex-row flex-nowrap items-center gap-2 w-full md:w-auto">
+      <select
+        class="min-w-0 flex-1 md:flex-none md:w-auto md:max-w-[200px] px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer"
+        :value="filters.direction"
+        @change="updateDirection"
+      >
+        <option value="">Все направления</option>
+        <option v-for="direction in directions" :key="direction.id" :value="direction.id">
+          {{ direction.name }}
+        </option>
+      </select>
+      <select
+        class="min-w-0 flex-1 md:flex-none md:w-auto md:max-w-[200px] px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer"
+        :value="filters.level"
+        @change="updateLevel"
+      >
+        <option value="">Все уровни</option>
+        <option v-for="level in levels" :key="level.id" :value="level.id">
+          {{ level.name }}
+        </option>
+      </select>
+      <button
+        v-if="filters.direction || filters.level"
+        @click="resetFilters"
+        class="hidden md:inline-flex shrink-0 px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+      >
+        ✕ Сбросить
+      </button>
+    </div>
+    <div
       v-if="filters.direction || filters.level"
-      @click="resetFilters"
-      class="shrink-0 px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+      class="mt-2 flex items-center justify-between gap-2 md:hidden"
     >
-      ✕ Сбросить
-    </button>
+      <button
+        @click="resetFilters"
+        class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+      >
+        ✕ Сбросить
+      </button>
+      <span class="text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full text-center">
+        Найдено: {{ filteredCount ?? 0 }}
+      </span>
+    </div>
   </div>
 </template>
