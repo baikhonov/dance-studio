@@ -11,15 +11,16 @@ const props = defineProps<{
 
 const filters = defineModel<ScheduleFilters>({ required: true })
 const isLevelsOpen = ref(false)
+const isDirectionsOpen = ref(false)
 const levelsMenuRef = ref<HTMLElement | null>(null)
+const directionsMenuRef = ref<HTMLElement | null>(null)
 
-function updateDirection(event: Event) {
-  const rawValue = (event.target as HTMLSelectElement | null)?.value ?? ''
-  const value = rawValue ? Number(rawValue) : null
+function selectDirection(value: number | null) {
   filters.value = {
     ...filters.value,
     direction: value,
   }
+  isDirectionsOpen.value = false
 }
 
 function selectLevel(value: number | null) {
@@ -32,8 +33,17 @@ function selectLevel(value: number | null) {
 
 const resetFilters = () => {
   filters.value = { direction: null, level: null }
+  isDirectionsOpen.value = false
   isLevelsOpen.value = false
 }
+
+const selectedDirectionLabel = computed(() => {
+  if (filters.value.direction === null) return 'Все направления'
+  return (
+    props.directions.find((direction) => direction.id === filters.value.direction)?.name ??
+    'Все направления'
+  )
+})
 
 const selectedLevelLabel = computed(() => {
   if (filters.value.level === null) return 'Все уровни'
@@ -51,11 +61,20 @@ const toggleLevelsMenu = () => {
   isLevelsOpen.value = !isLevelsOpen.value
 }
 
+const toggleDirectionsMenu = () => {
+  isDirectionsOpen.value = !isDirectionsOpen.value
+}
+
 const handleOutsideClick = (event: MouseEvent) => {
   const target = event.target as Node | null
-  if (!levelsMenuRef.value || !target) return
-  if (!levelsMenuRef.value.contains(target)) {
+  if (!target) return
+
+  if (!levelsMenuRef.value?.contains(target)) {
     isLevelsOpen.value = false
+  }
+
+  if (!directionsMenuRef.value?.contains(target)) {
+    isDirectionsOpen.value = false
   }
 }
 
@@ -71,16 +90,45 @@ onUnmounted(() => {
 <template>
   <div class="filters w-full md:w-auto">
     <div class="flex flex-row flex-nowrap items-center gap-2 w-full md:w-auto">
-      <select
-        class="min-w-0 flex-1 md:flex-none md:w-auto md:max-w-[200px] px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer"
-        :value="filters.direction"
-        @change="updateDirection"
+      <div
+        ref="directionsMenuRef"
+        class="relative z-50 min-w-0 flex-1 md:flex-none md:w-auto md:max-w-[200px]"
       >
-        <option value="">Все направления</option>
-        <option v-for="direction in directions" :key="direction.id" :value="direction.id">
-          {{ direction.name }}
-        </option>
-      </select>
+        <button
+          type="button"
+          class="w-full px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer inline-flex items-center justify-between gap-2"
+          @click.stop="toggleDirectionsMenu"
+        >
+          <span class="truncate">{{ selectedDirectionLabel }}</span>
+          <span
+            class="text-xs text-gray-500 transition-transform duration-200 ease-in-out"
+            :class="{ 'rotate-180': isDirectionsOpen }"
+            >▼</span
+          >
+        </button>
+
+        <div
+          v-if="isDirectionsOpen"
+          class="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden"
+        >
+          <button
+            type="button"
+            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
+            @click="selectDirection(null)"
+          >
+            Все направления
+          </button>
+          <button
+            v-for="direction in directions"
+            :key="direction.id"
+            type="button"
+            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
+            @click="selectDirection(direction.id)"
+          >
+            {{ direction.name }}
+          </button>
+        </div>
+      </div>
       <div
         ref="levelsMenuRef"
         class="relative z-50 min-w-0 flex-1 md:flex-none md:w-auto md:max-w-[220px]"
@@ -94,7 +142,11 @@ onUnmounted(() => {
             <span class="h-2.5 w-2.5 rounded-full shrink-0" :style="selectedLevelDotStyle"></span>
             <span class="truncate">{{ selectedLevelLabel }}</span>
           </span>
-          <span class="text-xs text-gray-500">▼</span>
+          <span
+            class="text-xs text-gray-500 transition-transform duration-200 ease-in-out"
+            :class="{ 'rotate-180': isLevelsOpen }"
+            >▼</span
+          >
         </button>
 
         <div

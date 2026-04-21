@@ -385,12 +385,12 @@ onUnmounted(() => {
                   </h3>
 
                   <!-- Время и уровень: на mobile уровень под временем -->
-                  <div class="mb-4 text-sm">
+                  <div class="flex flex-wrap items-start md:items-center md:flex-row gap-2 mb-4 text-sm">
                     <span class="bg-gray-100 px-3 py-1 rounded-full text-gray-700 font-medium">
                       {{ lesson.time }} — {{ lesson.endTime }}
                     </span>
                     <span
-                      class="mt-2 inline-flex md:mt-0 md:ml-3 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium"
+                      class="inline-flex md:mt-0 md:ml-3 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium"
                     >
                       {{ store.getLevelNamesByIds(lesson.levelIds).join(', ') }}
                     </span>
