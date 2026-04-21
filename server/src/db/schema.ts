@@ -17,6 +17,12 @@ export const teachers = sqliteTable('teachers', {
   photo: text('photo').notNull(),
 })
 
+export const studioSettings = sqliteTable('studio_settings', {
+  id: integer('id').primaryKey(),
+  schoolName: text('school_name').notNull(),
+  logoPath: text('logo_path'),
+})
+
 export const lessons = sqliteTable('lessons', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   day: text('day').notNull(),

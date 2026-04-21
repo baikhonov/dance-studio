@@ -4,12 +4,14 @@ import { authRouter } from './auth.js'
 import { directionsRouter } from './directions.js'
 import { lessonsRouter } from './lessons.js'
 import { levelsRouter } from './levels.js'
+import { settingsRouter } from './settings.js'
 import { teachersRouter } from './teachers.js'
 import { uploadsRouter } from './uploads.js'
 
 const apiRouter = Router()
 
 apiRouter.use('/auth', authRouter)
+apiRouter.use('/settings', settingsRouter)
 apiRouter.use(requireAuthForMutations)
 
 apiRouter.use('/lessons', lessonsRouter)

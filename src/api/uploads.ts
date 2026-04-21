@@ -5,7 +5,10 @@ type UploadResponse = {
   url: string
 }
 
-const uploadFile = async (endpoint: '/teacher-photo' | '/poster', file: File): Promise<UploadResponse> => {
+const uploadFile = async (
+  endpoint: '/teacher-photo' | '/poster' | '/school-logo',
+  file: File,
+): Promise<UploadResponse> => {
   const token = localStorage.getItem('admin_token')
   const formData = new FormData()
   formData.append('file', file)
@@ -25,3 +28,4 @@ const uploadFile = async (endpoint: '/teacher-photo' | '/poster', file: File): P
 
 export const uploadTeacherPhoto = (file: File) => uploadFile('/teacher-photo', file)
 export const uploadPoster = (file: File) => uploadFile('/poster', file)
+export const uploadSchoolLogo = (file: File) => uploadFile('/school-logo', file)

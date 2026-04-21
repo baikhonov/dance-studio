@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { db, sqlite } from './db/client.js'
-import { directions, lessonTeachers, lessons, levels, teachers } from './db/schema.js'
+import { directions, lessonTeachers, lessons, levels, studioSettings, teachers } from './db/schema.js'
 import { seedDirections, seedLessons, seedLevels, seedTeachers } from './db/seedData.js'
 
 const resetDatabase = () => {
@@ -10,6 +10,7 @@ const resetDatabase = () => {
   sqlite.exec('DELETE FROM teachers;')
   sqlite.exec('DELETE FROM directions;')
   sqlite.exec('DELETE FROM levels;')
+  sqlite.exec('DELETE FROM studio_settings;')
   sqlite.exec('DELETE FROM sqlite_sequence;')
   sqlite.exec('PRAGMA foreign_keys = ON;')
 }
