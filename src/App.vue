@@ -76,10 +76,12 @@ const updateFavicon = async (logoUrl: string | null) => {
   }
 
   context.clearRect(0, 0, 64, 64)
-  const size = Math.min(image.width, image.height)
-  const sx = (image.width - size) / 2
-  const sy = (image.height - size) / 2
-  context.drawImage(image, sx, sy, size, size, 0, 0, 64, 64)
+  const scale = Math.min(64 / image.width, 64 / image.height)
+  const drawWidth = image.width * scale
+  const drawHeight = image.height * scale
+  const offsetX = (64 - drawWidth) / 2
+  const offsetY = (64 - drawHeight) / 2
+  context.drawImage(image, offsetX, offsetY, drawWidth, drawHeight)
   link.href = canvas.toDataURL('image/png')
 }
 
