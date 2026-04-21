@@ -39,6 +39,7 @@ __screenshots__/
 *.timestamp-*-*.mjs
 src/lessons.js
 .env
+.env.production
 server/data/*.db
 server/data/*.db-*
 server/data/sqlite-export.sql
