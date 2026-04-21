@@ -465,7 +465,10 @@ onUnmounted(() => {
                         </option>
                         <option :value="CUSTOM_DIRECTION_VALUE">Свой вариант...</option>
                       </select>
-                      <div v-if="directionSelectValue === CUSTOM_DIRECTION_VALUE" class="mt-2 flex gap-2">
+                      <div
+                        v-if="directionSelectValue === CUSTOM_DIRECTION_VALUE"
+                        class="mt-2 flex flex-col gap-2 sm:flex-row"
+                      >
                         <input
                           v-model="customDirectionName"
                           type="text"
@@ -476,7 +479,7 @@ onUnmounted(() => {
                           type="button"
                           @click="createCustomDirection"
                           :disabled="isCreatingDirection"
-                          class="px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-60"
+                          class="w-full sm:w-auto px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-60"
                         >
                           {{ isCreatingDirection ? '...' : 'Добавить' }}
                         </button>
