@@ -1,0 +1,1 @@
+ALTER TABLE `levels` ADD `color` text DEFAULT '#94a3b8' NOT NULL;

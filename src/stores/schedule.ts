@@ -220,7 +220,7 @@ export const useScheduleStore = defineStore('schedule', () => {
   }
 
   const updateLevel = async (updated: Level) => {
-    const saved = await scheduleApi.updateLevel(updated.id, { name: updated.name })
+    const saved = await scheduleApi.updateLevel(updated.id, { name: updated.name, color: updated.color })
     const index = levels.value.findIndex((level) => level.id === saved.id)
     if (index !== -1) {
       levels.value[index] = saved

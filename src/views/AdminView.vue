@@ -74,6 +74,7 @@ const openDirectionModal = (direction?: Direction | DirectionDraft) => {
 const createEmptyLevel = (): LevelDraft => ({
   id: null,
   name: '',
+  color: '#f59e0b',
 })
 
 const openLevelModal = (level?: Level | LevelDraft) => {

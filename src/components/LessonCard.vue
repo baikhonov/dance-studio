@@ -14,7 +14,7 @@ defineProps<{
   lesson: LessonCard
   directionName: string
   levelName: string
-  directionClass: string
+  levelStyle: CSSProperties
   cardStyle: CSSProperties
 }>()
 
@@ -37,9 +37,8 @@ const formatTeacherNames = (teachers: Teacher[]): string =>
 
 <template>
   <div
-    class="absolute rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all cursor-pointer border-l-2 md:border-l-2"
-    :class="directionClass"
-    :style="cardStyle"
+    class="absolute rounded-lg shadow-sm overflow-hidden hover:shadow-md hover:brightness-[0.98] transition-all cursor-pointer border-l-2 md:border-l-2"
+    :style="[cardStyle, levelStyle]"
     @click="emit('select')"
   >
     <div class="lesson-card-content h-full p-1 flex flex-col text-[10px] overflow-hidden">

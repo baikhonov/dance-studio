@@ -218,7 +218,7 @@ const createCustomLevel = async () => {
 
   try {
     isCreatingLevel.value = true
-    const created = await store.addLevel({ name })
+    const created = await store.addLevel({ name, color: '#f59e0b' })
     editableLesson.value.levelId = created.id
     levelSelectValue.value = String(created.id)
     customLevelName.value = ''

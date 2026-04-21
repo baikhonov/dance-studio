@@ -1,5 +1,5 @@
 export type SeedDirection = { id: number; name: string }
-export type SeedLevel = { id: number; name: string }
+export type SeedLevel = { id: number; name: string; color: string }
 export type SeedTeacher = { id: number; name: string; photo: string }
 export type SeedLesson = {
   id: number
@@ -22,8 +22,8 @@ export const seedDirections: SeedDirection[] = [
 ]
 
 export const seedLevels: SeedLevel[] = [
-  { id: 1, name: 'Начинающие' },
-  { id: 2, name: 'Продолжающие' },
+  { id: 1, name: 'Начинающие', color: '#10b981' },
+  { id: 2, name: 'Продолжающие', color: '#3b82f6' },
 ]
 
 export const seedTeachers: SeedTeacher[] = [

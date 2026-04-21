@@ -18,6 +18,7 @@ export interface Direction {
 export interface Level {
   id: number
   name: string
+  color: string
 }
 
 export interface Teacher {

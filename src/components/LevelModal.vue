@@ -38,7 +38,7 @@ watch(
 
     if (level.id === null) {
       isEditing.value = true
-      editableLevel.value = { id: null, name: '' }
+      editableLevel.value = { id: null, name: '', color: '#f59e0b' }
       return
     }
 
@@ -82,6 +82,7 @@ const saveLevel = async () => {
   if (!editableLevel.value) return
 
   const normalizedName = editableLevel.value.name.trim()
+  const normalizedColor = editableLevel.value.color.trim()
   const currentLevelId = editableLevel.value.id
   if (!normalizedName) {
     showAlert('Введите название уровня')
@@ -90,6 +91,10 @@ const saveLevel = async () => {
 
   if (FOR_ALL_ALIASES.includes(normalizedName.toLowerCase())) {
     showAlert('Уровень «Для всех» системный и не редактируется в справочнике')
+    return
+  }
+  if (!/^#[0-9A-Fa-f]{6}$/.test(normalizedColor)) {
+    showAlert('Цвет должен быть в формате HEX, например #f59e0b')
     return
   }
 
@@ -106,9 +111,13 @@ const saveLevel = async () => {
 
   try {
     if (editableLevel.value.id !== null) {
-      await store.updateLevel({ id: editableLevel.value.id, name: normalizedName })
+      await store.updateLevel({
+        id: editableLevel.value.id,
+        name: normalizedName,
+        color: normalizedColor,
+      })
     } else {
-      await store.addLevel({ name: normalizedName })
+      await store.addLevel({ name: normalizedName, color: normalizedColor })
     }
 
     emit('close')
@@ -155,6 +164,10 @@ onUnmounted(() => {
                   <h3 class="text-2xl font-bold text-gray-900 mb-4 pr-8">
                     {{ level.name }}
                   </h3>
+                  <div class="mb-4 flex items-center gap-2 text-sm text-gray-600">
+                    <span class="h-3 w-3 rounded-full border border-gray-300" :style="{ backgroundColor: level.color }"></span>
+                    <span>{{ level.color }}</span>
+                  </div>
                   <p class="text-sm text-gray-600 mb-6">
                     При удалении уровня у связанных занятий поле уровня будет очищено.
                   </p>
@@ -191,6 +204,26 @@ onUnmounted(() => {
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
                         required
                       />
+                    </div>
+                    <div>
+                      <label for="level-color" class="block text-sm font-medium text-gray-700 mb-1">
+                        Цвет уровня
+                      </label>
+                      <div class="flex items-center gap-3">
+                        <input
+                          id="level-color"
+                          v-model="editableLevel.color"
+                          type="color"
+                          class="h-10 w-14 rounded border border-gray-300 bg-white px-1 py-1"
+                        />
+                        <input
+                          v-model="editableLevel.color"
+                          type="text"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                          pattern="^#[0-9A-Fa-f]{6}$"
+                          required
+                        />
+                      </div>
                     </div>
                     <div class="flex gap-3 pt-4">
                       <button

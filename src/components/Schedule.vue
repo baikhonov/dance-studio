@@ -6,7 +6,7 @@ import { useScheduleStore } from '@/stores/schedule'
 import { useUserStore } from '@/stores/user'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { getDirectionClass } from '@/utils/directionColors'
+import { getLevelCardStyle } from '@/utils/levelColors'
 import type { CSSProperties } from 'vue'
 import type { Lesson, NewLesson, Teacher } from '@/types/lesson'
 
@@ -14,7 +14,7 @@ type LessonCard = Lesson & {
   teachers: Teacher[]
   directionName: string
   levelName: string
-  directionClass: string
+  levelStyle: CSSProperties
 }
 type LessonDraft = NewLesson & { id: null }
 
@@ -31,13 +31,14 @@ const lessonsWithTeachers = computed<Record<string, LessonCard[]>>(() => {
     const lessonsOfDay = scheduleStore.getLessonsByDay(day)
     result[day] = lessonsOfDay.map((lesson) => {
       const directionName = scheduleStore.getDirectionNameById(lesson.directionId)
+      const levelColor = lesson.levelId === null ? null : (scheduleStore.getLevelById(lesson.levelId)?.color ?? null)
 
       return {
         ...lesson,
         teachers: scheduleStore.getTeachersForLesson(lesson.teacherIds),
         directionName,
         levelName: scheduleStore.getLevelNameById(lesson.levelId),
-        directionClass: getDirectionClass(directionName),
+        levelStyle: getLevelCardStyle(levelColor),
       }
     })
   }
@@ -287,7 +288,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
 <template>
   <div class="schedule">
     <!-- БЛОК ФИЛЬТРОВ (sticky) -->
-    <div ref="filtersSection" class="md:sticky md:top-0 z-20 bg-gray-100 py-2">
+    <div ref="filtersSection" class="md:sticky md:top-0 z-40 bg-gray-100 py-2">
       <div class="mb-2 max-md:mb-0 md:flex md:items-start md:gap-2">
         <button
           v-if="isAdmin"
@@ -379,7 +380,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
                 :lesson="lesson"
                 :direction-name="lesson.directionName"
                 :level-name="lesson.levelName"
-                :direction-class="lesson.directionClass"
+                :level-style="lesson.levelStyle"
                 :card-style="getLessonStyle(lesson)"
                 @select="openLessonModal(lesson)"
               />

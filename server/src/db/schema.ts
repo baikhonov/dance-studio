@@ -9,6 +9,7 @@ export const directions = sqliteTable('directions', {
 export const levels = sqliteTable('levels', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull().unique(),
+  color: text('color').notNull().default('#f59e0b'),
 })
 
 export const teachers = sqliteTable('teachers', {
