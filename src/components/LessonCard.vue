@@ -14,6 +14,7 @@ defineProps<{
   lesson: LessonCard
   directionName: string
   levelName: string
+  levelTitle: string
   levelStyle: CSSProperties
   cardStyle: CSSProperties
 }>()
@@ -46,7 +47,7 @@ const formatTeacherNames = (teachers: Teacher[]): string =>
         {{ directionName }}
       </p>
 
-      <p class="text-xs text-gray-700 mt-0 font-medium">
+      <p class="text-xs text-gray-700 mt-0 font-medium truncate" :title="levelTitle">
         {{ levelName }}
       </p>
 

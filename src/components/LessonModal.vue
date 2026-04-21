@@ -35,9 +35,7 @@ const editableLesson = ref<LessonForm | null>(null)
 const selectedTeacherIds = ref<number[]>([])
 const directionSelectValue = ref<string>('')
 const customDirectionName = ref('')
-const customLevelName = ref('')
 const isCreatingDirection = ref(false)
-const isCreatingLevel = ref(false)
 const isConfirmOpen = ref(false)
 const isAlertOpen = ref(false)
 const alertMessage = ref('')
@@ -194,35 +192,6 @@ const createCustomDirection = async () => {
     showAlert(message ? `Не удалось добавить направление: ${message}` : 'Не удалось добавить направление')
   } finally {
     isCreatingDirection.value = false
-  }
-}
-
-const createCustomLevel = async () => {
-  if (!editableLesson.value) return
-  const name = customLevelName.value.trim()
-  if (!name) {
-    showAlert('Введите название уровня')
-    return
-  }
-
-  const existing = levels.value.find((level) => level.name.trim().toLowerCase() === name.toLowerCase())
-  if (existing) {
-    editableLesson.value.levelIds = [...new Set([...editableLesson.value.levelIds, existing.id])]
-    customLevelName.value = ''
-    showAlert('Такой уровень уже существует. Выбрали существующий вариант.')
-    return
-  }
-
-  try {
-    isCreatingLevel.value = true
-    const created = await store.addLevel({ name, color: '#f59e0b' })
-    editableLesson.value.levelIds = [...new Set([...editableLesson.value.levelIds, created.id])]
-    customLevelName.value = ''
-  } catch (error) {
-    const message = error instanceof Error ? error.message : ''
-    showAlert(message ? `Не удалось добавить уровень: ${message}` : 'Не удалось добавить уровень')
-  } finally {
-    isCreatingLevel.value = false
   }
 }
 
@@ -410,12 +379,14 @@ onUnmounted(() => {
                     {{ store.getDirectionNameById(lesson.directionId) }}
                   </h3>
 
-                  <!-- Время и уровень в одной строке -->
-                  <div class="flex items-center gap-3 mb-4 text-sm">
+                  <!-- Время и уровень: на mobile уровень под временем -->
+                  <div class="mb-4 text-sm">
                     <span class="bg-gray-100 px-3 py-1 rounded-full text-gray-700 font-medium">
                       {{ lesson.time }} — {{ lesson.endTime }}
                     </span>
-                    <span class="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium">
+                    <span
+                      class="mt-2 inline-flex md:mt-0 md:ml-3 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium"
+                    >
                       {{ store.getLevelNamesByIds(lesson.levelIds).join(', ') }}
                     </span>
                   </div>
@@ -517,22 +488,6 @@ onUnmounted(() => {
                           />
                           <span class="text-sm text-gray-700">{{ level.name }}</span>
                         </label>
-                      </div>
-                      <div class="mt-2 flex gap-2">
-                        <input
-                          v-model="customLevelName"
-                          type="text"
-                          placeholder="Новый уровень"
-                          class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-                        />
-                        <button
-                          type="button"
-                          @click="createCustomLevel"
-                          :disabled="isCreatingLevel"
-                          class="px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-60"
-                        >
-                          {{ isCreatingLevel ? '...' : 'Добавить' }}
-                        </button>
                       </div>
                     </div>
 

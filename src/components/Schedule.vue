@@ -14,6 +14,7 @@ type LessonCard = Lesson & {
   teachers: Teacher[]
   directionName: string
   levelName: string
+  levelTitle: string
   levelStyle: CSSProperties
 }
 type LessonDraft = NewLesson & { id: null }
@@ -31,6 +32,8 @@ const lessonsWithTeachers = computed<Record<string, LessonCard[]>>(() => {
     const lessonsOfDay = scheduleStore.getLessonsByDay(day)
     result[day] = lessonsOfDay.map((lesson) => {
       const directionName = scheduleStore.getDirectionNameById(lesson.directionId)
+      const levelNames = scheduleStore.getLevelNamesByIds(lesson.levelIds)
+      const levelName = levelNames.join(', ')
       const levelColor =
         lesson.levelIds.length > 0 ? (scheduleStore.getLevelById(lesson.levelIds[0])?.color ?? null) : null
 
@@ -38,7 +41,8 @@ const lessonsWithTeachers = computed<Record<string, LessonCard[]>>(() => {
         ...lesson,
         teachers: scheduleStore.getTeachersForLesson(lesson.teacherIds),
         directionName,
-        levelName: scheduleStore.getPrimaryLevelNameByIds(lesson.levelIds),
+        levelName,
+        levelTitle: levelNames.join(', '),
         levelStyle: getLevelCardStyle(levelColor),
       }
     })
@@ -381,6 +385,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
                 :lesson="lesson"
                 :direction-name="lesson.directionName"
                 :level-name="lesson.levelName"
+                :level-title="lesson.levelTitle"
                 :level-style="lesson.levelStyle"
                 :card-style="getLessonStyle(lesson)"
                 @select="openLessonModal(lesson)"
