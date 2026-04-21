@@ -1,12 +1,14 @@
 import 'dotenv/config'
-import path from 'node:path'
-import Database from 'better-sqlite3'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
+import { drizzle } from 'drizzle-orm/node-postgres'
+import { Pool } from 'pg'
 
-const sqlitePath = process.env.SQLITE_PATH ?? './data/app.db'
-const resolvedPath = path.resolve(process.cwd(), sqlitePath)
+const databaseUrl = process.env.DATABASE_URL
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL is required')
+}
 
-export const sqlite = new Database(resolvedPath)
-sqlite.pragma('foreign_keys = ON')
+export const pool = new Pool({
+  connectionString: databaseUrl,
+})
 
-export const db = drizzle(sqlite)
+export const db = drizzle(pool)

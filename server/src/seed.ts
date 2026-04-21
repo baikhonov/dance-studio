@@ -1,23 +1,14 @@
 import { sql } from 'drizzle-orm'
-import { db, sqlite } from './db/client.js'
+import { db, pool } from './db/client.js'
 import { directions, lessonLevels, lessonTeachers, lessons, levels, studioSettings, teachers } from './db/schema.js'
 import { seedDirections, seedLessons, seedLevels, seedTeachers } from './db/seedData.js'
 
-const resetDatabase = () => {
-  sqlite.exec('PRAGMA foreign_keys = OFF;')
-  sqlite.exec('DELETE FROM lesson_teachers;')
-  sqlite.exec('DELETE FROM lesson_levels;')
-  sqlite.exec('DELETE FROM lessons;')
-  sqlite.exec('DELETE FROM teachers;')
-  sqlite.exec('DELETE FROM directions;')
-  sqlite.exec('DELETE FROM levels;')
-  sqlite.exec('DELETE FROM studio_settings;')
-  sqlite.exec('DELETE FROM sqlite_sequence;')
-  sqlite.exec('PRAGMA foreign_keys = ON;')
+const resetDatabase = async () => {
+  await db.execute(sql`TRUNCATE TABLE lesson_teachers, lesson_levels, lessons, teachers, directions, levels, studio_settings RESTART IDENTITY CASCADE`)
 }
 
 const seed = async () => {
-  resetDatabase()
+  await resetDatabase()
 
   await db.insert(directions).values(
     seedDirections.map((direction) => ({
@@ -78,5 +69,5 @@ seed()
     process.exitCode = 1
   })
   .finally(() => {
-    sqlite.close()
+    void pool.end()
   })

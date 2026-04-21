@@ -54,46 +54,100 @@ npm run db:normalize-assets
 
 Use this after pulling the upload/fallback changes to avoid requests to removed `/images/*` paths.
 
-## Deploy (Vercel + Render, free tiers)
+## Docker workflow (learn + production)
 
-This setup is the fastest way to launch the current stack with no code changes.
+### Local learning setup (backend + postgres)
 
-### 1) Backend on Render (Web Service)
+1) Start services:
 
-- Create a new **Web Service** from this repository.
-- Set **Root Directory** to `server`.
-- Build command: `npm install`
-- Start command: `npm run start`
-- Add environment variables (see `server/.env.example`):
-  - `PORT=3000`
-  - `JWT_SECRET=<strong-random-secret>`
-  - `ADMIN_PASSWORD=<your-admin-password>`
-  - `CORS_ORIGIN=https://<your-frontend>.vercel.app`
-  - `SQLITE_PATH=./data/app.db`
-  - `JWT_EXPIRES_IN=7d`
+```sh
+docker compose up -d
+```
 
-Health check URL:
-- `https://<your-backend>.onrender.com/health`
+2) Apply schema and check health:
 
-### 2) Frontend on Vercel
+```sh
+docker compose logs -f backend
+curl http://localhost:3000/health
+```
 
-- Import the same repository in Vercel.
-- Keep project root as repository root.
-- Framework preset: `Vite`
-- Build command: `npm run build`
-- Output directory: `dist`
-- Add environment variables (see `.env.example`):
-  - `VITE_API_BASE_URL=https://<your-backend>.onrender.com`
+3) (Optional) Seed demo data:
 
-### 3) Verify after deploy
+```sh
+cd server
+npm run db:seed
+```
 
-- Open frontend URL and confirm lessons/schedule are loaded.
-- Test admin login/logout.
-- Upload a teacher photo/poster and confirm backend returns files from `/uploads`.
-- Check backend health: `GET /health` returns `{ "ok": true }`.
+### Data migration from SQLite to PostgreSQL
 
-### Free-tier caveats
+1) Export current SQLite data:
 
-- Render free services may sleep after inactivity (cold starts).
-- SQLite in container filesystem is not durable across all restart/redeploy scenarios.
-- Treat this as iteration 1 deployment; move to managed Postgres for persistent production data.
+```sh
+cd server
+npm run db:export-sqlite
+```
+
+This creates `server/data/sqlite-export.sql`.
+
+2) Import SQL into running Postgres container:
+
+```sh
+docker compose exec -T postgres psql -U dance -d dance_studio < server/data/sqlite-export.sql
+```
+
+3) Check source counts before/after import:
+
+```sh
+cd server
+npm run db:count-sqlite
+docker compose exec postgres psql -U dance -d dance_studio -c "SELECT 'directions' AS table, COUNT(*) FROM directions UNION ALL SELECT 'levels', COUNT(*) FROM levels UNION ALL SELECT 'teachers', COUNT(*) FROM teachers UNION ALL SELECT 'studio_settings', COUNT(*) FROM studio_settings UNION ALL SELECT 'lessons', COUNT(*) FROM lessons UNION ALL SELECT 'lesson_levels', COUNT(*) FROM lesson_levels UNION ALL SELECT 'lesson_teachers', COUNT(*) FROM lesson_teachers;"
+```
+
+### VPS production deploy (Docker Compose + HTTPS)
+
+1) Copy project to VPS and set env:
+
+```sh
+cp .env.production.example .env.production
+```
+
+Fill values in `.env.production` (`DOMAIN`, DB creds, JWT secret).
+
+2) Start production stack:
+
+```sh
+docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
+```
+
+Services:
+- `postgres` with persistent volume
+- `backend` (migrations on startup)
+- `frontend` (Vite build served by Nginx)
+- `caddy` (automatic HTTPS + reverse proxy)
+
+3) Verify:
+- `https://<DOMAIN>/` opens frontend
+- `https://<DOMAIN>/health` is available via backend
+- admin login, CRUD, and uploads work
+
+### Backup and restore (PostgreSQL)
+
+Backup:
+
+```sh
+docker compose --env-file .env.production -f docker-compose.prod.yml exec -T postgres pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" > backup_$(date +%F).sql
+```
+
+Restore:
+
+```sh
+docker compose --env-file .env.production -f docker-compose.prod.yml exec -T postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < backup.sql
+```
+
+Rollback (app only):
+
+```sh
+docker compose --env-file .env.production -f docker-compose.prod.yml down
+git checkout <previous-stable-tag-or-commit>
+docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
+```

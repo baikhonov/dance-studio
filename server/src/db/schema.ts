@@ -1,43 +1,43 @@
 import { relations } from 'drizzle-orm'
-import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { boolean, integer, pgTable, primaryKey, serial, text } from 'drizzle-orm/pg-core'
 
-export const directions = sqliteTable('directions', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+export const directions = pgTable('directions', {
+  id: serial('id').primaryKey(),
   name: text('name').notNull().unique(),
   description: text('description'),
 })
 
-export const levels = sqliteTable('levels', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+export const levels = pgTable('levels', {
+  id: serial('id').primaryKey(),
   name: text('name').notNull().unique(),
   color: text('color').notNull().default('#f59e0b'),
 })
 
-export const teachers = sqliteTable('teachers', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+export const teachers = pgTable('teachers', {
+  id: serial('id').primaryKey(),
   name: text('name').notNull(),
   photo: text('photo').notNull(),
 })
 
-export const studioSettings = sqliteTable('studio_settings', {
+export const studioSettings = pgTable('studio_settings', {
   id: integer('id').primaryKey(),
   schoolName: text('school_name').notNull(),
   logoPath: text('logo_path'),
 })
 
-export const lessons = sqliteTable('lessons', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+export const lessons = pgTable('lessons', {
+  id: serial('id').primaryKey(),
   day: text('day').notNull(),
   time: text('time').notNull(),
   endTime: text('end_time').notNull(),
-  crossesMidnight: integer('crosses_midnight', { mode: 'boolean' }).notNull().default(false),
+  crossesMidnight: boolean('crosses_midnight').notNull().default(false),
   directionId: integer('direction_id')
     .notNull()
     .references(() => directions.id, { onDelete: 'cascade' }),
   poster: text('poster'),
 })
 
-export const lessonLevels = sqliteTable(
+export const lessonLevels = pgTable(
   'lesson_levels',
   {
     lessonId: integer('lesson_id')
@@ -50,7 +50,7 @@ export const lessonLevels = sqliteTable(
   (table) => [primaryKey({ columns: [table.lessonId, table.levelId] })],
 )
 
-export const lessonTeachers = sqliteTable(
+export const lessonTeachers = pgTable(
   'lesson_teachers',
   {
     lessonId: integer('lesson_id')
