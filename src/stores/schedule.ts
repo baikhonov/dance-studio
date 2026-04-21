@@ -146,7 +146,6 @@ export const useScheduleStore = defineStore('schedule', () => {
       directionId: updatedLesson.directionId,
       levelId: updatedLesson.levelId ?? null,
       teacherIds: updatedLesson.teacherIds,
-      type: updatedLesson.type,
       poster: updatedLesson.poster,
     })
 

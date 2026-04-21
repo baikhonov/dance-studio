@@ -1,5 +1,3 @@
-export type LessonType = 'lesson' | 'event'
-
 export interface Lesson {
   id: number
   day: string
@@ -8,7 +6,6 @@ export interface Lesson {
   directionId: number
   levelId: number | null
   teacherIds: number[]
-  type: LessonType
   poster: string | null
 }
 

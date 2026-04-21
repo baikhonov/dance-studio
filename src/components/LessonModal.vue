@@ -37,9 +37,7 @@ const isAlertOpen = ref(false)
 const alertMessage = ref('')
 const lessonToDelete = ref<number | null>(null)
 const lessonNameToDelete = ref('')
-const deleteEntityLabel = computed(() =>
-  editableLesson.value?.type === 'event' ? 'мероприятие' : 'занятие',
-)
+const deleteEntityLabel = computed(() => 'занятие')
 
 watch(
   () => props.lesson,
@@ -57,7 +55,6 @@ watch(
           directionId: directions.value[0]?.id ?? 0,
           levelId: null,
           teacherIds: [],
-          type: 'lesson',
           poster: null,
         }
       } else {
@@ -93,7 +90,6 @@ watch(
           directionId: directions.value[0]?.id ?? 0,
           levelId: null,
           teacherIds: [],
-          type: 'lesson',
           poster: null,
         }
       } else {
@@ -112,20 +108,6 @@ watch(
     }
   },
   { immediate: true },
-)
-
-watch(
-  () => editableLesson.value?.type,
-  (newType) => {
-    if (!editableLesson.value) return
-
-    if (newType === 'event') {
-      editableLesson.value.teacherIds = []
-      selectedTeacherIds.value = []
-    } else if (newType === 'lesson') {
-      editableLesson.value.poster = null
-    }
-  },
 )
 
 const lessonTeachers = computed(() => {
@@ -241,7 +223,6 @@ const saveLesson = async () => {
         directionId: editableLesson.value.directionId,
         levelId: editableLesson.value.levelId,
         teacherIds: editableLesson.value.teacherIds,
-        type: editableLesson.value.type,
         poster: editableLesson.value.poster,
       }
       await store.addLesson(newLesson)
@@ -274,6 +255,11 @@ const handlePosterUpload = async (event: Event) => {
       showAlert('Не удалось загрузить постер')
     }
   }
+}
+
+const removePoster = () => {
+  if (!editableLesson.value) return
+  editableLesson.value.poster = null
 }
 
 onMounted(() => {
@@ -346,8 +332,8 @@ onUnmounted(() => {
                       </div>
                     </div>
                   </div>
-                  <!-- Постер мероприятия -->
-                  <div v-else-if="lesson.type === 'event'">
+                  <!-- Постер занятия -->
+                  <div v-if="lesson.poster">
                     <img
                       :src="resolvePosterUrl(lesson.poster)"
                       :alt="store.getDirectionNameById(lesson.directionId)"
@@ -447,20 +433,6 @@ onUnmounted(() => {
                     </div>
 
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1"
-                        >Тип занятия</label
-                      >
-                      <select
-                        v-model="editableLesson.type"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      >
-                        <option value="lesson">Занятие</option>
-                        <option value="event">Мероприятие</option>
-                      </select>
-                    </div>
-
-                    <!-- Для занятия: выбор преподавателей -->
-                    <div v-if="editableLesson.type !== 'event'">
                       <label class="block text-sm font-medium text-gray-700 mb-2">
                         Преподаватели
                       </label>
@@ -488,15 +460,9 @@ onUnmounted(() => {
                       </div>
                     </div>
 
-                    <!-- Для вечеринки: поле для постера -->
-                    <div v-else>
-                      <img
-                        v-if="editableLesson.poster"
-                        :src="resolvePosterUrl(editableLesson.poster)"
-                        class="mt-2 w-32 h-32 object-cover rounded"
-                      />
+                    <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Постер (имя файла)
+                        Постер
                       </label>
                       <input
                         type="file"
@@ -504,6 +470,23 @@ onUnmounted(() => {
                         @change="handlePosterUpload"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
                       />
+                      <div class="flex items-center gap-2">
+                        <img
+                        v-if="editableLesson.poster"
+                        :src="resolvePosterUrl(editableLesson.poster)"
+                        class="mt-2 w-32 object-cover rounded"
+                      />
+                      <button
+                        v-if="editableLesson.poster"
+                        type="button"
+                        @click="removePoster"
+                        class="mt-2 mb-2 px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+                      >
+                        Удалить текущий постер
+                      </button>
+                      </div>
+                      
+                      
                     </div>
 
                     <div class="flex gap-3 pt-4">

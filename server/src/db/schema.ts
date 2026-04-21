@@ -32,7 +32,6 @@ export const lessons = sqliteTable('lessons', {
     .notNull()
     .references(() => directions.id, { onDelete: 'cascade' }),
   levelId: integer('level_id').references(() => levels.id, { onDelete: 'set null' }),
-  type: text('type', { enum: ['lesson', 'event'] }).notNull(),
   poster: text('poster'),
 })
 

@@ -1,7 +1,6 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import { db } from '../db/client.js'
 import { lessonTeachers, lessons } from '../db/schema.js'
-import type { LessonType } from '../utils/parsers.js'
 
 export type LessonFilters = {
   day?: string
@@ -16,7 +15,6 @@ export type LessonPayload = {
   directionId: number
   levelId: number | null
   teacherIds: number[]
-  type: LessonType
   poster: string | null
 }
 
@@ -49,7 +47,6 @@ export const listLessons = async (filters: LessonFilters = {}) => {
     directionId: lesson.directionId,
     levelId: lesson.levelId,
     teacherIds: teacherIdsByLesson.get(lesson.id) ?? [],
-    type: lesson.type as LessonType,
     poster: lesson.poster,
   }))
 }
@@ -68,7 +65,6 @@ export const createLesson = async (payload: LessonPayload) => {
       endTime: payload.endTime,
       directionId: payload.directionId,
       levelId: payload.levelId,
-      type: payload.type,
       poster: payload.poster,
     })
     .returning({ id: lessons.id })
@@ -97,7 +93,6 @@ export const updateLesson = async (id: number, payload: LessonPayload) => {
       endTime: payload.endTime,
       directionId: payload.directionId,
       levelId: payload.levelId,
-      type: payload.type,
       poster: payload.poster,
     })
     .where(eq(lessons.id, id))

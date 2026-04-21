@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { isLessonType, parseNumericId, parseOptionalNumeric, parseTeacherIds } from '../utils/parsers.js'
+import { parseNumericId, parseOptionalNumeric, parseTeacherIds } from '../utils/parsers.js'
 import { createLesson, deleteLesson, getLessonById, listLessons, updateLesson } from '../services/lessonsService.js'
 
 const lessonsRouter = Router()
@@ -31,14 +31,13 @@ lessonsRouter.get('/', async (req, res, next) => {
 
 lessonsRouter.post('/', async (req, res, next) => {
   try {
-    const { day, time, endTime, directionId, levelId, teacherIds, type, poster } = req.body as {
+    const { day, time, endTime, directionId, levelId, teacherIds, poster } = req.body as {
       day?: unknown
       time?: unknown
       endTime?: unknown
       directionId?: unknown
       levelId?: unknown
       teacherIds?: unknown
-      type?: unknown
       poster?: unknown
     }
 
@@ -48,8 +47,7 @@ lessonsRouter.post('/', async (req, res, next) => {
       typeof endTime !== 'string' ||
       typeof directionId !== 'number' ||
       !Number.isInteger(directionId) ||
-      directionId <= 0 ||
-      !isLessonType(type)
+      directionId <= 0
     ) {
       return res.status(400).json({ error: 'Invalid lesson payload' })
     }
@@ -69,7 +67,6 @@ lessonsRouter.post('/', async (req, res, next) => {
       directionId,
       levelId: normalizedLevelId,
       teacherIds: normalizedTeacherIds,
-      type,
       poster: normalizedPoster,
     })
     if (!inserted) {
@@ -92,14 +89,13 @@ lessonsRouter.put('/:id', async (req, res, next) => {
     const existing = await getLessonById(id)
     if (!existing) return res.status(404).json({ error: 'Lesson not found' })
 
-    const { day, time, endTime, directionId, levelId, teacherIds, type, poster } = req.body as {
+    const { day, time, endTime, directionId, levelId, teacherIds, poster } = req.body as {
       day?: unknown
       time?: unknown
       endTime?: unknown
       directionId?: unknown
       levelId?: unknown
       teacherIds?: unknown
-      type?: unknown
       poster?: unknown
     }
 
@@ -109,8 +105,7 @@ lessonsRouter.put('/:id', async (req, res, next) => {
       typeof endTime !== 'string' ||
       typeof directionId !== 'number' ||
       !Number.isInteger(directionId) ||
-      directionId <= 0 ||
-      !isLessonType(type)
+      directionId <= 0
     ) {
       return res.status(400).json({ error: 'Invalid lesson payload' })
     }
@@ -130,7 +125,6 @@ lessonsRouter.put('/:id', async (req, res, next) => {
       directionId,
       levelId: normalizedLevelId,
       teacherIds: normalizedTeacherIds,
-      type,
       poster: normalizedPoster,
     })
 

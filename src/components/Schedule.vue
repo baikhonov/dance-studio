@@ -250,7 +250,6 @@ const createEmptyLesson = (): LessonDraft => {
     levelId: null,
     teacherIds: [],
     poster: null,
-    type: 'lesson',
   }
 }
 

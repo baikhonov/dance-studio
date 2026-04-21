@@ -9,7 +9,6 @@ export type SeedLesson = {
   directionId: number
   levelId: number | null
   teacherIds: number[]
-  type: 'lesson' | 'event'
   poster: string | null
 }
 
@@ -40,7 +39,6 @@ export const seedLessons: SeedLesson[] = [
     directionId: 1,
     levelId: 2,
     teacherIds: [7],
-    type: 'lesson',
     poster: null,
   },
   {
@@ -51,7 +49,6 @@ export const seedLessons: SeedLesson[] = [
     directionId: 2,
     levelId: 1,
     teacherIds: [5, 7],
-    type: 'lesson',
     poster: null,
   },
   {
@@ -62,7 +59,6 @@ export const seedLessons: SeedLesson[] = [
     directionId: 3,
     levelId: null,
     teacherIds: [5],
-    type: 'lesson',
     poster: null,
   },
   {
@@ -73,7 +69,6 @@ export const seedLessons: SeedLesson[] = [
     directionId: 2,
     levelId: 2,
     teacherIds: [5, 7],
-    type: 'lesson',
     poster: null,
   },
   {
@@ -84,7 +79,6 @@ export const seedLessons: SeedLesson[] = [
     directionId: 1,
     levelId: 2,
     teacherIds: [7],
-    type: 'lesson',
     poster: null,
   },
   {
@@ -95,7 +89,6 @@ export const seedLessons: SeedLesson[] = [
     directionId: 2,
     levelId: 1,
     teacherIds: [5, 7],
-    type: 'lesson',
     poster: null,
   },
   {
@@ -106,7 +99,6 @@ export const seedLessons: SeedLesson[] = [
     directionId: 3,
     levelId: null,
     teacherIds: [5],
-    type: 'lesson',
     poster: null,
   },
   {
@@ -117,7 +109,6 @@ export const seedLessons: SeedLesson[] = [
     directionId: 2,
     levelId: 2,
     teacherIds: [5, 7],
-    type: 'lesson',
     poster: null,
   },
   {
@@ -128,7 +119,6 @@ export const seedLessons: SeedLesson[] = [
     directionId: 1,
     levelId: 1,
     teacherIds: [7],
-    type: 'lesson',
     poster: null,
   },
   {
@@ -139,7 +129,6 @@ export const seedLessons: SeedLesson[] = [
     directionId: 4,
     levelId: null,
     teacherIds: [5, 7],
-    type: 'lesson',
     poster: null,
   },
   {
@@ -150,7 +139,6 @@ export const seedLessons: SeedLesson[] = [
     directionId: 5,
     levelId: null,
     teacherIds: [],
-    type: 'event',
     poster: 'party-bachatamania.webp',
   },
   {
@@ -161,7 +149,6 @@ export const seedLessons: SeedLesson[] = [
     directionId: 1,
     levelId: 1,
     teacherIds: [7],
-    type: 'lesson',
     poster: null,
   },
 ]
