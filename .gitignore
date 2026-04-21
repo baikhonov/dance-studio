@@ -41,5 +41,6 @@ src/lessons.js
 .env
 server/data/*.db
 server/data/*.db-*
+server/data/sqlite-export.sql
 server/uploads/*
 !server/uploads/.gitkeep
