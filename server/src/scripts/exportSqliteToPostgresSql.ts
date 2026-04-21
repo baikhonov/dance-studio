@@ -61,6 +61,20 @@ try {
     chunks.push(`${values.join(',\n')};`)
   }
 
+  // Keep serial sequences in sync after explicit id inserts.
+  chunks.push(
+    "SELECT setval(pg_get_serial_sequence('directions', 'id'), COALESCE((SELECT MAX(id) FROM directions), 1), true);",
+  )
+  chunks.push(
+    "SELECT setval(pg_get_serial_sequence('levels', 'id'), COALESCE((SELECT MAX(id) FROM levels), 1), true);",
+  )
+  chunks.push(
+    "SELECT setval(pg_get_serial_sequence('teachers', 'id'), COALESCE((SELECT MAX(id) FROM teachers), 1), true);",
+  )
+  chunks.push(
+    "SELECT setval(pg_get_serial_sequence('lessons', 'id'), COALESCE((SELECT MAX(id) FROM lessons), 1), true);",
+  )
+
   chunks.push('COMMIT;')
   await fs.writeFile(outputPath, `${chunks.join('\n')}\n`, 'utf-8')
   console.log(`SQLite export written to ${outputPath}`)
