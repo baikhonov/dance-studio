@@ -192,6 +192,7 @@ export const useScheduleStore = defineStore('schedule', () => {
   const addDirection = async (direction: NewDirection) => {
     const created = await scheduleApi.createDirection(direction)
     directions.value.push(created)
+    return created
   }
 
   const updateDirection = async (updated: Direction) => {
@@ -214,6 +215,7 @@ export const useScheduleStore = defineStore('schedule', () => {
   const addLevel = async (level: NewLevel) => {
     const created = await scheduleApi.createLevel(level)
     levels.value.push(created)
+    return created
   }
 
   const updateLevel = async (updated: Level) => {

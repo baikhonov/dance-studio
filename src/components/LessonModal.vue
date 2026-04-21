@@ -28,10 +28,18 @@ const emit = defineEmits<{
 
 const store = useScheduleStore()
 const { days, directions, levels } = storeToRefs(store)
+const CUSTOM_DIRECTION_VALUE = '__custom_direction__'
+const CUSTOM_LEVEL_VALUE = '__custom_level__'
 
 const isEditing = ref(false)
 const editableLesson = ref<LessonForm | null>(null)
 const selectedTeacherIds = ref<number[]>([])
+const directionSelectValue = ref<string>('')
+const levelSelectValue = ref<string>('')
+const customDirectionName = ref('')
+const customLevelName = ref('')
+const isCreatingDirection = ref(false)
+const isCreatingLevel = ref(false)
 const isConfirmOpen = ref(false)
 const isAlertOpen = ref(false)
 const alertMessage = ref('')
@@ -105,6 +113,8 @@ watch(
   (newLesson) => {
     if (newLesson) {
       selectedTeacherIds.value = [...(newLesson.teacherIds || [])]
+      directionSelectValue.value = String(newLesson.directionId)
+      levelSelectValue.value = newLesson.levelId === null ? '' : String(newLesson.levelId)
     }
   },
   { immediate: true },
@@ -133,10 +143,82 @@ const enableEditing = () => {
   isEditing.value = true
 }
 
+const onLessonDirectionChange = (event: Event) => {
+  if (!editableLesson.value) return
+  const raw = (event.target as HTMLSelectElement).value
+  directionSelectValue.value = raw
+  if (raw === CUSTOM_DIRECTION_VALUE) return
+  editableLesson.value.directionId = Number(raw)
+}
+
 const onLessonLevelChange = (event: Event) => {
   if (!editableLesson.value) return
   const raw = (event.target as HTMLSelectElement).value
+  levelSelectValue.value = raw
+  if (raw === CUSTOM_LEVEL_VALUE) return
   editableLesson.value.levelId = raw === '' ? null : Number(raw)
+}
+
+const createCustomDirection = async () => {
+  if (!editableLesson.value) return
+  const name = customDirectionName.value.trim()
+  if (!name) {
+    showAlert('Введите название направления')
+    return
+  }
+
+  const existing = directions.value.find(
+    (direction) => direction.name.trim().toLowerCase() === name.toLowerCase(),
+  )
+  if (existing) {
+    editableLesson.value.directionId = existing.id
+    directionSelectValue.value = String(existing.id)
+    customDirectionName.value = ''
+    return
+  }
+
+  try {
+    isCreatingDirection.value = true
+    const created = await store.addDirection({ name })
+    editableLesson.value.directionId = created.id
+    directionSelectValue.value = String(created.id)
+    customDirectionName.value = ''
+  } catch (error) {
+    const message = error instanceof Error ? error.message : ''
+    showAlert(message ? `Не удалось добавить направление: ${message}` : 'Не удалось добавить направление')
+  } finally {
+    isCreatingDirection.value = false
+  }
+}
+
+const createCustomLevel = async () => {
+  if (!editableLesson.value) return
+  const name = customLevelName.value.trim()
+  if (!name) {
+    showAlert('Введите название уровня')
+    return
+  }
+
+  const existing = levels.value.find((level) => level.name.trim().toLowerCase() === name.toLowerCase())
+  if (existing) {
+    editableLesson.value.levelId = existing.id
+    levelSelectValue.value = String(existing.id)
+    customLevelName.value = ''
+    return
+  }
+
+  try {
+    isCreatingLevel.value = true
+    const created = await store.addLevel({ name })
+    editableLesson.value.levelId = created.id
+    levelSelectValue.value = String(created.id)
+    customLevelName.value = ''
+  } catch (error) {
+    const message = error instanceof Error ? error.message : ''
+    showAlert(message ? `Не удалось добавить уровень: ${message}` : 'Не удалось добавить уровень')
+  } finally {
+    isCreatingLevel.value = false
+  }
 }
 
 const deleteLesson = () => {
@@ -184,6 +266,16 @@ const hasConflict = () => {
 // Сохранение изменений
 const saveLesson = async () => {
   if (!editableLesson.value) return
+
+  if (directionSelectValue.value === CUSTOM_DIRECTION_VALUE) {
+    showAlert('Добавьте новое направление или выберите существующее')
+    return
+  }
+
+  if (levelSelectValue.value === CUSTOM_LEVEL_VALUE) {
+    showAlert('Добавьте новый уровень или выберите существующий')
+    return
+  }
 
   // Проверка времени
   if (editableLesson.value.time >= editableLesson.value.endTime) {
@@ -365,14 +457,32 @@ onUnmounted(() => {
                       </label>
                       <select
                         id="direction"
-                        v-model.number="editableLesson.directionId"
+                        :value="directionSelectValue"
+                        @change="onLessonDirectionChange"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
                         required
                       >
                         <option v-for="direction in directions" :key="direction.id" :value="direction.id">
                           {{ direction.name }}
                         </option>
+                        <option :value="CUSTOM_DIRECTION_VALUE">Свой вариант...</option>
                       </select>
+                      <div v-if="directionSelectValue === CUSTOM_DIRECTION_VALUE" class="mt-2 flex gap-2">
+                        <input
+                          v-model="customDirectionName"
+                          type="text"
+                          placeholder="Новое направление"
+                          class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                        />
+                        <button
+                          type="button"
+                          @click="createCustomDirection"
+                          :disabled="isCreatingDirection"
+                          class="px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-60"
+                        >
+                          {{ isCreatingDirection ? '...' : 'Добавить' }}
+                        </button>
+                      </div>
                     </div>
 
                     <div>
@@ -381,7 +491,7 @@ onUnmounted(() => {
                       </label>
                       <select
                         id="level"
-                        :value="editableLesson.levelId === null ? '' : editableLesson.levelId"
+                        :value="levelSelectValue"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
                         @change="onLessonLevelChange"
                       >
@@ -389,7 +499,24 @@ onUnmounted(() => {
                         <option v-for="level in levels" :key="level.id" :value="level.id">
                           {{ level.name }}
                         </option>
+                        <option :value="CUSTOM_LEVEL_VALUE">Свой вариант...</option>
                       </select>
+                      <div v-if="levelSelectValue === CUSTOM_LEVEL_VALUE" class="mt-2 flex gap-2">
+                        <input
+                          v-model="customLevelName"
+                          type="text"
+                          placeholder="Новый уровень"
+                          class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                        />
+                        <button
+                          type="button"
+                          @click="createCustomLevel"
+                          :disabled="isCreatingLevel"
+                          class="px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-60"
+                        >
+                          {{ isCreatingLevel ? '...' : 'Добавить' }}
+                        </button>
+                      </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
