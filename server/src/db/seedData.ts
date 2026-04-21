@@ -1,4 +1,4 @@
-export type SeedDirection = { id: number; name: string }
+export type SeedDirection = { id: number; name: string; description: string | null }
 export type SeedLevel = { id: number; name: string; color: string }
 export type SeedTeacher = { id: number; name: string; photo: string }
 export type SeedLesson = {
@@ -14,11 +14,34 @@ export type SeedLesson = {
 }
 
 export const seedDirections: SeedDirection[] = [
-  { id: 1, name: 'Lady Style (соло)' },
-  { id: 2, name: 'Бачата в паре' },
-  { id: 3, name: 'Общее хорео (соло)' },
-  { id: 4, name: 'Бачата интенсив "Украшения в паре"' },
-  { id: 5, name: 'Вечеринка' },
+  {
+    id: 1,
+    name: 'Lady Style (соло)',
+    description: 'Женская пластика, осанка и музыкальность. На занятии разбираются связки и акценты корпуса.',
+  },
+  {
+    id: 2,
+    name: 'Бачата в паре',
+    description:
+      'Работа в паре: ведение, следование, базовые и развивающие элементы. Фокус на комфортном взаимодействии.',
+  },
+  {
+    id: 3,
+    name: 'Общее хорео (соло)',
+    description:
+      'Танцевальные комбинации в сольном формате. Развивает координацию, память движений и уверенность в танце.',
+  },
+  {
+    id: 4,
+    name: 'Бачата интенсив "Украшения в паре"',
+    description:
+      'Интенсив по музыкальным и визуальным украшениям в парной бачате. Подходит для расширения танцевального словаря.',
+  },
+  {
+    id: 5,
+    name: 'Вечеринка',
+    description: 'Практика в свободном формате: социальные танцы, закрепление материала и общение.',
+  },
 ]
 
 export const seedLevels: SeedLevel[] = [

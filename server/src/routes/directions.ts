@@ -15,11 +15,18 @@ directionsRouter.get('/', async (_req, res, next) => {
 
 directionsRouter.post('/', async (req, res, next) => {
   try {
-    const { name } = req.body as { name?: unknown }
+    const { name, description } = req.body as { name?: unknown; description?: unknown }
     if (typeof name !== 'string' || name.trim() === '') {
       return res.status(400).json({ error: 'Invalid direction payload' })
     }
-    const inserted = await createDirection({ name: name.trim() })
+    const normalizedDescription = typeof description === 'string' ? description.trim() : ''
+    if (description !== undefined && description !== null && typeof description !== 'string') {
+      return res.status(400).json({ error: 'Invalid direction description' })
+    }
+    const inserted = await createDirection({
+      name: name.trim(),
+      description: normalizedDescription === '' ? null : normalizedDescription,
+    })
     return res.status(201).json(inserted)
   } catch (error) {
     return next(error)
@@ -30,11 +37,18 @@ directionsRouter.put('/:id', async (req, res, next) => {
   try {
     const id = parseNumericId(req.params.id)
     if (!id) return res.status(400).json({ error: 'Invalid direction id' })
-    const { name } = req.body as { name?: unknown }
+    const { name, description } = req.body as { name?: unknown; description?: unknown }
     if (typeof name !== 'string' || name.trim() === '') {
       return res.status(400).json({ error: 'Invalid direction payload' })
     }
-    const updated = await updateDirection(id, { name: name.trim() })
+    const normalizedDescription = typeof description === 'string' ? description.trim() : ''
+    if (description !== undefined && description !== null && typeof description !== 'string') {
+      return res.status(400).json({ error: 'Invalid direction description' })
+    }
+    const updated = await updateDirection(id, {
+      name: name.trim(),
+      description: normalizedDescription === '' ? null : normalizedDescription,
+    })
     if (!updated) return res.status(404).json({ error: 'Direction not found' })
     return res.json(updated)
   } catch (error) {

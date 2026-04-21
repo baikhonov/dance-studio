@@ -13,6 +13,7 @@ export interface Lesson {
 export interface Direction {
   id: number
   name: string
+  description: string | null
 }
 
 export interface Level {

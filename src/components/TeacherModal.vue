@@ -69,6 +69,20 @@ const enableEditing = () => {
   isEditing.value = true
 }
 
+const cancelEditing = () => {
+  const current = props.teacher
+  if (!current) {
+    emit('close')
+    return
+  }
+  if (current.id === null) {
+    emit('close')
+    return
+  }
+  editableTeacher.value = JSON.parse(JSON.stringify(current)) as TeacherForm
+  isEditing.value = false
+}
+
 const requestDeleteTeacher = () => {
   const t = props.teacher
   if (!t || t.id === null) return
@@ -236,7 +250,7 @@ onUnmounted(() => {
                       </button>
                       <button
                         type="button"
-                        @click="emit('close')"
+                        @click="cancelEditing"
                         class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                       >
                         Отмена

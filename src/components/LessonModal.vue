@@ -124,6 +124,11 @@ const lessonTeachers = computed(() => {
     .filter((teacher): teacher is Teacher => Boolean(teacher))
 })
 
+const directionDescription = computed(() => {
+  if (!props.lesson) return null
+  return store.getDirectionById(props.lesson.directionId)?.description ?? null
+})
+
 const showAlert = (message: string) => {
   alertMessage.value = message
   isAlertOpen.value = true
@@ -183,7 +188,7 @@ const createCustomDirection = async () => {
 
   try {
     isCreatingDirection.value = true
-    const created = await store.addDirection({ name })
+    const created = await store.addDirection({ name, description: null })
     editableLesson.value.directionId = created.id
     directionSelectValue.value = String(created.id)
     customDirectionName.value = ''
@@ -390,6 +395,9 @@ onUnmounted(() => {
                       {{ store.getLevelNamesByIds(lesson.levelIds).join(', ') }}
                     </span>
                   </div>
+                  <p v-if="directionDescription" class="text-sm text-gray-700 whitespace-pre-line mb-4">
+                    {{ directionDescription }}
+                  </p>
 
                   <!-- Преподаватели -->
                   <div v-if="lessonTeachers.length > 0" class="mb-6">

@@ -57,6 +57,13 @@
       "when": 1776758898625,
       "tag": "0007_absurd_vulture",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1776769350608,
+      "tag": "0008_chilly_jack_flag",
+      "breakpoints": true
     }
   ]
 }

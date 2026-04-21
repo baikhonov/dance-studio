@@ -216,7 +216,10 @@ export const useScheduleStore = defineStore('schedule', () => {
   }
 
   const updateDirection = async (updated: Direction) => {
-    const saved = await scheduleApi.updateDirection(updated.id, { name: updated.name })
+    const saved = await scheduleApi.updateDirection(updated.id, {
+      name: updated.name,
+      description: updated.description,
+    })
     const index = directions.value.findIndex((direction) => direction.id === saved.id)
     if (index !== -1) {
       directions.value[index] = saved

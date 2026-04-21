@@ -57,6 +57,20 @@ const enableEditing = () => {
   isEditing.value = true
 }
 
+const cancelEditing = () => {
+  const current = props.level
+  if (!current) {
+    emit('close')
+    return
+  }
+  if (current.id === null) {
+    emit('close')
+    return
+  }
+  editableLevel.value = JSON.parse(JSON.stringify(current)) as LevelForm
+  isEditing.value = false
+}
+
 const requestDeleteLevel = () => {
   const current = props.level
   if (!current || current.id === null) return
@@ -234,7 +248,7 @@ onUnmounted(() => {
                       </button>
                       <button
                         type="button"
-                        @click="emit('close')"
+                        @click="cancelEditing"
                         class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                       >
                         Отмена

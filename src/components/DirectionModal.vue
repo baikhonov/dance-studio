@@ -37,7 +37,7 @@ watch(
 
     if (direction.id === null) {
       isEditing.value = true
-      editableDirection.value = { id: null, name: '' }
+      editableDirection.value = { id: null, name: '', description: null }
       return
     }
 
@@ -54,6 +54,20 @@ const showAlert = (message: string) => {
 
 const enableEditing = () => {
   isEditing.value = true
+}
+
+const cancelEditing = () => {
+  const current = props.direction
+  if (!current) {
+    emit('close')
+    return
+  }
+  if (current.id === null) {
+    emit('close')
+    return
+  }
+  editableDirection.value = JSON.parse(JSON.stringify(current)) as DirectionForm
+  isEditing.value = false
 }
 
 const requestDeleteDirection = () => {
@@ -100,9 +114,16 @@ const saveDirection = async () => {
 
   try {
     if (editableDirection.value.id !== null) {
-      await store.updateDirection({ id: editableDirection.value.id, name: normalizedName })
+      await store.updateDirection({
+        id: editableDirection.value.id,
+        name: normalizedName,
+        description: editableDirection.value.description?.trim() || null,
+      })
     } else {
-      await store.addDirection({ name: normalizedName })
+      await store.addDirection({
+        name: normalizedName,
+        description: editableDirection.value.description?.trim() || null,
+      })
     }
 
     emit('close')
@@ -149,10 +170,20 @@ onUnmounted(() => {
                   <h3 class="text-2xl font-bold text-gray-900 mb-4 pr-8">
                     {{ direction.name }}
                   </h3>
-                  <p class="text-sm text-gray-600 mb-6">
-                    Удаление направления удалит все связанные занятия из расписания.
-                  </p>
-                  <div class="flex gap-2 mt-4 pt-4 border-t border-gray-200">
+                  <div v-if="direction.description" class="mb-4">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Описание</p>
+                    <p class="text-sm text-gray-700 whitespace-pre-line">
+                      {{ direction.description }}
+                    </p>
+                  </div>
+                  <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                    <p class="text-sm font-semibold text-amber-800">Внимание</p>
+                    <p class="mt-1 text-sm text-amber-700">
+                      При удалении направления все связанные занятия будут удалены из расписания без возможности
+                      восстановления.
+                    </p>
+                  </div>
+                  <div class="flex gap-2 mt-2 pt-4 border-t border-gray-200">
                     <button
                       type="button"
                       @click="enableEditing"
@@ -186,6 +217,18 @@ onUnmounted(() => {
                         required
                       />
                     </div>
+                    <div>
+                      <label for="direction-description" class="block text-sm font-medium text-gray-700 mb-1">
+                        Описание направления
+                      </label>
+                      <textarea
+                        id="direction-description"
+                        v-model="editableDirection.description"
+                        rows="4"
+                        placeholder="Для кого это направление, что изучается на занятии и т.п."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                      />
+                    </div>
                     <div class="flex gap-3 pt-4">
                       <button
                         type="submit"
@@ -195,7 +238,7 @@ onUnmounted(() => {
                       </button>
                       <button
                         type="button"
-                        @click="emit('close')"
+                        @click="cancelEditing"
                         class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                       >
                         Отмена

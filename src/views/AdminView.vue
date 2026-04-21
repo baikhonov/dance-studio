@@ -60,6 +60,7 @@ const openTeacherModal = (teacher?: Teacher | TeacherDraft) => {
 const createEmptyDirection = (): DirectionDraft => ({
   id: null,
   name: '',
+  description: null,
 })
 
 const openDirectionModal = (direction?: Direction | DirectionDraft) => {

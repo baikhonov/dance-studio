@@ -4,6 +4,7 @@ import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 export const directions = sqliteTable('directions', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull().unique(),
+  description: text('description'),
 })
 
 export const levels = sqliteTable('levels', {

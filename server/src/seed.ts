@@ -19,7 +19,13 @@ const resetDatabase = () => {
 const seed = async () => {
   resetDatabase()
 
-  await db.insert(directions).values(seedDirections)
+  await db.insert(directions).values(
+    seedDirections.map((direction) => ({
+      id: direction.id,
+      name: direction.name,
+      description: direction.description,
+    })),
+  )
   await db.insert(levels).values(seedLevels)
   await db.insert(teachers).values(seedTeachers)
   await db.insert(lessons).values(
