@@ -54,6 +54,20 @@ export const useScheduleStore = defineStore('schedule', () => {
     level: null,
   })
 
+  const normalizeLesson = (
+    lesson: Lesson & {
+      levelId?: number | null
+      levelIds?: number[]
+    },
+  ): Lesson => ({
+    ...lesson,
+    levelIds: Array.isArray(lesson.levelIds)
+      ? lesson.levelIds
+      : lesson.levelId === null || lesson.levelId === undefined
+        ? []
+        : [lesson.levelId],
+  })
+
   const uniqueDirections = computed(() => {
     return [...directions.value]
       .map((direction) => direction.name)
@@ -70,7 +84,7 @@ export const useScheduleStore = defineStore('schedule', () => {
 
       let matchLevel = true
       if (filters.value.level !== null) {
-        matchLevel = lesson.levelId === null || lesson.levelId === filters.value.level
+        matchLevel = lesson.levelIds.length === 0 || lesson.levelIds.includes(filters.value.level)
       }
 
       return matchDirection && matchLevel
@@ -97,9 +111,14 @@ export const useScheduleStore = defineStore('schedule', () => {
     return levels.value.find((level) => level.id === id)
   }
 
-  const getLevelNameById = (id: number | null): string => {
-    if (id === null) return 'Для всех'
-    return getLevelById(id)?.name ?? 'Для всех'
+  const getLevelNamesByIds = (ids: number[]): string[] => {
+    if (ids.length === 0) return ['Для всех']
+    return ids.map((id) => getLevelById(id)?.name ?? 'Для всех')
+  }
+
+  const getPrimaryLevelNameByIds = (ids: number[]): string => {
+    if (ids.length === 0) return 'Для всех'
+    return getLevelById(ids[0])?.name ?? 'Для всех'
   }
 
   const getTeachersForLesson = (teacherIds: number[] = []): Teacher[] => {
@@ -117,7 +136,7 @@ export const useScheduleStore = defineStore('schedule', () => {
         scheduleApi.getTeachers(),
         scheduleApi.getLevels(),
       ])
-      lessons.value = lessonsData
+      lessons.value = lessonsData.map((lesson) => normalizeLesson(lesson))
       directions.value = directionsData
       teachers.value = teachersData
       levels.value = levelsData
@@ -145,24 +164,24 @@ export const useScheduleStore = defineStore('schedule', () => {
       endTime: updatedLesson.endTime,
       crossesMidnight: updatedLesson.crossesMidnight,
       directionId: updatedLesson.directionId,
-      levelId: updatedLesson.levelId ?? null,
+      levelIds: updatedLesson.levelIds ?? [],
       teacherIds: updatedLesson.teacherIds,
       poster: updatedLesson.poster,
     })
 
     const index = lessons.value.findIndex((lesson) => lesson.id === updated.id)
     if (index !== -1) {
-      lessons.value[index] = updated
+      lessons.value[index] = normalizeLesson(updated)
     }
   }
 
   const addLesson = async (newLesson: NewLesson) => {
     const created = await scheduleApi.createLesson({
       ...newLesson,
-      levelId: newLesson.levelId ?? null,
+      levelIds: newLesson.levelIds ?? [],
       teacherIds: newLesson.teacherIds ?? [],
     })
-    lessons.value.push(created)
+    lessons.value.push(normalizeLesson(created))
   }
 
   const addTeacher = async (teacher: NewTeacher) => {
@@ -230,7 +249,10 @@ export const useScheduleStore = defineStore('schedule', () => {
   const deleteLevel = async (id: number) => {
     await scheduleApi.deleteLevel(id)
     levels.value = levels.value.filter((level) => level.id !== id)
-    lessons.value = lessons.value.map((lesson) => (lesson.levelId === id ? { ...lesson, levelId: null } : lesson))
+    lessons.value = lessons.value.map((lesson) => ({
+      ...lesson,
+      levelIds: lesson.levelIds.filter((levelId) => levelId !== id),
+    }))
     if (filters.value.level === id) {
       filters.value.level = null
     }
@@ -255,7 +277,8 @@ export const useScheduleStore = defineStore('schedule', () => {
     getDirectionById,
     getDirectionNameById,
     getLevelById,
-    getLevelNameById,
+    getLevelNamesByIds,
+    getPrimaryLevelNameByIds,
     getTeachersForLesson,
     deleteLesson,
     updateLesson,

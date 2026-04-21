@@ -31,13 +31,14 @@ const lessonsWithTeachers = computed<Record<string, LessonCard[]>>(() => {
     const lessonsOfDay = scheduleStore.getLessonsByDay(day)
     result[day] = lessonsOfDay.map((lesson) => {
       const directionName = scheduleStore.getDirectionNameById(lesson.directionId)
-      const levelColor = lesson.levelId === null ? null : (scheduleStore.getLevelById(lesson.levelId)?.color ?? null)
+      const levelColor =
+        lesson.levelIds.length > 0 ? (scheduleStore.getLevelById(lesson.levelIds[0])?.color ?? null) : null
 
       return {
         ...lesson,
         teachers: scheduleStore.getTeachersForLesson(lesson.teacherIds),
         directionName,
-        levelName: scheduleStore.getLevelNameById(lesson.levelId),
+        levelName: scheduleStore.getPrimaryLevelNameByIds(lesson.levelIds),
         levelStyle: getLevelCardStyle(levelColor),
       }
     })
@@ -268,7 +269,7 @@ const createEmptyLesson = (): LessonDraft => {
     endTime: '',
     crossesMidnight: false,
     directionId: defaultDirectionId,
-    levelId: null,
+    levelIds: [],
     teacherIds: [],
     poster: null,
   }

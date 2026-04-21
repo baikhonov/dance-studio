@@ -33,9 +33,21 @@ export const lessons = sqliteTable('lessons', {
   directionId: integer('direction_id')
     .notNull()
     .references(() => directions.id, { onDelete: 'cascade' }),
-  levelId: integer('level_id').references(() => levels.id, { onDelete: 'set null' }),
   poster: text('poster'),
 })
+
+export const lessonLevels = sqliteTable(
+  'lesson_levels',
+  {
+    lessonId: integer('lesson_id')
+      .notNull()
+      .references(() => lessons.id, { onDelete: 'cascade' }),
+    levelId: integer('level_id')
+      .notNull()
+      .references(() => levels.id, { onDelete: 'cascade' }),
+  },
+  (table) => [primaryKey({ columns: [table.lessonId, table.levelId] })],
+)
 
 export const lessonTeachers = sqliteTable(
   'lesson_teachers',
@@ -55,10 +67,7 @@ export const lessonsRelations = relations(lessons, ({ one, many }) => ({
     fields: [lessons.directionId],
     references: [directions.id],
   }),
-  level: one(levels, {
-    fields: [lessons.levelId],
-    references: [levels.id],
-  }),
+  lessonLevels: many(lessonLevels),
   lessonTeachers: many(lessonTeachers),
 }))
 
@@ -67,7 +76,7 @@ export const directionsRelations = relations(directions, ({ many }) => ({
 }))
 
 export const levelsRelations = relations(levels, ({ many }) => ({
-  lessons: many(lessons),
+  lessonLevels: many(lessonLevels),
 }))
 
 export const teachersRelations = relations(teachers, ({ many }) => ({
@@ -82,5 +91,16 @@ export const lessonTeachersRelations = relations(lessonTeachers, ({ one }) => ({
   teacher: one(teachers, {
     fields: [lessonTeachers.teacherId],
     references: [teachers.id],
+  }),
+}))
+
+export const lessonLevelsRelations = relations(lessonLevels, ({ one }) => ({
+  lesson: one(lessons, {
+    fields: [lessonLevels.lessonId],
+    references: [lessons.id],
+  }),
+  level: one(levels, {
+    fields: [lessonLevels.levelId],
+    references: [levels.id],
   }),
 }))

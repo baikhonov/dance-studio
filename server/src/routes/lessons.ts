@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { parseNumericId, parseOptionalNumeric, parseTeacherIds } from '../utils/parsers.js'
+import { parseLevelIds, parseNumericId, parseTeacherIds } from '../utils/parsers.js'
 import { createLesson, deleteLesson, getLessonById, listLessons, updateLesson } from '../services/lessonsService.js'
 
 const lessonsRouter = Router()
@@ -31,13 +31,13 @@ lessonsRouter.get('/', async (req, res, next) => {
 
 lessonsRouter.post('/', async (req, res, next) => {
   try {
-    const { day, time, endTime, crossesMidnight, directionId, levelId, teacherIds, poster } = req.body as {
+    const { day, time, endTime, crossesMidnight, directionId, levelIds, teacherIds, poster } = req.body as {
       day?: unknown
       time?: unknown
       endTime?: unknown
       crossesMidnight?: unknown
       directionId?: unknown
-      levelId?: unknown
+      levelIds?: unknown
       teacherIds?: unknown
       poster?: unknown
     }
@@ -54,10 +54,12 @@ lessonsRouter.post('/', async (req, res, next) => {
       return res.status(400).json({ error: 'Invalid lesson payload' })
     }
 
-    const normalizedLevelId = parseOptionalNumeric(levelId)
-    if (levelId !== undefined && levelId !== null && normalizedLevelId === null) {
-      return res.status(400).json({ error: 'Invalid levelId' })
+    const normalizedLevelIds = parseLevelIds(levelIds)
+    const hasInvalidLevelIds = Array.isArray(levelIds) && normalizedLevelIds.length !== levelIds.length
+    if (hasInvalidLevelIds) {
+      return res.status(400).json({ error: 'Invalid levelIds' })
     }
+    const effectiveLevelIds = Array.isArray(levelIds) ? normalizedLevelIds : []
 
     const normalizedPoster = poster === null ? null : typeof poster === 'string' ? poster : null
     const normalizedTeacherIds = parseTeacherIds(teacherIds)
@@ -68,7 +70,7 @@ lessonsRouter.post('/', async (req, res, next) => {
       endTime: endTime.trim(),
       crossesMidnight,
       directionId,
-      levelId: normalizedLevelId,
+      levelIds: effectiveLevelIds,
       teacherIds: normalizedTeacherIds,
       poster: normalizedPoster,
     })
@@ -92,13 +94,13 @@ lessonsRouter.put('/:id', async (req, res, next) => {
     const existing = await getLessonById(id)
     if (!existing) return res.status(404).json({ error: 'Lesson not found' })
 
-    const { day, time, endTime, crossesMidnight, directionId, levelId, teacherIds, poster } = req.body as {
+    const { day, time, endTime, crossesMidnight, directionId, levelIds, teacherIds, poster } = req.body as {
       day?: unknown
       time?: unknown
       endTime?: unknown
       crossesMidnight?: unknown
       directionId?: unknown
-      levelId?: unknown
+      levelIds?: unknown
       teacherIds?: unknown
       poster?: unknown
     }
@@ -115,10 +117,12 @@ lessonsRouter.put('/:id', async (req, res, next) => {
       return res.status(400).json({ error: 'Invalid lesson payload' })
     }
 
-    const normalizedLevelId = parseOptionalNumeric(levelId)
-    if (levelId !== undefined && levelId !== null && normalizedLevelId === null) {
-      return res.status(400).json({ error: 'Invalid levelId' })
+    const normalizedLevelIds = parseLevelIds(levelIds)
+    const hasInvalidLevelIds = Array.isArray(levelIds) && normalizedLevelIds.length !== levelIds.length
+    if (hasInvalidLevelIds) {
+      return res.status(400).json({ error: 'Invalid levelIds' })
     }
+    const effectiveLevelIds = Array.isArray(levelIds) ? normalizedLevelIds : []
 
     const normalizedPoster = poster === null ? null : typeof poster === 'string' ? poster : null
     const normalizedTeacherIds = parseTeacherIds(teacherIds)
@@ -129,7 +133,7 @@ lessonsRouter.put('/:id', async (req, res, next) => {
       endTime: endTime.trim(),
       crossesMidnight,
       directionId,
-      levelId: normalizedLevelId,
+      levelIds: effectiveLevelIds,
       teacherIds: normalizedTeacherIds,
       poster: normalizedPoster,
     })

@@ -5,7 +5,7 @@ export interface Lesson {
   endTime: string
   crossesMidnight: boolean
   directionId: number
-  levelId: number | null
+  levelIds: number[]
   teacherIds: number[]
   poster: string | null
 }

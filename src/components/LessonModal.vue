@@ -29,13 +29,11 @@ const emit = defineEmits<{
 const store = useScheduleStore()
 const { days, directions, levels } = storeToRefs(store)
 const CUSTOM_DIRECTION_VALUE = '__custom_direction__'
-const CUSTOM_LEVEL_VALUE = '__custom_level__'
 
 const isEditing = ref(false)
 const editableLesson = ref<LessonForm | null>(null)
 const selectedTeacherIds = ref<number[]>([])
 const directionSelectValue = ref<string>('')
-const levelSelectValue = ref<string>('')
 const customDirectionName = ref('')
 const customLevelName = ref('')
 const isCreatingDirection = ref(false)
@@ -62,7 +60,7 @@ watch(
           endTime: '',
           crossesMidnight: false,
           directionId: directions.value[0]?.id ?? 0,
-          levelId: null,
+          levelIds: [],
           teacherIds: [],
           poster: null,
         }
@@ -98,7 +96,7 @@ watch(
           endTime: '',
           crossesMidnight: false,
           directionId: directions.value[0]?.id ?? 0,
-          levelId: null,
+          levelIds: [],
           teacherIds: [],
           poster: null,
         }
@@ -116,7 +114,6 @@ watch(
     if (newLesson) {
       selectedTeacherIds.value = [...(newLesson.teacherIds || [])]
       directionSelectValue.value = String(newLesson.directionId)
-      levelSelectValue.value = newLesson.levelId === null ? '' : String(newLesson.levelId)
     }
   },
   { immediate: true },
@@ -158,12 +155,13 @@ const onLessonDirectionChange = (event: Event) => {
   editableLesson.value.directionId = Number(raw)
 }
 
-const onLessonLevelChange = (event: Event) => {
+const toggleLessonLevel = (event: Event, levelId: number) => {
   if (!editableLesson.value) return
-  const raw = (event.target as HTMLSelectElement).value
-  levelSelectValue.value = raw
-  if (raw === CUSTOM_LEVEL_VALUE) return
-  editableLesson.value.levelId = raw === '' ? null : Number(raw)
+  const checked = (event.target as HTMLInputElement).checked
+  const current = editableLesson.value.levelIds
+  editableLesson.value.levelIds = checked
+    ? [...new Set([...current, levelId])]
+    : current.filter((id) => id !== levelId)
 }
 
 const createCustomDirection = async () => {
@@ -209,8 +207,7 @@ const createCustomLevel = async () => {
 
   const existing = levels.value.find((level) => level.name.trim().toLowerCase() === name.toLowerCase())
   if (existing) {
-    editableLesson.value.levelId = existing.id
-    levelSelectValue.value = String(existing.id)
+    editableLesson.value.levelIds = [...new Set([...editableLesson.value.levelIds, existing.id])]
     customLevelName.value = ''
     showAlert('Такой уровень уже существует. Выбрали существующий вариант.')
     return
@@ -219,8 +216,7 @@ const createCustomLevel = async () => {
   try {
     isCreatingLevel.value = true
     const created = await store.addLevel({ name, color: '#f59e0b' })
-    editableLesson.value.levelId = created.id
-    levelSelectValue.value = String(created.id)
+    editableLesson.value.levelIds = [...new Set([...editableLesson.value.levelIds, created.id])]
     customLevelName.value = ''
   } catch (error) {
     const message = error instanceof Error ? error.message : ''
@@ -296,11 +292,6 @@ const saveLesson = async () => {
     return
   }
 
-  if (levelSelectValue.value === CUSTOM_LEVEL_VALUE) {
-    showAlert('Добавьте новый уровень или выберите существующий')
-    return
-  }
-
   const startMinutes = timeToMinutes(editableLesson.value.time)
   const endMinutes = timeToMinutes(editableLesson.value.endTime)
   if (!editableLesson.value.crossesMidnight && startMinutes >= endMinutes) {
@@ -323,11 +314,9 @@ const saveLesson = async () => {
     return
   }
 
-  if (
-    editableLesson.value.levelId !== null &&
-    !store.getLevelById(editableLesson.value.levelId)
-  ) {
-    showAlert('Выберите уровень из списка')
+  const hasMissingLevels = editableLesson.value.levelIds.some((levelId) => !store.getLevelById(levelId))
+  if (hasMissingLevels) {
+    showAlert('Выберите корректные уровни из списка')
     return
   }
 
@@ -343,7 +332,7 @@ const saveLesson = async () => {
         endTime: editableLesson.value.endTime,
         crossesMidnight: editableLesson.value.crossesMidnight,
         directionId: editableLesson.value.directionId,
-        levelId: editableLesson.value.levelId,
+        levelIds: editableLesson.value.levelIds,
         teacherIds: editableLesson.value.teacherIds,
         poster: editableLesson.value.poster,
       }
@@ -427,7 +416,7 @@ onUnmounted(() => {
                       {{ lesson.time }} — {{ lesson.endTime }}
                     </span>
                     <span class="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium">
-                      {{ store.getLevelNameById(lesson.levelId) }}
+                      {{ store.getLevelNamesByIds(lesson.levelIds).join(', ') }}
                     </span>
                   </div>
 
@@ -516,22 +505,20 @@ onUnmounted(() => {
                     </div>
 
                     <div>
-                      <label for="level" class="block text-sm font-medium text-gray-700 mb-1">
-                        Уровень
-                      </label>
-                      <select
-                        id="level"
-                        :value="levelSelectValue"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-                        @change="onLessonLevelChange"
-                      >
-                        <option value="">Для всех</option>
-                        <option v-for="level in levels" :key="level.id" :value="level.id">
-                          {{ level.name }}
-                        </option>
-                        <option :value="CUSTOM_LEVEL_VALUE">Свой вариант...</option>
-                      </select>
-                      <div v-if="levelSelectValue === CUSTOM_LEVEL_VALUE" class="mt-2 flex gap-2">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Уровни</label>
+                      <p class="text-xs text-gray-500 mb-2">Если ничего не выбрано, занятие считается "Для всех".</p>
+                      <div class="space-y-2 max-h-40 overflow-y-auto border border-gray-300 rounded-lg p-3">
+                        <label v-for="level in levels" :key="level.id" class="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="editableLesson.levelIds.includes(level.id)"
+                            @change="toggleLessonLevel($event, level.id)"
+                            class="rounded border-gray-300 text-amber-500 focus:ring-amber-400"
+                          />
+                          <span class="text-sm text-gray-700">{{ level.name }}</span>
+                        </label>
+                      </div>
+                      <div class="mt-2 flex gap-2">
                         <input
                           v-model="customLevelName"
                           type="text"

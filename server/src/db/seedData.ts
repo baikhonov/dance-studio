@@ -8,7 +8,7 @@ export type SeedLesson = {
   endTime: string
   crossesMidnight: boolean
   directionId: number
-  levelId: number | null
+  levelIds: number[]
   teacherIds: number[]
   poster: string | null
 }
@@ -22,6 +22,7 @@ export const seedDirections: SeedDirection[] = [
 ]
 
 export const seedLevels: SeedLevel[] = [
+  { id: 3, name: 'Новички', color: '#f59e0b' },
   { id: 1, name: 'Начинающие', color: '#10b981' },
   { id: 2, name: 'Продолжающие', color: '#3b82f6' },
 ]
@@ -39,7 +40,7 @@ export const seedLessons: SeedLesson[] = [
     endTime: '20:30',
     crossesMidnight: false,
     directionId: 1,
-    levelId: 2,
+    levelIds: [2],
     teacherIds: [7],
     poster: null,
   },
@@ -50,7 +51,7 @@ export const seedLessons: SeedLesson[] = [
     endTime: '21:30',
     crossesMidnight: false,
     directionId: 2,
-    levelId: 1,
+    levelIds: [1],
     teacherIds: [5, 7],
     poster: null,
   },
@@ -61,7 +62,7 @@ export const seedLessons: SeedLesson[] = [
     endTime: '20:30',
     crossesMidnight: false,
     directionId: 3,
-    levelId: null,
+    levelIds: [3, 1],
     teacherIds: [5],
     poster: null,
   },
@@ -72,7 +73,7 @@ export const seedLessons: SeedLesson[] = [
     endTime: '21:30',
     crossesMidnight: false,
     directionId: 2,
-    levelId: 2,
+    levelIds: [2],
     teacherIds: [5, 7],
     poster: null,
   },
@@ -83,7 +84,7 @@ export const seedLessons: SeedLesson[] = [
     endTime: '20:30',
     crossesMidnight: false,
     directionId: 1,
-    levelId: 2,
+    levelIds: [2],
     teacherIds: [7],
     poster: null,
   },
@@ -94,7 +95,7 @@ export const seedLessons: SeedLesson[] = [
     endTime: '21:30',
     crossesMidnight: false,
     directionId: 2,
-    levelId: 1,
+    levelIds: [1],
     teacherIds: [5, 7],
     poster: null,
   },
@@ -105,7 +106,7 @@ export const seedLessons: SeedLesson[] = [
     endTime: '20:30',
     crossesMidnight: false,
     directionId: 3,
-    levelId: null,
+    levelIds: [3, 1],
     teacherIds: [5],
     poster: null,
   },
@@ -116,7 +117,7 @@ export const seedLessons: SeedLesson[] = [
     endTime: '21:30',
     crossesMidnight: false,
     directionId: 2,
-    levelId: 2,
+    levelIds: [2],
     teacherIds: [5, 7],
     poster: null,
   },
@@ -127,7 +128,7 @@ export const seedLessons: SeedLesson[] = [
     endTime: '20:30',
     crossesMidnight: false,
     directionId: 1,
-    levelId: 1,
+    levelIds: [3, 1],
     teacherIds: [7],
     poster: null,
   },
@@ -138,7 +139,7 @@ export const seedLessons: SeedLesson[] = [
     endTime: '22:30',
     crossesMidnight: false,
     directionId: 4,
-    levelId: null,
+    levelIds: [],
     teacherIds: [5, 7],
     poster: null,
   },
@@ -149,7 +150,7 @@ export const seedLessons: SeedLesson[] = [
     endTime: '23:00',
     crossesMidnight: false,
     directionId: 5,
-    levelId: null,
+    levelIds: [],
     teacherIds: [],
     poster: 'party-bachatamania.webp',
   },
@@ -160,7 +161,7 @@ export const seedLessons: SeedLesson[] = [
     endTime: '14:00',
     crossesMidnight: false,
     directionId: 1,
-    levelId: 1,
+    levelIds: [3, 1],
     teacherIds: [7],
     poster: null,
   },

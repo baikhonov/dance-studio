@@ -1,6 +1,6 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import { db } from '../db/client.js'
-import { lessonTeachers, lessons } from '../db/schema.js'
+import { lessonLevels, lessonTeachers, lessons } from '../db/schema.js'
 
 export type LessonFilters = {
   day?: string
@@ -14,7 +14,7 @@ export type LessonPayload = {
   endTime: string
   crossesMidnight: boolean
   directionId: number
-  levelId: number | null
+  levelIds: number[]
   teacherIds: number[]
   poster: string | null
 }
@@ -23,7 +23,6 @@ export const listLessons = async (filters: LessonFilters = {}) => {
   const conditions = []
   if (filters.day) conditions.push(eq(lessons.day, filters.day))
   if (filters.directionId) conditions.push(eq(lessons.directionId, filters.directionId))
-  if (filters.levelId) conditions.push(eq(lessons.levelId, filters.levelId))
 
   const lessonRows =
     conditions.length > 0 ? await db.select().from(lessons).where(and(...conditions)) : await db.select().from(lessons)
@@ -31,13 +30,23 @@ export const listLessons = async (filters: LessonFilters = {}) => {
   if (lessonRows.length === 0) return []
 
   const lessonIds = lessonRows.map((lesson) => lesson.id)
-  const links = await db.select().from(lessonTeachers).where(inArray(lessonTeachers.lessonId, lessonIds))
+  const [teacherLinks, levelLinks] = await Promise.all([
+    db.select().from(lessonTeachers).where(inArray(lessonTeachers.lessonId, lessonIds)),
+    db.select().from(lessonLevels).where(inArray(lessonLevels.lessonId, lessonIds)),
+  ])
 
   const teacherIdsByLesson = new Map<number, number[]>()
-  for (const link of links) {
+  for (const link of teacherLinks) {
     const ids = teacherIdsByLesson.get(link.lessonId) ?? []
     ids.push(link.teacherId)
     teacherIdsByLesson.set(link.lessonId, ids)
+  }
+
+  const levelIdsByLesson = new Map<number, number[]>()
+  for (const link of levelLinks) {
+    const ids = levelIdsByLesson.get(link.lessonId) ?? []
+    ids.push(link.levelId)
+    levelIdsByLesson.set(link.lessonId, ids)
   }
 
   return lessonRows.map((lesson) => ({
@@ -47,10 +56,12 @@ export const listLessons = async (filters: LessonFilters = {}) => {
     endTime: lesson.endTime,
     crossesMidnight: lesson.crossesMidnight,
     directionId: lesson.directionId,
-    levelId: lesson.levelId,
+    levelIds: levelIdsByLesson.get(lesson.id) ?? [],
     teacherIds: teacherIdsByLesson.get(lesson.id) ?? [],
     poster: lesson.poster,
-  }))
+  })).filter((lesson) =>
+    filters.levelId ? lesson.levelIds.length === 0 || lesson.levelIds.includes(filters.levelId) : true,
+  )
 }
 
 export const getLessonById = async (id: number) => {
@@ -67,7 +78,6 @@ export const createLesson = async (payload: LessonPayload) => {
       endTime: payload.endTime,
       crossesMidnight: payload.crossesMidnight,
       directionId: payload.directionId,
-      levelId: payload.levelId,
       poster: payload.poster,
     })
     .returning({ id: lessons.id })
@@ -75,13 +85,29 @@ export const createLesson = async (payload: LessonPayload) => {
   const inserted = insertedRows[0]?.id
   if (!inserted) return null
 
+  const inserts: Promise<unknown>[] = []
   if (payload.teacherIds.length > 0) {
-    await db.insert(lessonTeachers).values(
-      payload.teacherIds.map((teacherId) => ({
-        lessonId: inserted,
-        teacherId,
-      })),
+    inserts.push(
+      db.insert(lessonTeachers).values(
+        payload.teacherIds.map((teacherId) => ({
+          lessonId: inserted,
+          teacherId,
+        })),
+      ),
     )
+  }
+  if (payload.levelIds.length > 0) {
+    inserts.push(
+      db.insert(lessonLevels).values(
+        payload.levelIds.map((levelId) => ({
+          lessonId: inserted,
+          levelId,
+        })),
+      ),
+    )
+  }
+  if (inserts.length > 0) {
+    await Promise.all(inserts)
   }
 
   return inserted
@@ -96,19 +122,38 @@ export const updateLesson = async (id: number, payload: LessonPayload) => {
       endTime: payload.endTime,
       crossesMidnight: payload.crossesMidnight,
       directionId: payload.directionId,
-      levelId: payload.levelId,
       poster: payload.poster,
     })
     .where(eq(lessons.id, id))
 
-  await db.delete(lessonTeachers).where(eq(lessonTeachers.lessonId, id))
+  await Promise.all([
+    db.delete(lessonTeachers).where(eq(lessonTeachers.lessonId, id)),
+    db.delete(lessonLevels).where(eq(lessonLevels.lessonId, id)),
+  ])
+
+  const inserts: Promise<unknown>[] = []
   if (payload.teacherIds.length > 0) {
-    await db.insert(lessonTeachers).values(
-      payload.teacherIds.map((teacherId) => ({
-        lessonId: id,
-        teacherId,
-      })),
+    inserts.push(
+      db.insert(lessonTeachers).values(
+        payload.teacherIds.map((teacherId) => ({
+          lessonId: id,
+          teacherId,
+        })),
+      ),
     )
+  }
+  if (payload.levelIds.length > 0) {
+    inserts.push(
+      db.insert(lessonLevels).values(
+        payload.levelIds.map((levelId) => ({
+          lessonId: id,
+          levelId,
+        })),
+      ),
+    )
+  }
+  if (inserts.length > 0) {
+    await Promise.all(inserts)
   }
 }
 
