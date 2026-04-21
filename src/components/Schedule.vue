@@ -74,6 +74,8 @@ onUnmounted(() => {
 
 const SLOT_HEIGHT = 110
 const COMPRESSED_SLOT_HEIGHT = 32
+const LONG_LESSON_THRESHOLD_MINUTES = 90
+const LONG_ONLY_SLOT_HEIGHT = Math.round(SLOT_HEIGHT * 0.5)
 
 const sortedDirections = computed(() => [...directions.value].sort((a, b) => a.name.localeCompare(b.name)))
 const sortedLevels = computed(() => [...levels.value].sort((a, b) => a.name.localeCompare(b.name)))
@@ -96,17 +98,34 @@ const slotDurations = computed(() =>
   }),
 )
 
-const slotHasLessons = computed(() =>
+const slotOccupancy = computed(() =>
   timeSlotMinutes.value.map((slotStart, index, slots) => {
     const nextSlotStart = slots[index + 1]
     const fallbackInterval = index > 0 ? slotStart - slots[index - 1] : 60
     const slotEnd = nextSlotStart ?? slotStart + fallbackInterval
 
-    return filteredLessons.value.some((lesson) => {
+    let hasAny = false
+    let hasShort = false
+
+    filteredLessons.value.forEach((lesson) => {
       const lessonStart = timeToMinutes(lesson.time)
       const lessonEnd = lesson.crossesMidnight ? 24 * 60 : timeToMinutes(lesson.endTime)
-      return lessonStart < slotEnd && lessonEnd > slotStart
+      const intersects = lessonStart < slotEnd && lessonEnd > slotStart
+      if (!intersects) return
+
+      hasAny = true
+      const lessonDuration = lesson.crossesMidnight
+        ? 24 * 60 - lessonStart + timeToMinutes(lesson.endTime)
+        : lessonEnd - lessonStart
+      if (lessonDuration < LONG_LESSON_THRESHOLD_MINUTES) {
+        hasShort = true
+      }
     })
+
+    return {
+      hasAny,
+      isLongOnly: hasAny && !hasShort,
+    }
   }),
 )
 
@@ -126,25 +145,25 @@ const timelineSegments = computed<TimelineSegment[]>(() => {
   const segments: TimelineSegment[] = []
   const minutes = timeSlotMinutes.value
   const durations = slotDurations.value
-  const hasLessons = slotHasLessons.value
+  const occupancy = slotOccupancy.value
 
   let index = 0
   while (index < minutes.length) {
     const startMinutes = minutes[index]
 
-    if (hasLessons[index]) {
+    if (occupancy[index]?.hasAny) {
       const endMinutes = startMinutes + durations[index]
       segments.push({
         startMinutes,
         endMinutes,
-        height: SLOT_HEIGHT,
+        height: occupancy[index].isLongOnly ? LONG_ONLY_SLOT_HEIGHT : SLOT_HEIGHT,
       })
       index += 1
       continue
     }
 
     let endIndex = index
-    while (endIndex + 1 < minutes.length && !hasLessons[endIndex + 1]) {
+    while (endIndex + 1 < minutes.length && !occupancy[endIndex + 1]?.hasAny) {
       endIndex += 1
     }
 
@@ -305,7 +324,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
       <div class="mx-auto min-w-[870px] md:min-w-0 md:max-w-[1280px] border-gray-300">
         <!-- ШАПКА С ДНЯМИ (sticky) -->
         <div
-          class="sticky top-0 z-30 grid grid-cols-[100px_repeat(7,minmax(110px,1fr))] bg-gray-100 shadow-sm"
+          class="sticky top-0 z-30 grid grid-cols-[90px_repeat(7,minmax(110px,1fr))] bg-gray-100 shadow-sm"
           :style="windowWidth >= 768 ? { top: `${scheduleHeaderTop}px` } : {}"
         >
           <!-- УГЛОВАЯ ЯЧЕЙКА "Время" -->
@@ -326,7 +345,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
         </div>
 
         <!-- ОСНОВНОЙ КОНТЕЙНЕР: временная сетка + занятия -->
-        <div class="grid grid-cols-[100px_repeat(7,minmax(110px,1fr))]">
+        <div class="grid grid-cols-[90px_repeat(7,minmax(110px,1fr))]">
           <!-- КОЛОНКА С ВРЕМЕННЫМИ МЕТКАМИ -->
           <div class="sticky left-0 z-10 bg-gray-100 md:static">
             <div
