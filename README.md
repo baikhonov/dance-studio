@@ -56,36 +56,44 @@ Use this after pulling the upload/fallback changes to avoid requests to removed 
 
 ## Deploy (Vercel + Render, free tiers)
 
-### 1) Backend on Render
+This setup is the fastest way to launch the current stack with no code changes.
 
-- Create a new **Web Service** from this repo.
+### 1) Backend on Render (Web Service)
+
+- Create a new **Web Service** from this repository.
 - Set **Root Directory** to `server`.
 - Build command: `npm install`
 - Start command: `npm run start`
-- Add environment variables from `server/.env.example`:
+- Add environment variables (see `server/.env.example`):
   - `PORT=3000`
   - `JWT_SECRET=<strong-random-secret>`
   - `ADMIN_PASSWORD=<your-admin-password>`
   - `CORS_ORIGIN=https://<your-frontend>.vercel.app`
   - `SQLITE_PATH=./data/app.db`
+  - `JWT_EXPIRES_IN=7d`
 
-Health check URL: `https://<your-backend>.onrender.com/health`
+Health check URL:
+- `https://<your-backend>.onrender.com/health`
 
 ### 2) Frontend on Vercel
 
-- Import the same GitHub repo in Vercel.
+- Import the same repository in Vercel.
 - Keep project root as repository root.
+- Framework preset: `Vite`
 - Build command: `npm run build`
-- Add environment variables from `.env.example`:
+- Output directory: `dist`
+- Add environment variables (see `.env.example`):
   - `VITE_API_BASE_URL=https://<your-backend>.onrender.com`
 
-### 3) Verify
+### 3) Verify after deploy
 
-- Open frontend URL and check schedule loading.
-- Test login/logout in admin area.
-- Test image uploads (teacher photo/poster) and verify images are returned from backend `/uploads`.
+- Open frontend URL and confirm lessons/schedule are loaded.
+- Test admin login/logout.
+- Upload a teacher photo/poster and confirm backend returns files from `/uploads`.
+- Check backend health: `GET /health` returns `{ "ok": true }`.
 
-### Notes about free tier
+### Free-tier caveats
 
-- Render free services can sleep after inactivity (first request may be slow).
-- SQLite file storage in container filesystem is not durable across some deploy/restart scenarios. For long-term persistence, move to managed Postgres later.
+- Render free services may sleep after inactivity (cold starts).
+- SQLite in container filesystem is not durable across all restart/redeploy scenarios.
+- Treat this as iteration 1 deployment; move to managed Postgres for persistent production data.
