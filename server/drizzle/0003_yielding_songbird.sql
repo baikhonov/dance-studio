@@ -1,0 +1,1 @@
+ALTER TABLE `lessons` ADD `crosses_midnight` integer DEFAULT false NOT NULL;

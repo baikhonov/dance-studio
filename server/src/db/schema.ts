@@ -28,6 +28,7 @@ export const lessons = sqliteTable('lessons', {
   day: text('day').notNull(),
   time: text('time').notNull(),
   endTime: text('end_time').notNull(),
+  crossesMidnight: integer('crosses_midnight', { mode: 'boolean' }).notNull().default(false),
   directionId: integer('direction_id')
     .notNull()
     .references(() => directions.id, { onDelete: 'cascade' }),

@@ -27,6 +27,7 @@ const seed = async () => {
       day: lesson.day,
       time: lesson.time,
       endTime: lesson.endTime,
+      crossesMidnight: lesson.crossesMidnight,
       directionId: lesson.directionId,
       levelId: lesson.levelId,
       poster: lesson.poster,

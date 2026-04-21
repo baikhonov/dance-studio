@@ -60,6 +60,7 @@ watch(
           day: '',
           time: '',
           endTime: '',
+          crossesMidnight: false,
           directionId: directions.value[0]?.id ?? 0,
           levelId: null,
           teacherIds: [],
@@ -95,6 +96,7 @@ watch(
           day: '',
           time: '',
           endTime: '',
+          crossesMidnight: false,
           directionId: directions.value[0]?.id ?? 0,
           levelId: null,
           teacherIds: [],
@@ -137,6 +139,11 @@ const setFallbackImage = (event: Event, fallbackSrc: string) => {
   if (image) {
     image.src = fallbackSrc
   }
+}
+
+const timeToMinutes = (time: string): number => {
+  const [hours, minutes] = time.split(':').map(Number)
+  return hours * 60 + minutes
 }
 
 const enableEditing = () => {
@@ -248,20 +255,35 @@ const hasConflict = () => {
   const current = editableLesson.value
   if (!current) return false
 
+  const dayToIndex = new Map(days.value.map((day, index) => [day, index]))
+  const dayCount = days.value.length
+  if (dayCount === 0) return false
+
+  type Segment = { dayIndex: number; start: number; end: number }
+  const buildSegments = (lesson: LessonForm | Lesson): Segment[] => {
+    const dayIndex = dayToIndex.get(lesson.day)
+    if (dayIndex === undefined) return []
+    const start = timeToMinutes(lesson.time)
+    const end = timeToMinutes(lesson.endTime)
+    if (!lesson.crossesMidnight) {
+      return [{ dayIndex, start, end }]
+    }
+    return [
+      { dayIndex, start, end: 24 * 60 },
+      { dayIndex: (dayIndex + 1) % dayCount, start: 0, end },
+    ]
+  }
+
+  const currentSegments = buildSegments(current)
+
   return lessons.some((lesson) => {
-    // Пропускаем само редактируемое занятие
     if (lesson.id === current.id) return false
-
-    // Проверяем только занятия в выбранный день
-    if (lesson.day !== current.day) return false
-
-    const start1 = current.time
-    const end1 = current.endTime
-    const start2 = lesson.time
-    const end2 = lesson.endTime
-
-    // Проверка пересечения интервалов
-    return start1 < end2 && end1 > start2
+    const lessonSegments = buildSegments(lesson)
+    return currentSegments.some((left) =>
+      lessonSegments.some(
+        (right) => left.dayIndex === right.dayIndex && left.start < right.end && left.end > right.start,
+      ),
+    )
   })
 }
 
@@ -279,9 +301,14 @@ const saveLesson = async () => {
     return
   }
 
-  // Проверка времени
-  if (editableLesson.value.time >= editableLesson.value.endTime) {
-    showAlert('Время начала должно быть раньше времени окончания')
+  const startMinutes = timeToMinutes(editableLesson.value.time)
+  const endMinutes = timeToMinutes(editableLesson.value.endTime)
+  if (!editableLesson.value.crossesMidnight && startMinutes >= endMinutes) {
+    showAlert('Если занятие в рамках дня, время начала должно быть раньше времени окончания')
+    return
+  }
+  if (editableLesson.value.crossesMidnight && startMinutes <= endMinutes) {
+    showAlert('Для перехода через полночь время начала должно быть позже времени окончания')
     return
   }
 
@@ -314,6 +341,7 @@ const saveLesson = async () => {
         day: editableLesson.value.day,
         time: editableLesson.value.time,
         endTime: editableLesson.value.endTime,
+        crossesMidnight: editableLesson.value.crossesMidnight,
         directionId: editableLesson.value.directionId,
         levelId: editableLesson.value.levelId,
         teacherIds: editableLesson.value.teacherIds,
@@ -547,6 +575,15 @@ onUnmounted(() => {
                         />
                       </div>
                     </div>
+
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                      <input
+                        v-model="editableLesson.crossesMidnight"
+                        type="checkbox"
+                        class="rounded border-gray-300 text-amber-500 focus:ring-amber-400"
+                      />
+                      Переходит через полночь (заканчивается на следующие сутки)
+                    </label>
 
                     <div>
                       <label for="day" class="block text-sm font-medium text-gray-700 mb-1">

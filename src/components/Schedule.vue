@@ -104,7 +104,7 @@ const slotHasLessons = computed(() =>
 
     return filteredLessons.value.some((lesson) => {
       const lessonStart = timeToMinutes(lesson.time)
-      const lessonEnd = timeToMinutes(lesson.endTime)
+      const lessonEnd = lesson.crossesMidnight ? 24 * 60 : timeToMinutes(lesson.endTime)
       return lessonStart < slotEnd && lessonEnd > slotStart
     })
   }),
@@ -222,7 +222,7 @@ const getMinutesOffset = (targetMinutes: number): number => {
 
 const getLessonStyle = (lesson: Lesson): CSSProperties => {
   const startMinutes = timeToMinutes(lesson.time)
-  const endMinutes = timeToMinutes(lesson.endTime)
+  const endMinutes = lesson.crossesMidnight ? 24 * 60 : timeToMinutes(lesson.endTime)
   const top = getMinutesOffset(startMinutes)
   const height = getMinutesOffset(endMinutes) - top
 
@@ -246,6 +246,7 @@ const createEmptyLesson = (): LessonDraft => {
     day: '',
     time: '',
     endTime: '',
+    crossesMidnight: false,
     directionId: defaultDirectionId,
     levelId: null,
     teacherIds: [],

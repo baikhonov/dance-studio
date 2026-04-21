@@ -31,10 +31,11 @@ lessonsRouter.get('/', async (req, res, next) => {
 
 lessonsRouter.post('/', async (req, res, next) => {
   try {
-    const { day, time, endTime, directionId, levelId, teacherIds, poster } = req.body as {
+    const { day, time, endTime, crossesMidnight, directionId, levelId, teacherIds, poster } = req.body as {
       day?: unknown
       time?: unknown
       endTime?: unknown
+      crossesMidnight?: unknown
       directionId?: unknown
       levelId?: unknown
       teacherIds?: unknown
@@ -45,6 +46,7 @@ lessonsRouter.post('/', async (req, res, next) => {
       typeof day !== 'string' ||
       typeof time !== 'string' ||
       typeof endTime !== 'string' ||
+      typeof crossesMidnight !== 'boolean' ||
       typeof directionId !== 'number' ||
       !Number.isInteger(directionId) ||
       directionId <= 0
@@ -64,6 +66,7 @@ lessonsRouter.post('/', async (req, res, next) => {
       day: day.trim(),
       time: time.trim(),
       endTime: endTime.trim(),
+      crossesMidnight,
       directionId,
       levelId: normalizedLevelId,
       teacherIds: normalizedTeacherIds,
@@ -89,10 +92,11 @@ lessonsRouter.put('/:id', async (req, res, next) => {
     const existing = await getLessonById(id)
     if (!existing) return res.status(404).json({ error: 'Lesson not found' })
 
-    const { day, time, endTime, directionId, levelId, teacherIds, poster } = req.body as {
+    const { day, time, endTime, crossesMidnight, directionId, levelId, teacherIds, poster } = req.body as {
       day?: unknown
       time?: unknown
       endTime?: unknown
+      crossesMidnight?: unknown
       directionId?: unknown
       levelId?: unknown
       teacherIds?: unknown
@@ -103,6 +107,7 @@ lessonsRouter.put('/:id', async (req, res, next) => {
       typeof day !== 'string' ||
       typeof time !== 'string' ||
       typeof endTime !== 'string' ||
+      typeof crossesMidnight !== 'boolean' ||
       typeof directionId !== 'number' ||
       !Number.isInteger(directionId) ||
       directionId <= 0
@@ -122,6 +127,7 @@ lessonsRouter.put('/:id', async (req, res, next) => {
       day: day.trim(),
       time: time.trim(),
       endTime: endTime.trim(),
+      crossesMidnight,
       directionId,
       levelId: normalizedLevelId,
       teacherIds: normalizedTeacherIds,

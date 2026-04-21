@@ -12,6 +12,7 @@ export type LessonPayload = {
   day: string
   time: string
   endTime: string
+  crossesMidnight: boolean
   directionId: number
   levelId: number | null
   teacherIds: number[]
@@ -44,6 +45,7 @@ export const listLessons = async (filters: LessonFilters = {}) => {
     day: lesson.day,
     time: lesson.time,
     endTime: lesson.endTime,
+    crossesMidnight: lesson.crossesMidnight,
     directionId: lesson.directionId,
     levelId: lesson.levelId,
     teacherIds: teacherIdsByLesson.get(lesson.id) ?? [],
@@ -63,6 +65,7 @@ export const createLesson = async (payload: LessonPayload) => {
       day: payload.day,
       time: payload.time,
       endTime: payload.endTime,
+      crossesMidnight: payload.crossesMidnight,
       directionId: payload.directionId,
       levelId: payload.levelId,
       poster: payload.poster,
@@ -91,6 +94,7 @@ export const updateLesson = async (id: number, payload: LessonPayload) => {
       day: payload.day,
       time: payload.time,
       endTime: payload.endTime,
+      crossesMidnight: payload.crossesMidnight,
       directionId: payload.directionId,
       levelId: payload.levelId,
       poster: payload.poster,

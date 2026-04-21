@@ -3,6 +3,7 @@ export interface Lesson {
   day: string
   time: string
   endTime: string
+  crossesMidnight: boolean
   directionId: number
   levelId: number | null
   teacherIds: number[]

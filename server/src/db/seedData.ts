@@ -6,6 +6,7 @@ export type SeedLesson = {
   day: string
   time: string
   endTime: string
+  crossesMidnight: boolean
   directionId: number
   levelId: number | null
   teacherIds: number[]
@@ -36,6 +37,7 @@ export const seedLessons: SeedLesson[] = [
     day: 'Понедельник',
     time: '19:30',
     endTime: '20:30',
+    crossesMidnight: false,
     directionId: 1,
     levelId: 2,
     teacherIds: [7],
@@ -46,6 +48,7 @@ export const seedLessons: SeedLesson[] = [
     day: 'Понедельник',
     time: '20:30',
     endTime: '21:30',
+    crossesMidnight: false,
     directionId: 2,
     levelId: 1,
     teacherIds: [5, 7],
@@ -56,6 +59,7 @@ export const seedLessons: SeedLesson[] = [
     day: 'Вторник',
     time: '19:30',
     endTime: '20:30',
+    crossesMidnight: false,
     directionId: 3,
     levelId: null,
     teacherIds: [5],
@@ -66,6 +70,7 @@ export const seedLessons: SeedLesson[] = [
     day: 'Вторник',
     time: '20:30',
     endTime: '21:30',
+    crossesMidnight: false,
     directionId: 2,
     levelId: 2,
     teacherIds: [5, 7],
@@ -76,6 +81,7 @@ export const seedLessons: SeedLesson[] = [
     day: 'Среда',
     time: '19:30',
     endTime: '20:30',
+    crossesMidnight: false,
     directionId: 1,
     levelId: 2,
     teacherIds: [7],
@@ -86,6 +92,7 @@ export const seedLessons: SeedLesson[] = [
     day: 'Среда',
     time: '20:30',
     endTime: '21:30',
+    crossesMidnight: false,
     directionId: 2,
     levelId: 1,
     teacherIds: [5, 7],
@@ -96,6 +103,7 @@ export const seedLessons: SeedLesson[] = [
     day: 'Четверг',
     time: '19:30',
     endTime: '20:30',
+    crossesMidnight: false,
     directionId: 3,
     levelId: null,
     teacherIds: [5],
@@ -106,6 +114,7 @@ export const seedLessons: SeedLesson[] = [
     day: 'Четверг',
     time: '20:30',
     endTime: '21:30',
+    crossesMidnight: false,
     directionId: 2,
     levelId: 2,
     teacherIds: [5, 7],
@@ -116,6 +125,7 @@ export const seedLessons: SeedLesson[] = [
     day: 'Пятница',
     time: '19:30',
     endTime: '20:30',
+    crossesMidnight: false,
     directionId: 1,
     levelId: 1,
     teacherIds: [7],
@@ -126,6 +136,7 @@ export const seedLessons: SeedLesson[] = [
     day: 'Пятница',
     time: '20:30',
     endTime: '22:30',
+    crossesMidnight: false,
     directionId: 4,
     levelId: null,
     teacherIds: [5, 7],
@@ -136,6 +147,7 @@ export const seedLessons: SeedLesson[] = [
     day: 'Суббота',
     time: '20:00',
     endTime: '23:00',
+    crossesMidnight: false,
     directionId: 5,
     levelId: null,
     teacherIds: [],
@@ -146,6 +158,7 @@ export const seedLessons: SeedLesson[] = [
     day: 'Воскресенье',
     time: '13:00',
     endTime: '14:00',
+    crossesMidnight: false,
     directionId: 1,
     levelId: 1,
     teacherIds: [7],
