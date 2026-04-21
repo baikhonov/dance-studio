@@ -174,6 +174,7 @@ const createCustomDirection = async () => {
     editableLesson.value.directionId = existing.id
     directionSelectValue.value = String(existing.id)
     customDirectionName.value = ''
+    showAlert('Такое направление уже существует. Выбрали существующий вариант.')
     return
   }
 
@@ -204,6 +205,7 @@ const createCustomLevel = async () => {
     editableLesson.value.levelId = existing.id
     levelSelectValue.value = String(existing.id)
     customLevelName.value = ''
+    showAlert('Такой уровень уже существует. Выбрали существующий вариант.')
     return
   }
 
