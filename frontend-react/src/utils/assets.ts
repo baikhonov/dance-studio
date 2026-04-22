@@ -33,3 +33,10 @@ export const resolvePosterUrl = (poster: string | null): string => {
   if (poster.includes('/')) return `${UPLOADS_BASE_URL}/${poster}`
   return DEFAULT_EVENT_POSTER
 }
+
+export const resolveBrandingLogoUrl = (logoPath: string | null): string | null => {
+  if (!logoPath) return null
+  if (isAbsoluteUrl(logoPath)) return logoPath
+  if (logoPath.includes('/')) return `${UPLOADS_BASE_URL}/${logoPath}`
+  return null
+}
