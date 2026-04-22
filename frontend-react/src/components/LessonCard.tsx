@@ -26,34 +26,34 @@ export function LessonCard({
   return (
     <article
       style={{ borderLeft: `4px solid ${levelColor ?? '#cbd5e1'}` }}
-      className="lesson-card"
+      className="rounded-xl border border-slate-200 bg-white p-3 text-left shadow-sm"
       title={`${directionName} (${lesson.time}-${lesson.endTime})`}
     >
-      <p className="lesson-card__direction">{directionName}</p>
-      <p className="lesson-card__level">{levelLabel}</p>
-      <p className="lesson-card__time">
+      <p className="truncate text-sm font-semibold text-slate-900">{directionName}</p>
+      <p className="mt-1 line-clamp-2 text-sm text-slate-600">{levelLabel}</p>
+      <p className="mt-2 inline-block rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">
         {lesson.time}-{lesson.endTime}
       </p>
       {teacherPhotos.length > 0 ? (
         <>
-          <div className="lesson-card__avatars">
+          <div className="mt-2 flex gap-1.5">
             {teacherPhotos.slice(0, 3).map((photo, index) => (
               <img
                 key={`${lesson.id}-teacher-${index}`}
                 src={resolveTeacherPhotoUrl(photo)}
                 alt={teacherNames}
-                className="lesson-card__avatar"
+                className="h-7 w-7 rounded-full border border-slate-200 object-cover"
                 onError={(event) => setFallbackImage(event, DEFAULT_TEACHER_AVATAR)}
               />
             ))}
           </div>
-          <p className="lesson-card__teachers">{teacherNames}</p>
+          <p className="mt-1 truncate text-xs text-slate-500">{teacherNames}</p>
         </>
       ) : (
         <img
           src={resolvePosterUrl(lesson.poster)}
           alt={directionName}
-          className="lesson-card__poster"
+          className="mt-2 h-24 w-full rounded-lg border border-slate-200 object-cover"
           onError={(event) => setFallbackImage(event, DEFAULT_EVENT_POSTER)}
         />
       )}

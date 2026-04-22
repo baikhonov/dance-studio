@@ -26,7 +26,11 @@ const toMinutes = (time: string) => {
 
 export function ScheduleList({ lessons, directions, levels, teachers }: ScheduleListProps) {
   if (lessons.length === 0) {
-    return <p>No lessons yet.</p>
+    return (
+      <div className="rounded-xl border border-dashed border-slate-300 bg-white/70 p-6 text-center text-slate-600">
+        No lessons yet.
+      </div>
+    )
   }
 
   const getDirectionNameById = (id: number) =>
@@ -62,11 +66,11 @@ export function ScheduleList({ lessons, directions, levels, teachers }: Schedule
     .filter((group) => group.lessons.length > 0)
 
   return (
-    <section>
+    <section className="space-y-6">
       {grouped.map((group) => (
         <div key={group.day}>
-          <h2>{group.day}</h2>
-          <ul className="schedule-list__cards">
+          <h2 className="mb-3 text-2xl font-semibold text-slate-900">{group.day}</h2>
+          <ul className="grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
             {group.lessons.map((lesson) => (
               <li key={lesson.id}>
                 <LessonCard
