@@ -55,14 +55,6 @@ type TimelineSegment = {
 }
 
 export function ScheduleList({ lessons, directions, levels, teachers, stickyTop = 0 }: ScheduleListProps) {
-  if (lessons.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-white/70 p-6 text-center text-slate-600">
-        No lessons yet.
-      </div>
-    )
-  }
-
   const getDirectionNameById = (id: number) =>
     directions.find((direction) => direction.id === id)?.name ?? 'Без направления'
 
@@ -86,7 +78,7 @@ export function ScheduleList({ lessons, directions, levels, teachers, stickyTop 
     return levels.find((level) => level.id === ids[0])?.color ?? null
   }
 
-  const visibleDays = weekDaysOrder.filter((day) => lessons.some((lesson) => lesson.day === day))
+  const visibleDays = weekDaysOrder
   const timeSlotMinutes = baseTimeSlots.map(toMinutes)
 
   const slotDurations = timeSlotMinutes.map((slotStart, index, slots) => {
@@ -227,21 +219,21 @@ export function ScheduleList({ lessons, directions, levels, teachers, stickyTop 
 
   return (
     <section className="max-h-[75dvh] overflow-x-auto overflow-y-auto md:max-h-none md:overflow-visible">
-      <div className="mx-auto min-w-[870px] md:min-w-0 md:max-w-[1280px]">
+      <div className="mx-auto min-w-[870px] border-gray-300 md:min-w-0 md:max-w-[1280px]">
         <div
           className="sticky top-0 z-30 grid bg-gray-100 shadow-sm"
           style={{
             top: `${stickyTop}px`,
-            gridTemplateColumns: `90px repeat(${visibleDays.length}, minmax(110px, 1fr))`,
+            gridTemplateColumns: '90px repeat(7, minmax(110px, 1fr))',
           }}
         >
-          <div className="sticky left-0 z-20 flex items-center justify-center border border-r border-gray-300 bg-gray-200 p-2 text-center font-semibold text-gray-700 md:border-r-0 md:bg-gray-200/50">
+          <div className="sticky left-0 z-20 flex items-center justify-center border border-r border-gray-300 bg-gray-200 p-2 text-center font-semibold text-gray-700 md:border-r-0 md:bg-gray-200/50 md:p-3">
             Время
           </div>
           {visibleDays.map((day) => (
             <div
               key={`head-${day}`}
-              className="flex items-center justify-center border border-r-0 border-gray-300 bg-gray-200 p-2 text-center font-semibold text-gray-700 last:border-r md:bg-gray-200/50"
+              className="flex items-center justify-center border border-r-0 border-gray-300 bg-gray-200 p-2 text-center font-semibold text-gray-700 last:border-r md:bg-gray-200/50 md:p-3"
             >
               <span className="md:hidden">{day.slice(0, 11)}</span>
               <span className="hidden md:inline">{day}</span>
@@ -251,13 +243,13 @@ export function ScheduleList({ lessons, directions, levels, teachers, stickyTop 
 
         <div
           className="grid"
-          style={{ gridTemplateColumns: `90px repeat(${visibleDays.length}, minmax(110px, 1fr))` }}
+          style={{ gridTemplateColumns: '90px repeat(7, minmax(110px, 1fr))' }}
         >
           <div className="sticky left-0 z-10 bg-gray-100 md:static">
             {timeRows.map((row) => (
               <div
                 key={row.key}
-                className="flex items-center justify-center whitespace-nowrap border border-b-0 border-gray-300 p-2 text-center text-sm font-medium text-gray-600 last:border-b"
+                className="flex items-center justify-center whitespace-nowrap border border-b-0 border-gray-300 p-2 text-center text-sm font-medium text-gray-600 last:border-b md:p-3"
                 style={{ height: `${row.height}px` }}
               >
                 {row.label}

@@ -92,7 +92,7 @@ function App() {
   })
 
   return (
-    <div className="min-h-screen px-3 py-3 font-sans text-slate-900 md:px-4">
+    <div className="min-h-screen text-slate-900">
       <header className="mx-auto mb-3 grid w-full max-w-[1800px] grid-cols-[1fr_auto] gap-2 border-b border-gray-200 pb-2 md:grid-cols-[1fr_auto_1fr] md:items-center">
         <div className="min-w-0">
           <a href="#" className="inline-flex items-center">

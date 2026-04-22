@@ -36,3 +36,7 @@ export const getLevelCardStyle = (color: string | null | undefined) => {
     backgroundColor: lightenHex(normalized, 0.74),
   }
 }
+
+export const getLevelDotStyle = (color: string | null | undefined) => ({
+  backgroundColor: normalizeLevelColor(color),
+})

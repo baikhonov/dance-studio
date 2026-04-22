@@ -1,4 +1,6 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Direction, Level } from '../services/schedule'
+import { DEFAULT_LEVEL_COLOR, getLevelDotStyle } from '../utils/levelColors'
 
 type ScheduleFiltersValue = {
   direction: number | null
@@ -14,56 +16,159 @@ type ScheduleFiltersProps = {
 }
 
 export function ScheduleFilters({ directions, levels, value, onChange, filteredCount }: ScheduleFiltersProps) {
-  const onDirectionChange = (rawValue: string) => {
+  const [isDirectionsOpen, setIsDirectionsOpen] = useState(false)
+  const [isLevelsOpen, setIsLevelsOpen] = useState(false)
+  const directionsMenuRef = useRef<HTMLDivElement | null>(null)
+  const levelsMenuRef = useRef<HTMLDivElement | null>(null)
+
+  const selectedDirectionLabel = useMemo(() => {
+    if (value.direction === null) return 'Все направления'
+    return directions.find((direction) => direction.id === value.direction)?.name ?? 'Все направления'
+  }, [directions, value.direction])
+
+  const selectedLevelLabel = useMemo(() => {
+    if (value.level === null) return 'Все уровни'
+    return levels.find((level) => level.id === value.level)?.name ?? 'Все уровни'
+  }, [levels, value.level])
+
+  const selectedLevelColor = useMemo(() => {
+    if (value.level === null) return null
+    return levels.find((level) => level.id === value.level)?.color ?? null
+  }, [levels, value.level])
+
+  const selectDirection = (next: number | null) => {
     onChange({
       ...value,
-      direction: rawValue ? Number(rawValue) : null,
+      direction: next,
     })
+    setIsDirectionsOpen(false)
   }
 
-  const onLevelChange = (rawValue: string) => {
+  const selectLevel = (next: number | null) => {
     onChange({
       ...value,
-      level: rawValue ? Number(rawValue) : null,
+      level: next,
     })
+    setIsLevelsOpen(false)
   }
 
-  const resetFilters = () => onChange({ direction: null, level: null })
+  const resetFilters = () => {
+    onChange({ direction: null, level: null })
+    setIsDirectionsOpen(false)
+    setIsLevelsOpen(false)
+  }
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node | null
+      if (!target) return
+
+      if (!levelsMenuRef.current?.contains(target)) {
+        setIsLevelsOpen(false)
+      }
+      if (!directionsMenuRef.current?.contains(target)) {
+        setIsDirectionsOpen(false)
+      }
+    }
+
+    document.addEventListener('click', handleOutsideClick)
+    return () => {
+      document.removeEventListener('click', handleOutsideClick)
+    }
+  }, [])
 
   return (
     <section className="filters w-full md:w-auto">
       <div className="flex w-full flex-row flex-nowrap items-center gap-2 md:w-auto">
-        <label className="grid min-w-0 flex-1 gap-1 md:max-w-[220px] md:flex-none">
-          <span className="sr-only">Направление</span>
-          <select
-            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm outline-none ring-amber-200 transition focus:ring-2"
-            value={value.direction ?? ''}
-            onChange={(event) => onDirectionChange(event.target.value)}
+        <div ref={directionsMenuRef} className="relative z-50 min-w-0 flex-1 md:max-w-[200px] md:flex-none">
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm"
+            onClick={(event) => {
+              event.stopPropagation()
+              setIsDirectionsOpen((prev) => !prev)
+              setIsLevelsOpen(false)
+            }}
           >
-            <option value="">Все направления</option>
-            {directions.map((direction) => (
-              <option key={direction.id} value={direction.id}>
-                {direction.name}
-              </option>
-            ))}
-          </select>
-        </label>
+            <span className="truncate">{selectedDirectionLabel}</span>
+            <span className={`text-xs text-gray-500 transition-transform ${isDirectionsOpen ? 'rotate-180' : ''}`}>
+              ▼
+            </span>
+          </button>
+          {isDirectionsOpen && (
+            <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+              <button
+                type="button"
+                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                onClick={() => selectDirection(null)}
+              >
+                Все направления
+              </button>
+              {directions.map((direction) => (
+                <button
+                  key={direction.id}
+                  type="button"
+                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  onClick={() => selectDirection(direction.id)}
+                >
+                  {direction.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
-        <label className="grid min-w-0 flex-1 gap-1 md:max-w-[220px] md:flex-none">
-          <span className="sr-only">Уровень</span>
-          <select
-            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm outline-none ring-amber-200 transition focus:ring-2"
-            value={value.level ?? ''}
-            onChange={(event) => onLevelChange(event.target.value)}
+        <div ref={levelsMenuRef} className="relative z-50 min-w-0 flex-1 md:max-w-[220px] md:flex-none">
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm"
+            onClick={(event) => {
+              event.stopPropagation()
+              setIsLevelsOpen((prev) => !prev)
+              setIsDirectionsOpen(false)
+            }}
           >
-            <option value="">Все уровни</option>
-            {levels.map((level) => (
-              <option key={level.id} value={level.id}>
-                {level.name}
-              </option>
-            ))}
-          </select>
-        </label>
+            <span className="inline-flex min-w-0 items-center gap-2 truncate">
+              <span
+                className="block h-2.5 w-2.5 shrink-0 rounded-full aspect-square"
+                style={getLevelDotStyle(selectedLevelColor)}
+              />
+              <span className="truncate">{selectedLevelLabel}</span>
+            </span>
+            <span className={`text-xs text-gray-500 transition-transform ${isLevelsOpen ? 'rotate-180' : ''}`}>
+              ▼
+            </span>
+          </button>
+          {isLevelsOpen && (
+            <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+              <button
+                type="button"
+                className="inline-flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                onClick={() => selectLevel(null)}
+              >
+                <span
+                  className="block h-2.5 w-2.5 shrink-0 rounded-full aspect-square"
+                  style={getLevelDotStyle(DEFAULT_LEVEL_COLOR)}
+                />
+                <span>Все уровни</span>
+              </button>
+              {levels.map((level) => (
+                <button
+                  key={level.id}
+                  type="button"
+                  className="inline-flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  onClick={() => selectLevel(level.id)}
+                >
+                  <span
+                    className="block h-2.5 w-2.5 shrink-0 rounded-full aspect-square"
+                    style={getLevelDotStyle(level.color)}
+                  />
+                  <span>{level.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {(value.direction !== null || value.level !== null) && (
           <button
