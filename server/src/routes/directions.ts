@@ -3,6 +3,11 @@ import { createDirection, deleteDirection, listDirections, updateDirection } fro
 import { parseNumericId } from '../utils/parsers.js'
 
 const directionsRouter = Router()
+const isUniqueViolation = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') return false
+  const maybeError = error as { code?: string; cause?: { code?: string } }
+  return maybeError.code === '23505' || maybeError.cause?.code === '23505'
+}
 
 directionsRouter.get('/', async (_req, res, next) => {
   try {
@@ -29,6 +34,9 @@ directionsRouter.post('/', async (req, res, next) => {
     })
     return res.status(201).json(inserted)
   } catch (error) {
+    if (isUniqueViolation(error)) {
+      return res.status(409).json({ error: 'Direction with this name already exists' })
+    }
     return next(error)
   }
 })
@@ -52,6 +60,9 @@ directionsRouter.put('/:id', async (req, res, next) => {
     if (!updated) return res.status(404).json({ error: 'Direction not found' })
     return res.json(updated)
   } catch (error) {
+    if (isUniqueViolation(error)) {
+      return res.status(409).json({ error: 'Direction with this name already exists' })
+    }
     return next(error)
   }
 })
