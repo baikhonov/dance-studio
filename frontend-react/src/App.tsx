@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { LessonModal } from './components/LessonModal'
 import { ScheduleFilters } from './components/ScheduleFilters'
 import { ScheduleList } from './components/ScheduleList'
 import {
@@ -23,6 +24,8 @@ function App() {
   const filtersRef = useRef<HTMLDivElement | null>(null)
   const [filtersHeight, setFiltersHeight] = useState(0)
   const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth)
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
+  const [isLessonModalOpen, setIsLessonModalOpen] = useState(false)
   const [filters, setFilters] = useState<{ direction: number | null; level: number | null }>({
     direction: null,
     level: null,
@@ -91,6 +94,11 @@ function App() {
     return directionMatch && levelMatch
   })
 
+  const openLessonModal = (lesson: Lesson) => {
+    setSelectedLesson(lesson)
+    setIsLessonModalOpen(true)
+  }
+
   return (
     <div className="min-h-screen text-slate-900">
       <header className="mx-auto mb-3 grid w-full max-w-[1800px] grid-cols-[1fr_auto] gap-2 border-b border-gray-200 pb-2 md:grid-cols-[1fr_auto_1fr] md:items-center">
@@ -136,10 +144,20 @@ function App() {
           levels={levels}
           teachers={teachers}
           stickyTop={windowWidth >= 768 ? Math.max(filtersHeight - 1, 0) : 0}
+          onSelectLesson={openLessonModal}
         />
       </main>
 
       <footer className="my-6 text-center text-gray-600">© 2026 {schoolName}. Все права защищены.</footer>
+
+      <LessonModal
+        lesson={selectedLesson}
+        isOpen={isLessonModalOpen}
+        onClose={() => setIsLessonModalOpen(false)}
+        directions={directions}
+        levels={levels}
+        teachers={teachers}
+      />
     </div>
   )
 }

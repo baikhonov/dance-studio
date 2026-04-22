@@ -10,6 +10,7 @@ type LessonCardProps = {
   teacherNames: string
   teacherPhotos: string[]
   levelColor: string | null
+  onSelect?: () => void
 }
 
 const setFallbackImage = (event: SyntheticEvent<HTMLImageElement>, fallbackSrc: string) => {
@@ -23,6 +24,7 @@ export function LessonCard({
   teacherNames,
   teacherPhotos,
   levelColor,
+  onSelect,
 }: LessonCardProps) {
   const shortTeacherNames = teacherNames
     .split(',')
@@ -34,6 +36,7 @@ export function LessonCard({
       style={getLevelCardStyle(levelColor)}
       className="h-full cursor-pointer overflow-hidden rounded-lg border-l-2 p-1 text-left shadow-sm transition-all hover:brightness-[0.98] hover:shadow-md"
       title={`${directionName} (${lesson.time}-${lesson.endTime})`}
+      onClick={onSelect}
     >
       <p className="shrink-0 truncate text-xs leading-tight font-bold text-gray-900">{directionName}</p>
       <p className="mt-0 truncate text-xs font-medium text-gray-700">{levelLabel}</p>

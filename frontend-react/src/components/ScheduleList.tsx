@@ -7,6 +7,7 @@ type ScheduleListProps = {
   levels: Level[]
   teachers: Teacher[]
   stickyTop?: number
+  onSelectLesson?: (lesson: Lesson) => void
 }
 
 const weekDaysOrder = [
@@ -54,7 +55,14 @@ type TimelineSegment = {
   height: number
 }
 
-export function ScheduleList({ lessons, directions, levels, teachers, stickyTop = 0 }: ScheduleListProps) {
+export function ScheduleList({
+  lessons,
+  directions,
+  levels,
+  teachers,
+  stickyTop = 0,
+  onSelectLesson,
+}: ScheduleListProps) {
   const getDirectionNameById = (id: number) =>
     directions.find((direction) => direction.id === id)?.name ?? 'Без направления'
 
@@ -279,6 +287,7 @@ export function ScheduleList({ lessons, directions, levels, teachers, stickyTop 
                     teacherNames={getTeacherNamesByIds(lesson.teacherIds)}
                     teacherPhotos={getTeacherPhotosByIds(lesson.teacherIds)}
                     levelColor={getLevelColorByIds(lesson.levelIds)}
+                    onSelect={() => onSelectLesson?.(lesson)}
                   />
                 </div>
               ))}
