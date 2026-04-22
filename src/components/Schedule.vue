@@ -326,7 +326,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
     </div>
 
     <!-- СЕТКА РАСПИСАНИЯ -->
-    <div class="max-h-[75dvh] overflow-x-auto overflow-y-auto md:max-h-none md:overflow-visible rounded-xl border border-gray-300 dark:border-slate-700">
+    <div class="max-h-[75dvh] overflow-x-auto overflow-y-auto md:max-h-none md:overflow-visible rounded-xl">
       <div class="mx-auto min-w-[870px] md:min-w-0 md:max-w-[1280px] border-gray-300">
         <!-- ШАПКА С ДНЯМИ (sticky) -->
         <div
