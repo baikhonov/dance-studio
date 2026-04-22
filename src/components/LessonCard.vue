@@ -82,12 +82,12 @@ const formatTeacherNames = (teachers: Teacher[]): string =>
 
       <div
         v-else-if="lesson.poster"
-        class="flex items-center justify-end mt-0.5 pt-0.5"
+        class="mt-0.5 pt-0.5 min-h-0"
       >
         <img
           :src="resolvePosterUrl(lesson.poster ?? '')"
           :alt="directionName"
-          class="w-full rounded-md border border-white/90 shadow-sm object-cover"
+          class="h-full w-full rounded-md shadow-sm object-cover"
           @error="setFallbackImage($event, DEFAULT_EVENT_POSTER)"
         />
       </div>

@@ -535,7 +535,7 @@ onUnmounted(() => {
                         type="checkbox"
                         class="rounded border-gray-300 text-amber-500 focus:ring-amber-400"
                       />
-                      Переходит через полночь (заканчивается на следующие сутки)
+                      Переходит за полночь (заканчивается на следующие сутки)
                     </label>
 
                     <div>
