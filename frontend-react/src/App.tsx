@@ -1,206 +1,72 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { LessonModal } from './components/LessonModal'
-import { ScheduleFilters } from './components/ScheduleFilters'
-import { ScheduleList } from './components/ScheduleList'
-import {
-  getDirections,
-  getLevels,
-  getPublicSchedule,
-  getTeachers,
-  type Direction,
-  type Lesson,
-  type Level,
-  type Teacher,
-} from './services/schedule'
+import { useEffect, useState } from 'react'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { AUTH_UNAUTHORIZED_EVENT, clearAuthToken, isAuthenticated } from './auth/session'
 
 function App() {
   const schoolName = 'Dance Studio'
-  const [lessons, setLessons] = useState<Lesson[]>([])
-  const [directions, setDirections] = useState<Direction[]>([])
-  const [levels, setLevels] = useState<Level[]>([])
-  const [teachers, setTeachers] = useState<Teacher[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const filtersRef = useRef<HTMLDivElement | null>(null)
-  const [filtersHeight, setFiltersHeight] = useState(0)
-  const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth)
-  const [isAdmin, setIsAdmin] = useState<boolean>(() => Boolean(localStorage.getItem('admin_token')))
-  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
-  const [modalMode, setModalMode] = useState<'view' | 'create'>('view')
-  const [isLessonModalOpen, setIsLessonModalOpen] = useState(false)
-  const [filters, setFilters] = useState<{ direction: number | null; level: number | null }>({
-    direction: null,
-    level: null,
-  })
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => isAuthenticated())
 
-  const measureFiltersHeight = () => {
-    setFiltersHeight(filtersRef.current?.offsetHeight ?? 0)
-  }
-
-  const loadData = () =>
-    Promise.all([getPublicSchedule(), getDirections(), getLevels(), getTeachers()])
-      .then(([lessonsData, directionsData, levelsData, teachersData]) => {
-        setLessons(lessonsData)
-        setDirections(directionsData)
-        setLevels(levelsData)
-        setTeachers(teachersData)
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Unknown error')
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
+  const pageTitle = location.pathname === '/admin' ? 'Администрирование' : 'Расписание занятий'
 
   useEffect(() => {
-    void loadData()
-    const syncAuth = () => setIsAdmin(Boolean(localStorage.getItem('admin_token')))
+    const syncAuth = () => setIsAdmin(isAuthenticated())
+    const onUnauthorized = () => {
+      clearAuthToken()
+      setIsAdmin(false)
+      navigate('/login')
+    }
     window.addEventListener('storage', syncAuth)
-    return () => window.removeEventListener('storage', syncAuth)
-  }, [])
-
-  useEffect(() => {
-    if (isLoading) return
-
-    const updateMetrics = () => {
-      setWindowWidth(window.innerWidth)
-      measureFiltersHeight()
-    }
-
-    updateMetrics()
-    window.addEventListener('resize', updateMetrics)
-
-    const observer = new ResizeObserver(updateMetrics)
-    if (filtersRef.current) {
-      observer.observe(filtersRef.current)
-    }
-
+    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, onUnauthorized)
     return () => {
-      window.removeEventListener('resize', updateMetrics)
-      observer.disconnect()
+      window.removeEventListener('storage', syncAuth)
+      window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, onUnauthorized)
     }
-  }, [isLoading])
+  }, [navigate])
 
-  useLayoutEffect(() => {
-    if (isLoading) return
-
-    measureFiltersHeight()
-    const frameId = window.requestAnimationFrame(measureFiltersHeight)
-    return () => window.cancelAnimationFrame(frameId)
-  }, [isLoading, isAdmin, filters.direction, filters.level, directions.length, levels.length])
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen px-3 py-3 md:px-4">
-        <main className="mx-auto max-w-[1800px]">
-          <p className="mt-3 text-slate-600">Loading schedule...</p>
-        </main>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen px-3 py-3 md:px-4">
-        <main className="mx-auto max-w-[1800px]">
-          <p className="mt-3 text-rose-600">Error: {error}</p>
-        </main>
-      </div>
-    )
-  }
-
-  const filteredLessons = lessons.filter((lesson) => {
-    const directionMatch = filters.direction === null || lesson.directionId === filters.direction
-    const levelMatch =
-      filters.level === null || lesson.levelIds.length === 0 || lesson.levelIds.includes(filters.level)
-    return directionMatch && levelMatch
-  })
-
-  const openLessonModal = (lesson: Lesson) => {
-    setModalMode('view')
-    setSelectedLesson(lesson)
-    setIsLessonModalOpen(true)
-  }
-
-  const openCreateLessonModal = () => {
-    setModalMode('create')
-    setSelectedLesson(null)
-    setIsLessonModalOpen(true)
+  const logout = () => {
+    clearAuthToken()
+    setIsAdmin(false)
+    navigate('/')
   }
 
   return (
     <div className="min-h-screen text-slate-900">
       <header className="mx-auto mb-3 grid w-full max-w-[1800px] grid-cols-[1fr_auto] gap-2 border-b border-gray-200 pb-2 md:grid-cols-[1fr_auto_1fr] md:items-center">
         <div className="min-w-0">
-          <a href="#" className="inline-flex items-center">
+          <Link to="/" className="inline-flex items-center">
             <h1 className="truncate text-base font-semibold text-gray-800 md:text-lg">{schoolName}</h1>
-          </a>
+          </Link>
         </div>
 
         <div className="flex items-center gap-3 justify-self-end md:justify-self-end">
-          <a href="#" className="text-sm text-amber-600 hover:text-amber-700">
-            Войти
-          </a>
+          {!isAdmin ? (
+            <Link to="/login" className="text-sm text-amber-600 hover:text-amber-700">
+              Войти
+            </Link>
+          ) : (
+            <>
+              <Link to="/admin" className="text-sm text-blue-600 hover:text-blue-700">
+                Админка
+              </Link>
+              <button type="button" onClick={logout} className="text-sm text-red-600 hover:text-red-700">
+                Выйти
+              </button>
+            </>
+          )}
         </div>
 
         <div className="col-span-2 flex justify-center md:col-span-1 md:col-start-2 md:row-start-1">
-          <h2 className="text-lg font-semibold text-gray-800 md:text-xl">Расписание занятий</h2>
+          <h2 className="text-lg font-semibold text-gray-800 md:text-xl">{pageTitle}</h2>
         </div>
       </header>
 
       <main className="mx-auto mb-4 w-full max-w-[1800px]">
-        <div ref={filtersRef} className="z-40 bg-gray-100 py-2 md:sticky md:top-0">
-          <div className="mb-2 max-md:mb-0 md:flex md:items-start md:gap-2">
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={openCreateLessonModal}
-                className="mb-2 w-full rounded-lg bg-amber-500 px-4 py-2 text-white hover:bg-amber-600 md:mb-0 md:w-auto md:shrink-0"
-              >
-                Добавить занятие
-              </button>
-            )}
-            <div className="flex flex-row flex-nowrap items-center gap-2 pb-1 md:flex-1 md:justify-end md:pb-0">
-              <div className="min-w-0 flex-1 md:flex-none">
-                <ScheduleFilters
-                  directions={directions}
-                  levels={levels}
-                  value={filters}
-                  onChange={setFilters}
-                  filteredCount={filteredLessons.length}
-                />
-              </div>
-              {(filters.direction !== null || filters.level !== null) && (
-                <div className="hidden shrink-0 rounded-full bg-gray-100 px-3 py-1.5 text-center text-sm text-gray-600 md:block">
-                  Найдено: {filteredLessons.length}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        <ScheduleList
-          lessons={filteredLessons}
-          directions={directions}
-          levels={levels}
-          teachers={teachers}
-          stickyTop={windowWidth >= 768 ? Math.max(filtersHeight - 1, 0) : 0}
-          onSelectLesson={openLessonModal}
-        />
+        <Outlet />
       </main>
 
       <footer className="my-6 text-center text-gray-600">© 2026 {schoolName}. Все права защищены.</footer>
-
-      <LessonModal
-        lesson={selectedLesson}
-        isOpen={isLessonModalOpen}
-        onClose={() => setIsLessonModalOpen(false)}
-        directions={directions}
-        levels={levels}
-        teachers={teachers}
-        isAdmin={isAdmin}
-        mode={modalMode}
-        onSaved={() => void loadData()}
-      />
     </div>
   )
 }
