@@ -6,6 +6,7 @@ import {
   type Direction,
   type NewDirection,
 } from '../services/schedule'
+import { ConfirmModal } from './ConfirmModal'
 
 type DirectionModalProps = {
   direction: Direction | null
@@ -38,6 +39,7 @@ export function DirectionModal({ direction, allDirections, isOpen, onClose, onSa
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [draft, setDraft] = useState<DirectionDraft | null>(null)
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
 
   useEffect(() => {
     if (!isOpen) return
@@ -53,11 +55,13 @@ export function DirectionModal({ direction, allDirections, isOpen, onClose, onSa
 
   useEffect(() => {
     const onEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) onClose()
+      if (event.key !== 'Escape' || !isOpen) return
+      if (isDeleteConfirmOpen) return
+      onClose()
     }
     window.addEventListener('keydown', onEsc)
     return () => window.removeEventListener('keydown', onEsc)
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, isDeleteConfirmOpen])
 
   const existingNames = useMemo(() => {
     if (!draft) return new Set<string>()
@@ -103,12 +107,8 @@ export function DirectionModal({ direction, allDirections, isOpen, onClose, onSa
     }
   }
 
-  const handleDelete = async () => {
+  const runDelete = async () => {
     if (draft.id === null) return
-    if (!window.confirm(`Вы уверены, что хотите удалить направление ${draft.name}? Связанные занятия будут удалены.`)) {
-      return
-    }
-
     setError(null)
     setIsSubmitting(true)
     try {
@@ -124,6 +124,14 @@ export function DirectionModal({ direction, allDirections, isOpen, onClose, onSa
 
   return (
     <div className="fixed inset-0 z-50">
+      <ConfirmModal
+        isOpen={isDeleteConfirmOpen}
+        title="Удалить направление?"
+        message={`Вы уверены, что хотите удалить направление «${draft.name}»? Связанные занятия будут удалены.`}
+        confirmText="Удалить"
+        onConfirm={() => void runDelete()}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+      />
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}>
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <div
@@ -159,7 +167,7 @@ export function DirectionModal({ direction, allDirections, isOpen, onClose, onSa
                     </button>
                     <button
                       type="button"
-                      onClick={() => void handleDelete()}
+                      onClick={() => setIsDeleteConfirmOpen(true)}
                       disabled={isSubmitting}
                       className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-60 dark:bg-red-700 dark:text-red-50 dark:hover:bg-red-800"
                     >

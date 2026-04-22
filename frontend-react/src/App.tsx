@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { AUTH_UNAUTHORIZED_EVENT, clearAuthToken, isAuthenticated } from './auth/session'
+import { AUTH_SESSION_CHANGED_EVENT, AUTH_UNAUTHORIZED_EVENT, clearAuthToken, isAuthenticated } from './auth/session'
 import { getSettings, SITE_SETTINGS_UPDATED_EVENT } from './services/settings'
 import { resolveBrandingLogoUrl } from './utils/assets'
+import { resetFaviconToDefault, updateFaviconFromLogoUrl } from './utils/favicon'
 import { shouldUseLogoContrastBackground } from './utils/logoContrast'
 import { getResolvedTheme, getStoredThemeMode, setThemeMode as persistThemeMode, type ThemeMode } from './utils/theme'
 import { ThemeSwitch } from './components/ThemeSwitch'
@@ -38,6 +39,20 @@ function App() {
   useEffect(() => {
     loadSiteBranding()
   }, [location.pathname, loadSiteBranding])
+
+  useEffect(() => {
+    if (!schoolLogoUrl) {
+      resetFaviconToDefault()
+      return
+    }
+    let cancelled = false
+    void updateFaviconFromLogoUrl(schoolLogoUrl).catch(() => {
+      if (!cancelled) resetFaviconToDefault()
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [schoolLogoUrl])
 
   useEffect(() => {
     window.addEventListener(SITE_SETTINGS_UPDATED_EVENT, loadSiteBranding)
@@ -105,9 +120,11 @@ function App() {
       navigate('/login')
     }
     window.addEventListener('storage', syncAuth)
+    window.addEventListener(AUTH_SESSION_CHANGED_EVENT, syncAuth)
     window.addEventListener(AUTH_UNAUTHORIZED_EVENT, onUnauthorized)
     return () => {
       window.removeEventListener('storage', syncAuth)
+      window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, syncAuth)
       window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, onUnauthorized)
     }
   }, [navigate])

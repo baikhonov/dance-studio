@@ -12,7 +12,7 @@ import {
   type Level,
   type Teacher,
 } from '../services/schedule'
-import { isAuthenticated } from '../auth/session'
+import { AUTH_SESSION_CHANGED_EVENT, isAuthenticated } from '../auth/session'
 
 export function SchedulePage() {
   const [lessons, setLessons] = useState<Lesson[]>([])
@@ -56,7 +56,11 @@ export function SchedulePage() {
     void loadData()
     const syncAuth = () => setIsAdmin(isAuthenticated())
     window.addEventListener('storage', syncAuth)
-    return () => window.removeEventListener('storage', syncAuth)
+    window.addEventListener(AUTH_SESSION_CHANGED_EVENT, syncAuth)
+    return () => {
+      window.removeEventListener('storage', syncAuth)
+      window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, syncAuth)
+    }
   }, [])
 
   useEffect(() => {
@@ -90,11 +94,11 @@ export function SchedulePage() {
   }, [isLoading, isAdmin, filters.direction, filters.level, directions.length, levels.length])
 
   if (isLoading) {
-    return <p className="mt-3 text-slate-600 dark:text-slate-300">Loading schedule...</p>
+    return <p className="mt-3 text-slate-600 dark:text-slate-300">Загрузка расписания…</p>
   }
 
   if (error) {
-    return <p className="mt-3 text-rose-600 dark:text-rose-400">Error: {error}</p>
+    return <p className="mt-3 text-rose-600 dark:text-rose-400">Ошибка: {error}</p>
   }
 
   const filteredLessons = lessons.filter((lesson) => {
@@ -163,6 +167,7 @@ export function SchedulePage() {
         directions={directions}
         levels={levels}
         teachers={teachers}
+        lessons={lessons}
         isAdmin={isAdmin}
         mode={modalMode}
         onSaved={() => void loadData()}

@@ -1,8 +1,23 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent, SyntheticEvent } from 'react'
 import { uploadPoster } from '../api/uploads'
-import { createLesson, deleteLesson, updateLesson, type Direction, type Lesson, type Level, type NewLesson, type Teacher } from '../services/schedule'
+import {
+  createDirection,
+  createLesson,
+  deleteLesson,
+  updateLesson,
+  type Direction,
+  type Lesson,
+  type Level,
+  type NewDirection,
+  type NewLesson,
+  type Teacher,
+} from '../services/schedule'
 import { DEFAULT_EVENT_POSTER, DEFAULT_TEACHER_AVATAR, resolvePosterUrl, resolveTeacherPhotoUrl } from '../utils/assets'
+import { AlertModal } from './AlertModal'
+import { ConfirmModal } from './ConfirmModal'
+
+const CUSTOM_DIRECTION_VALUE = '__custom_direction__'
 
 type LessonModalProps = {
   lesson: Lesson | null
@@ -13,6 +28,7 @@ type LessonModalProps = {
   directions: Direction[]
   levels: Level[]
   teachers: Teacher[]
+  lessons: Lesson[]
   isAdmin: boolean
 }
 
@@ -34,7 +50,7 @@ const cloneLesson = (lesson: NewLesson): NewLesson => ({
 })
 
 const buildEmptyDraft = (directions: Direction[]): NewLesson => ({
-  day: weekDays[0],
+  day: '',
   time: '19:00',
   endTime: '20:00',
   crossesMidnight: false,
@@ -44,36 +60,86 @@ const buildEmptyDraft = (directions: Direction[]): NewLesson => ({
   poster: null,
 })
 
-export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions, levels, teachers, isAdmin }: LessonModalProps) {
+const timeToMinutes = (time: string) => {
+  const [hours, minutes] = time.split(':').map(Number)
+  return hours * 60 + minutes
+}
+
+export function LessonModal({
+  lesson,
+  mode,
+  isOpen,
+  onClose,
+  onSaved,
+  directions,
+  levels,
+  teachers,
+  lessons,
+  isAdmin,
+}: LessonModalProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [draft, setDraft] = useState<NewLesson | null>(lesson ? cloneLesson(lesson) : null)
+
+  const [directionSelectValue, setDirectionSelectValue] = useState('')
+  const [customDirectionName, setCustomDirectionName] = useState('')
+  const [isCreatingDirection, setIsCreatingDirection] = useState(false)
+
+  const [alertMessage, setAlertMessage] = useState('')
+  const [isAlertOpen, setIsAlertOpen] = useState(false)
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
+
   const sortedDirections = useMemo(() => [...directions].sort((a, b) => a.name.localeCompare(b.name)), [directions])
   const sortedLevels = useMemo(() => [...levels].sort((a, b) => a.name.localeCompare(b.name)), [levels])
+
+  const showAlert = (message: string) => {
+    setAlertMessage(message)
+    setIsAlertOpen(true)
+  }
+
+  const blockMainEscape = isAlertOpen || isDeleteConfirmOpen
 
   useEffect(() => {
     if (mode === 'create') {
       setDraft(buildEmptyDraft(directions))
       setIsEditing(true)
-      setError(null)
+      setCustomDirectionName('')
+      setDirectionSelectValue(directions[0] ? String(directions[0].id) : '')
       return
     }
 
     if (lesson) {
       setDraft(cloneLesson(lesson))
       setIsEditing(false)
-      setError(null)
+      setCustomDirectionName('')
+      setDirectionSelectValue(String(lesson.directionId))
     }
-  }, [lesson, isOpen, mode, directions])
+  }, [lesson, isOpen, mode])
+
+  useEffect(() => {
+    if (!isOpen || mode !== 'create' || !draft || draft.directionId !== 0) return
+    const first = directions[0]
+    if (!first) return
+    setDraft((prev) => (prev ? { ...prev, directionId: first.id } : prev))
+    setDirectionSelectValue(String(first.id))
+  }, [directions, isOpen, mode, draft?.directionId])
 
   useEffect(() => {
     const onEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) onClose()
+      if (event.key !== 'Escape' || !isOpen) return
+      if (blockMainEscape) return
+      onClose()
     }
     window.addEventListener('keydown', onEsc)
     return () => window.removeEventListener('keydown', onEsc)
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, blockMainEscape])
+
+  useEffect(() => {
+    if (!isOpen) {
+      setIsAlertOpen(false)
+      setIsDeleteConfirmOpen(false)
+    }
+  }, [isOpen])
 
   if (!isOpen || !draft) return null
   if (mode === 'view' && !lesson) return null
@@ -89,12 +155,46 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
     .map((id) => teachers.find((teacher) => teacher.id === id))
     .filter((teacher): teacher is Teacher => Boolean(teacher))
 
+  const currentLessonId = mode === 'view' && lesson ? lesson.id : null
+
   const canSave =
     draft.day.trim() !== '' &&
     draft.time.trim() !== '' &&
     draft.endTime.trim() !== '' &&
     Number.isFinite(draft.directionId) &&
     draft.directionId > 0
+
+  const hasConflict = (): boolean => {
+    const current = draft
+    const dayToIndex = new Map(weekDays.map((day, index) => [day, index]))
+    const dayCount = weekDays.length
+    if (dayCount === 0) return false
+
+    type Segment = { dayIndex: number; start: number; end: number }
+    const buildSegments = (l: NewLesson | Lesson): Segment[] => {
+      const dayIndex = dayToIndex.get(l.day)
+      if (dayIndex === undefined) return []
+      const start = timeToMinutes(l.time)
+      const end = timeToMinutes(l.endTime)
+      if (!l.crossesMidnight) {
+        return [{ dayIndex, start, end }]
+      }
+      return [
+        { dayIndex, start, end: 24 * 60 },
+        { dayIndex: (dayIndex + 1) % dayCount, start: 0, end },
+      ]
+    }
+
+    const currentSegments = buildSegments(current)
+
+    return lessons.some((other) => {
+      if (currentLessonId !== null && other.id === currentLessonId) return false
+      const otherSegments = buildSegments(other)
+      return currentSegments.some((left) =>
+        otherSegments.some((right) => left.dayIndex === right.dayIndex && left.start < right.end && left.end > right.start),
+      )
+    })
+  }
 
   const onToggleLevel = (levelId: number, checked: boolean) => {
     setDraft((prev) =>
@@ -121,13 +221,12 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
   const handlePosterUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
-    setError(null)
     setIsSubmitting(true)
     try {
       const uploaded = await uploadPoster(file)
       setDraft((prev) => (prev ? { ...prev, poster: uploaded.path } : prev))
     } catch {
-      setError('Не удалось загрузить постер')
+      showAlert('Не удалось загрузить постер')
     } finally {
       setIsSubmitting(false)
       event.target.value = ''
@@ -138,9 +237,80 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
     setDraft((prev) => (prev ? { ...prev, poster: null } : prev))
   }
 
+  const onLessonDirectionChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const raw = event.target.value
+    setDirectionSelectValue(raw)
+    if (raw === CUSTOM_DIRECTION_VALUE) return
+    setDraft((prev) => (prev ? { ...prev, directionId: Number(raw) } : prev))
+  }
+
+  const createCustomDirection = async () => {
+    const name = customDirectionName.trim()
+    if (!name) {
+      showAlert('Введите название направления')
+      return
+    }
+
+    const existing = directions.find((d) => d.name.trim().toLowerCase() === name.toLowerCase())
+    if (existing) {
+      setDraft((prev) => (prev ? { ...prev, directionId: existing.id } : prev))
+      setDirectionSelectValue(String(existing.id))
+      setCustomDirectionName('')
+      showAlert('Такое направление уже существует. Выбрали существующий вариант.')
+      return
+    }
+
+    setIsCreatingDirection(true)
+    try {
+      const payload: NewDirection = { name, description: null }
+      const created = await createDirection(payload)
+      setDraft((prev) => (prev ? { ...prev, directionId: created.id } : prev))
+      setDirectionSelectValue(String(created.id))
+      setCustomDirectionName('')
+      void onSaved()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : ''
+      showAlert(message ? `Не удалось добавить направление: ${message}` : 'Не удалось добавить направление')
+    } finally {
+      setIsCreatingDirection(false)
+    }
+  }
+
   const handleSave = async () => {
     if (!draft || !canSave) return
-    setError(null)
+
+    if (directionSelectValue === CUSTOM_DIRECTION_VALUE) {
+      showAlert('Добавьте новое направление или выберите существующее')
+      return
+    }
+
+    const startMinutes = timeToMinutes(draft.time)
+    const endMinutes = timeToMinutes(draft.endTime)
+    if (!draft.crossesMidnight && startMinutes >= endMinutes) {
+      showAlert('Если занятие в рамках дня, время начала должно быть раньше времени окончания')
+      return
+    }
+    if (draft.crossesMidnight && startMinutes <= endMinutes) {
+      showAlert('Для перехода через полночь время начала должно быть позже времени окончания')
+      return
+    }
+
+    if (hasConflict()) {
+      showAlert('Это время уже занято другим занятием в выбранный день')
+      return
+    }
+
+    if (!directions.some((d) => d.id === draft.directionId)) {
+      showAlert('Выберите направление из списка')
+      return
+    }
+
+    const hasMissingLevels = draft.levelIds.some((levelId) => !levels.some((level) => level.id === levelId))
+    if (hasMissingLevels) {
+      showAlert('Выберите корректные уровни из списка')
+      return
+    }
+
     setIsSubmitting(true)
     try {
       const payload: NewLesson = cloneLesson(draft)
@@ -152,31 +322,41 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
       onSaved()
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось сохранить занятие')
+      showAlert(err instanceof Error ? err.message : 'Не удалось сохранить занятие')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleDelete = async () => {
+  const runDeleteLesson = async () => {
     if (!lesson) return
-    const confirmDelete = window.confirm('Удалить занятие?')
-    if (!confirmDelete) return
-    setError(null)
     setIsSubmitting(true)
     try {
       await deleteLesson(lesson.id)
       onSaved()
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось удалить занятие')
+      showAlert(err instanceof Error ? err.message : 'Не удалось удалить занятие')
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  const deleteDirectionLabel = direction?.name ?? 'занятие'
+
   return (
     <div className="fixed inset-0 z-50">
+      <AlertModal isOpen={isAlertOpen} message={alertMessage} onClose={() => setIsAlertOpen(false)} />
+      <ConfirmModal
+        isOpen={isDeleteConfirmOpen}
+        title="Удалить занятие?"
+        message={`Удалить занятие «${deleteDirectionLabel}»?`}
+        confirmText="Удалить"
+        cancelText="Отмена"
+        onConfirm={() => void runDeleteLesson()}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+      />
+
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}>
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <div
@@ -232,7 +412,7 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                       <img
                         src={resolvePosterUrl(lesson.poster)}
                         alt={direction?.name ?? 'Занятие'}
-                        className="w-full mx-auto rounded-lg shadow-md"
+                        className="mx-auto w-full rounded-lg shadow-md"
                         onError={(event) => setFallbackImage(event, DEFAULT_EVENT_POSTER)}
                       />
                     </div>
@@ -248,7 +428,7 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                         Редактировать
                       </button>
                       <button
-                        onClick={handleDelete}
+                        onClick={() => setIsDeleteConfirmOpen(true)}
                         className="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-60 dark:bg-red-700 dark:text-red-200 dark:hover:bg-red-800"
                         type="button"
                         disabled={isSubmitting}
@@ -270,21 +450,43 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                     <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-400">Направление</label>
                     <select
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400"
-                      value={draft.directionId}
-                      onChange={(event) =>
-                        setDraft((prev) => (prev ? { ...prev, directionId: Number(event.target.value) } : prev))
-                      }
+                      value={directionSelectValue}
+                      onChange={onLessonDirectionChange}
+                      required
                     >
                       {sortedDirections.map((item) => (
                         <option key={item.id} value={item.id}>
                           {item.name}
                         </option>
                       ))}
+                      <option value={CUSTOM_DIRECTION_VALUE}>Свой вариант...</option>
                     </select>
+                    {directionSelectValue === CUSTOM_DIRECTION_VALUE ? (
+                      <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                        <input
+                          type="text"
+                          value={customDirectionName}
+                          onChange={(e) => setCustomDirectionName(e.target.value)}
+                          placeholder="Новое направление"
+                          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-amber-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400"
+                        />
+                        <button
+                          type="button"
+                          disabled={isCreatingDirection}
+                          onClick={() => void createCustomDirection()}
+                          className="w-full rounded-lg bg-amber-500 px-3 py-2 text-white hover:bg-amber-600 disabled:opacity-60 sm:w-auto dark:bg-amber-700 dark:text-amber-100 dark:hover:bg-amber-800"
+                        >
+                          {isCreatingDirection ? '...' : 'Добавить'}
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
 
                   <div>
                     <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-400">Уровни</label>
+                    <p className="mb-2 text-xs text-gray-500 dark:text-slate-500">
+                      Если ничего не выбрано, занятие считается «Для всех».
+                    </p>
                     <div className="max-h-32 space-y-2 overflow-y-auto rounded-lg border border-gray-300 p-3 dark:border-slate-600">
                       {sortedLevels.map((level) => (
                         <label key={level.id} className="flex items-center gap-2">
@@ -307,6 +509,7 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400"
                         value={draft.time}
                         onChange={(event) => setDraft((prev) => (prev ? { ...prev, time: event.target.value } : prev))}
+                        required
                       />
                     </div>
                     <div>
@@ -316,6 +519,7 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400"
                         value={draft.endTime}
                         onChange={(event) => setDraft((prev) => (prev ? { ...prev, endTime: event.target.value } : prev))}
+                        required
                       />
                     </div>
                   </div>
@@ -339,13 +543,11 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                       onChange={(event) => setDraft((prev) => (prev ? { ...prev, day: event.target.value } : prev))}
                     >
                       <option value="">Выберите день</option>
-                      {['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'].map(
-                        (day) => (
-                          <option key={day} value={day}>
-                            {day}
-                          </option>
-                        ),
-                      )}
+                      {weekDays.map((day) => (
+                        <option key={day} value={day}>
+                          {day}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -369,7 +571,7 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-1">Постер</label>
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-400">Постер</label>
                     <input
                       type="file"
                       accept="image/*"
@@ -381,7 +583,7 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                         <img
                           src={resolvePosterUrl(draft.poster)}
                           alt=""
-                          className="mt-2 w-32 object-cover rounded"
+                          className="mt-2 w-32 rounded object-cover"
                           onError={(event) => setFallbackImage(event, DEFAULT_EVENT_POSTER)}
                         />
                       ) : null}
@@ -389,15 +591,13 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                         <button
                           type="button"
                           onClick={removePoster}
-                          className="mt-2 mb-2 px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50"
+                          className="mt-2 mb-2 rounded-lg bg-red-100 px-3 py-1.5 text-sm text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50"
                         >
                           Удалить текущий постер
                         </button>
                       ) : null}
                     </div>
                   </div>
-
-                  {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
                   <div className="flex gap-3 pt-2">
                     <button
@@ -417,8 +617,9 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                         if (lesson) {
                           setDraft(cloneLesson(lesson))
                           setIsEditing(false)
+                          setDirectionSelectValue(String(lesson.directionId))
+                          setCustomDirectionName('')
                         }
-                        setError(null)
                       }}
                       className="flex-1 rounded-lg bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600"
                     >
@@ -433,6 +634,7 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
               onClick={onClose}
               className="absolute top-2 right-2 cursor-pointer p-2 text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-400"
               aria-label="Закрыть"
+              type="button"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />

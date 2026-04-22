@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createLevel, deleteLevel, updateLevel, type Level, type NewLevel } from '../services/schedule'
+import { ConfirmModal } from './ConfirmModal'
 
 const FOR_ALL_ALIASES = ['для всех', 'все уровни']
 
@@ -34,6 +35,7 @@ export function LevelModal({ level, allLevels, isOpen, onClose, onSaved }: Level
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [draft, setDraft] = useState<LevelDraft | null>(null)
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
 
   useEffect(() => {
     if (!isOpen) return
@@ -49,11 +51,13 @@ export function LevelModal({ level, allLevels, isOpen, onClose, onSaved }: Level
 
   useEffect(() => {
     const onEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) onClose()
+      if (event.key !== 'Escape' || !isOpen) return
+      if (isDeleteConfirmOpen) return
+      onClose()
     }
     window.addEventListener('keydown', onEsc)
     return () => window.removeEventListener('keydown', onEsc)
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, isDeleteConfirmOpen])
 
   const existingNames = useMemo(() => {
     if (!draft) return new Set<string>()
@@ -105,12 +109,8 @@ export function LevelModal({ level, allLevels, isOpen, onClose, onSaved }: Level
     }
   }
 
-  const handleDelete = async () => {
+  const runDelete = async () => {
     if (draft.id === null) return
-    if (!window.confirm(`Вы уверены, что хотите удалить уровень ${draft.name}? У связанных занятий уровень будет очищен.`)) {
-      return
-    }
-
     setError(null)
     setIsSubmitting(true)
     try {
@@ -126,6 +126,14 @@ export function LevelModal({ level, allLevels, isOpen, onClose, onSaved }: Level
 
   return (
     <div className="fixed inset-0 z-50">
+      <ConfirmModal
+        isOpen={isDeleteConfirmOpen}
+        title="Удалить уровень?"
+        message={`Вы уверены, что хотите удалить уровень «${draft.name}»? У связанных занятий уровень будет очищен.`}
+        confirmText="Удалить"
+        onConfirm={() => void runDelete()}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+      />
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}>
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <div
@@ -156,7 +164,7 @@ export function LevelModal({ level, allLevels, isOpen, onClose, onSaved }: Level
                     </button>
                     <button
                       type="button"
-                      onClick={() => void handleDelete()}
+                      onClick={() => setIsDeleteConfirmOpen(true)}
                       disabled={isSubmitting}
                       className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-60 dark:bg-red-700 dark:text-red-50 dark:hover:bg-red-800"
                     >
