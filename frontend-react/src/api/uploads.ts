@@ -25,4 +25,5 @@ const uploadFile = async (endpoint: '/teacher-photo' | '/poster' | '/school-logo
 }
 
 export const uploadTeacherPhoto = (file: File) => uploadFile('/teacher-photo', file)
+export const uploadPoster = (file: File) => uploadFile('/poster', file)
 export const uploadSchoolLogo = (file: File) => uploadFile('/school-logo', file)

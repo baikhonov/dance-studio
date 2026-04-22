@@ -34,42 +34,45 @@ export function LessonCard({
   return (
     <article
       style={getLevelCardStyle(levelColor)}
-      className="h-full cursor-pointer overflow-hidden rounded-lg border-l-2 p-1 text-left shadow-sm transition-all hover:brightness-[0.98] hover:shadow-md"
+      className="flex h-full cursor-pointer flex-col overflow-hidden rounded-lg border-l-2 text-left shadow-sm transition-all hover:brightness-[0.98] hover:shadow-md"
       title={`${directionName} (${lesson.time}-${lesson.endTime})`}
       onClick={onSelect}
     >
-      <p className="shrink-0 truncate text-xs leading-tight font-bold text-gray-900">{directionName}</p>
-      <p className="mt-0 truncate text-xs font-medium text-gray-700">{levelLabel}</p>
-      <p className="mt-0.5 inline-block self-start rounded bg-white/50 px-1 py-0.5 text-xs font-medium text-gray-800">
-        {lesson.time}-{lesson.endTime}
-      </p>
-      {teacherPhotos.length > 0 ? (
-        <>
+      <div className="relative z-10 flex h-full min-h-0 flex-col overflow-hidden p-1 text-[10px]">
+        <p className="shrink-0 truncate text-xs font-bold leading-tight text-gray-900">{directionName}</p>
+        <p className="mt-0 truncate text-xs font-medium text-gray-700">{levelLabel}</p>
+        <div className="mt-0.5 inline-block self-start rounded bg-white/50 px-1 py-0.5 text-xs font-medium text-gray-700">
+          {lesson.time}-{lesson.endTime}
+        </div>
+
+        {teacherPhotos.length > 0 ? (
           <div className="pt-0.5">
             <div className="flex shrink-0 justify-end -space-x-3 md:-space-x-2">
-            {teacherPhotos.slice(0, 3).map((photo, index) => (
-              <img
-                key={`${lesson.id}-teacher-${index}`}
-                src={resolveTeacherPhotoUrl(photo)}
-                alt={teacherNames}
-                className="h-7 w-7 rounded-full border border-white object-cover shadow-sm md:border-2"
-                onError={(event) => setFallbackImage(event, DEFAULT_TEACHER_AVATAR)}
-              />
-            ))}
+              {teacherPhotos.slice(0, 3).map((photo, index) => (
+                <img
+                  key={`${lesson.id}-teacher-${index}`}
+                  src={resolveTeacherPhotoUrl(photo)}
+                  alt={teacherNames}
+                  className="h-7 w-7 rounded-full border border-white object-cover shadow-sm md:border-2"
+                  onError={(event) => setFallbackImage(event, DEFAULT_TEACHER_AVATAR)}
+                />
+              ))}
             </div>
-            <p className="mt-0.5 truncate text-right text-[10px] leading-tight font-medium text-gray-700">
+            <p className="mt-0.5 truncate text-right text-[10px] font-medium leading-tight text-gray-700">
               {shortTeacherNames}
             </p>
           </div>
-        </>
-      ) : (
-        <img
-          src={resolvePosterUrl(lesson.poster)}
-          alt={directionName}
-          className="mt-1 h-16 w-full rounded-md border border-slate-200 object-cover shadow-sm"
-          onError={(event) => setFallbackImage(event, DEFAULT_EVENT_POSTER)}
-        />
-      )}
+        ) : lesson.poster ? (
+          <div className="mt-0.5 pt-0.5 min-h-0">
+            <img
+              src={resolvePosterUrl(lesson.poster)}
+              alt={directionName}
+              className="h-full w-full rounded-md object-cover shadow-sm"
+              onError={(event) => setFallbackImage(event, DEFAULT_EVENT_POSTER)}
+            />
+          </div>
+        ) : null}
+      </div>
     </article>
   )
 }

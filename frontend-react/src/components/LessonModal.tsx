@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent, SyntheticEvent } from 'react'
+import { uploadPoster } from '../api/uploads'
 import { createLesson, deleteLesson, updateLesson, type Direction, type Lesson, type Level, type NewLesson, type Teacher } from '../services/schedule'
 import { DEFAULT_EVENT_POSTER, DEFAULT_TEACHER_AVATAR, resolvePosterUrl, resolveTeacherPhotoUrl } from '../utils/assets'
 
@@ -117,6 +118,26 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
     )
   }
 
+  const handlePosterUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setError(null)
+    setIsSubmitting(true)
+    try {
+      const uploaded = await uploadPoster(file)
+      setDraft((prev) => (prev ? { ...prev, poster: uploaded.path } : prev))
+    } catch {
+      setError('Не удалось загрузить постер')
+    } finally {
+      setIsSubmitting(false)
+      event.target.value = ''
+    }
+  }
+
+  const removePoster = () => {
+    setDraft((prev) => (prev ? { ...prev, poster: null } : prev))
+  }
+
   const handleSave = async () => {
     if (!draft || !canSave) return
     setError(null)
@@ -206,7 +227,7 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                       <img
                         src={resolvePosterUrl(lesson.poster)}
                         alt={direction?.name ?? 'Занятие'}
-                        className="mx-auto w-full rounded-lg shadow-md"
+                        className="w-full mx-auto rounded-lg shadow-md"
                         onError={(event) => setFallbackImage(event, DEFAULT_EVENT_POSTER)}
                       />
                     </div>
@@ -339,6 +360,35 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                           <span className="text-sm text-gray-700">{teacher.name}</span>
                         </label>
                       ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Постер</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) => void handlePosterUpload(event)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                    />
+                    <div className="flex items-center gap-2">
+                      {draft.poster ? (
+                        <img
+                          src={resolvePosterUrl(draft.poster)}
+                          alt=""
+                          className="mt-2 w-32 object-cover rounded"
+                          onError={(event) => setFallbackImage(event, DEFAULT_EVENT_POSTER)}
+                        />
+                      ) : null}
+                      {draft.poster ? (
+                        <button
+                          type="button"
+                          onClick={removePoster}
+                          className="mt-2 mb-2 px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 dark:bg-red-900/30 dark:text-red-200 dark:hover:bg-red-900/50"
+                        >
+                          Удалить текущий постер
+                        </button>
+                      ) : null}
                     </div>
                   </div>
 

@@ -5,7 +5,7 @@ import { LevelModal } from '../components/LevelModal'
 import { TeacherModal } from '../components/TeacherModal'
 import { DEFAULT_TEACHER_AVATAR, resolveBrandingLogoUrl, resolveTeacherPhotoUrl } from '../utils/assets'
 import { getDirections, getLevels, getTeachers, type Direction, type Level, type Teacher } from '../services/schedule'
-import { getSettings, updateSettings } from '../services/settings'
+import { getSettings, SITE_SETTINGS_UPDATED_EVENT, updateSettings } from '../services/settings'
 
 const DEFAULT_SCHOOL_NAME = 'Школа танцев'
 const SYSTEM_LEVEL_ALIASES = ['для всех', 'все уровни']
@@ -113,6 +113,7 @@ export function AdminPage() {
       setSchoolNameDraft(saved.schoolName || DEFAULT_SCHOOL_NAME)
       setLogoPathDraft(saved.logoPath)
       setSettingsMessage('Настройки сохранены')
+      window.dispatchEvent(new Event(SITE_SETTINGS_UPDATED_EVENT))
     } catch {
       setSettingsError('Не удалось сохранить настройки')
     } finally {
