@@ -237,6 +237,24 @@ watch(
           @click="toggleTheme"
         >
           <span>{{ isDark ? '🌙' : '☀️' }}</span>
+          <span class="hidden sm:inline">{{ isDark ? 'Тёмная' : 'Светлая' }}</span>
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center gap-1 rounded-full border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-700 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          :disabled="themeMode === 'system'"
+          title="Следовать настройкам системы"
+          aria-label="Следовать настройкам системы"
+          @click="setSystemTheme"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path
+              fill-rule="evenodd"
+              d="M3 5.75A2.75 2.75 0 0 1 5.75 3h8.5A2.75 2.75 0 0 1 17 5.75v5.5A2.75 2.75 0 0 1 14.25 14H11v1h1.25a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5H9v-1H5.75A2.75 2.75 0 0 1 3 11.25v-5.5Zm1.5 0c0-.69.56-1.25 1.25-1.25h8.5c.69 0 1.25.56 1.25 1.25v5.5c0 .69-.56 1.25-1.25 1.25h-8.5c-.69 0-1.25-.56-1.25-1.25v-5.5Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <span class="hidden sm:inline">Система</span>
         </button>
       </div>
       <div v-if="!isAdmin" class="text-right">
