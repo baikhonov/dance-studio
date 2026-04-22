@@ -408,7 +408,7 @@ onUnmounted(() => {
                       {{ lesson.time }} — {{ lesson.endTime }}
                     </span>
                     <span
-                      class="inline-flex md:mt-0 md:ml-3 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium"
+                      class="inline-flex md:mt-0 md:ml-3 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium dark:bg-amber-900/25 dark:text-amber-200"
                     >
                       {{ store.getLevelNamesByIds(lesson.levelIds).join(', ') }}
                     </span>
@@ -453,13 +453,13 @@ onUnmounted(() => {
                   <div v-if="isAdmin" class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
                     <button
                       @click="enableEditing"
-                      class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+                      class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 dark:bg-amber-700 dark:text-amber-50 dark:hover:bg-amber-800"
                     >
                       Редактировать
                     </button>
                     <button
                       @click="deleteLesson"
-                      class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                      class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 dark:bg-red-700 dark:text-red-50 dark:hover:bg-red-800"
                     >
                       Удалить
                     </button>
@@ -497,7 +497,7 @@ onUnmounted(() => {
                           type="button"
                           @click="createCustomDirection"
                           :disabled="isCreatingDirection"
-                          class="w-full sm:w-auto px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-60"
+                          class="w-full sm:w-auto px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-60 dark:bg-amber-700 dark:text-amber-50 dark:hover:bg-amber-800"
                         >
                           {{ isCreatingDirection ? '...' : 'Добавить' }}
                         </button>
@@ -617,7 +617,7 @@ onUnmounted(() => {
                         v-if="editableLesson.poster"
                         type="button"
                         @click="removePoster"
-                        class="mt-2 mb-2 px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+                        class="mt-2 mb-2 px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 dark:bg-red-900/30 dark:text-red-200 dark:hover:bg-red-900/50"
                       >
                         Удалить текущий постер
                       </button>
@@ -629,7 +629,7 @@ onUnmounted(() => {
                     <div class="flex gap-3 pt-4">
                       <button
                         type="submit"
-                        class="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                        class="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors dark:bg-amber-700 dark:text-amber-50 dark:hover:bg-amber-800"
                       >
                         Сохранить
                       </button>

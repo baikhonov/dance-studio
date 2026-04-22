@@ -264,30 +264,48 @@ watch(
     <div class="flex items-center gap-3 justify-self-end md:justify-self-end">
       <div class="flex items-center justify-end gap-3">
         <button
+          class="relative inline-flex h-7 w-12 items-center rounded-full border transition-colors duration-200 disabled:opacity-55 disabled:cursor-not-allowed"
+          :class="isDark ? 'bg-slate-900 border-slate-600' : 'bg-white border-gray-300'"
           type="button"
-          class="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          role="switch"
+          aria-label="Toggle dark mode"
+          :aria-checked="isDark ? 'true' : 'false'"
           :title="themeMode === 'system' ? 'Системная тема включена' : 'Переключить светлую/тёмную тему'"
           @click="toggleTheme"
         >
-          <span>{{ isDark ? '🌙' : '☀️' }}</span>
-          <span class="hidden sm:inline">{{ isDark ? 'Тёмная' : 'Светлая' }}</span>
-        </button>
-        <button
-          type="button"
-          class="inline-flex items-center justify-center gap-1 rounded-full border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-700 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-          :disabled="themeMode === 'system'"
-          title="Следовать настройкам системы"
-          aria-label="Следовать настройкам системы"
-          @click="setSystemTheme"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path
-              fill-rule="evenodd"
-              d="M3 5.75A2.75 2.75 0 0 1 5.75 3h8.5A2.75 2.75 0 0 1 17 5.75v5.5A2.75 2.75 0 0 1 14.25 14H11v1h1.25a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5H9v-1H5.75A2.75 2.75 0 0 1 3 11.25v-5.5Zm1.5 0c0-.69.56-1.25 1.25-1.25h8.5c.69 0 1.25.56 1.25 1.25v5.5c0 .69-.56 1.25-1.25 1.25h-8.5c-.69 0-1.25-.56-1.25-1.25v-5.5Z"
-              clip-rule="evenodd"
-            />
-          </svg>
-          <span class="hidden sm:inline">Система</span>
+          <span
+            class="relative ml-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full shadow transition-all duration-200"
+            :class="isDark ? 'translate-x-4.5 bg-slate-700 text-slate-50' : 'translate-x-0 bg-slate-50 text-slate-700'"
+          >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                focusable="false"
+                viewBox="0 0 24 24"
+                class="absolute h-3.5 w-3.5 transition-opacity duration-200"
+                :class="isDark ? 'opacity-0' : 'opacity-100'"
+              >
+                <path d="M12,18c-3.3,0-6-2.7-6-6s2.7-6,6-6s6,2.7,6,6S15.3,18,12,18zM12,8c-2.2,0-4,1.8-4,4c0,2.2,1.8,4,4,4c2.2,0,4-1.8,4-4C16,9.8,14.2,8,12,8z"></path>
+                <path d="M12,4c-0.6,0-1-0.4-1-1V1c0-0.6,0.4-1,1-1s1,0.4,1,1v2C13,3.6,12.6,4,12,4z"></path>
+                <path d="M12,24c-0.6,0-1-0.4-1-1v-2c0-0.6,0.4-1,1-1s1,0.4,1,1v2C13,23.6,12.6,24,12,24z"></path>
+                <path d="M5.6,6.6c-0.3,0-0.5-0.1-0.7-0.3L3.5,4.9c-0.4-0.4-0.4-1,0-1.4s1-0.4,1.4,0l1.4,1.4c0.4,0.4,0.4,1,0,1.4C6.2,6.5,5.9,6.6,5.6,6.6z"></path>
+                <path d="M19.8,20.8c-0.3,0-0.5-0.1-0.7-0.3l-1.4-1.4c-0.4-0.4-0.4-1,0-1.4s1-0.4,1.4,0l1.4,1.4c0.4,0.4,0.4,1,0,1.4C20.3,20.7,20,20.8,19.8,20.8z"></path>
+                <path d="M3,13H1c-0.6,0-1-0.4-1-1s0.4-1,1-1h2c0.6,0,1,0.4,1,1S3.6,13,3,13z"></path>
+                <path d="M23,13h-2c-0.6,0-1-0.4-1-1s0.4-1,1-1h2c0.6,0,1,0.4,1,1S23.6,13,23,13z"></path>
+                <path d="M4.2,20.8c-0.3,0-0.5-0.1-0.7-0.3c-0.4-0.4-0.4-1,0-1.4l1.4-1.4c0.4-0.4,1-0.4,1.4,0s0.4,1,0,1.4l-1.4,1.4C4.7,20.7,4.5,20.8,4.2,20.8z"></path>
+                <path d="M18.4,6.6c-0.3,0-0.5-0.1-0.7-0.3c-0.4-0.4-0.4-1,0-1.4l1.4-1.4c0.4-0.4,1-0.4,1.4,0s0.4,1,0,1.4l-1.4,1.4C18.9,6.5,18.6,6.6,18.4,6.6z"></path>
+              </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                focusable="false"
+                viewBox="0 0 24 24"
+                class="absolute h-3.5 w-3.5 transition-opacity duration-200"
+                :class="isDark ? 'opacity-100' : 'opacity-0'"
+              >
+                <path d="M12.1,22c-0.3,0-0.6,0-0.9,0c-5.5-0.5-9.5-5.4-9-10.9c0.4-4.8,4.2-8.6,9-9c0.4,0,0.8,0.2,1,0.5c0.2,0.3,0.2,0.8-0.1,1.1c-2,2.7-1.4,6.4,1.3,8.4c2.1,1.6,5,1.6,7.1,0c0.3-0.2,0.7-0.3,1.1-0.1c0.3,0.2,0.5,0.6,0.5,1c-0.2,2.7-1.5,5.1-3.6,6.8C16.6,21.2,14.4,22,12.1,22zM9.3,4.4c-2.9,1-5,3.6-5.2,6.8c-0.4,4.4,2.8,8.3,7.2,8.7c2.1,0.2,4.2-0.4,5.8-1.8c1.1-0.9,1.9-2.1,2.4-3.4c-2.5,0.9-5.3,0.5-7.5-1.1C9.2,11.4,8.1,7.7,9.3,4.4z"></path>
+              </svg>
+          </span>
         </button>
       </div>
       <div v-if="!isAdmin" class="text-right">

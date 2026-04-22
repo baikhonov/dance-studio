@@ -194,14 +194,14 @@ onUnmounted(() => {
                     <button
                       type="button"
                       @click="enableEditing"
-                      class="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+                      class="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 dark:bg-amber-700 dark:text-amber-50 dark:hover:bg-amber-800"
                     >
                       Редактировать
                     </button>
                     <button
                       type="button"
                       @click="requestDeleteTeacher"
-                      class="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                      class="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 dark:bg-red-700 dark:text-red-50 dark:hover:bg-red-800"
                     >
                       Удалить
                     </button>
@@ -244,7 +244,7 @@ onUnmounted(() => {
                     <div class="flex gap-3 pt-4">
                       <button
                         type="submit"
-                        class="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                        class="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors dark:bg-amber-700 dark:text-amber-50 dark:hover:bg-amber-800"
                       >
                         Сохранить
                       </button>

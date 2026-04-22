@@ -191,7 +191,7 @@ const removeSchoolLogo = () => {
 
           <button
             type="button"
-            class="px-4 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-60"
+            class="px-4 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-60 dark:bg-amber-700 dark:text-amber-50 dark:hover:bg-amber-800"
             :disabled="isSavingSettings"
             @click="saveStudioSettings"
           >
@@ -211,7 +211,7 @@ const removeSchoolLogo = () => {
             <span v-else class="text-sm text-gray-500 dark:text-slate-400">Логотип не загружен</span>
 
             <label
-              class="inline-flex cursor-pointer items-center rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
+              class="inline-flex cursor-pointer items-center rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700 dark:bg-blue-700 dark:text-blue-50 dark:hover:bg-blue-800"
             >
               {{ isUploadingLogo ? 'Загрузка...' : 'Загрузить логотип' }}
               <input
@@ -242,7 +242,7 @@ const removeSchoolLogo = () => {
           <div class="flex items-center gap-3">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-slate-100">Управление преподавателями</h2>
             <span
-              class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-blue-100 text-blue-700 whitespace-nowrap"
+              class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-blue-100 text-blue-700 whitespace-nowrap dark:bg-blue-900/35 dark:text-blue-200"
             >
               Всего: {{ teachers.length }}
             </span>
@@ -253,7 +253,7 @@ const removeSchoolLogo = () => {
         <button
           type="button"
           @click="openTeacherModal()"
-          class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+          class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600 dark:bg-amber-700 dark:text-amber-50 dark:hover:bg-amber-800"
         >
           Добавить преподавателя
         </button>
@@ -288,7 +288,7 @@ const removeSchoolLogo = () => {
           <div class="flex items-center gap-3">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-slate-100">Управление направлениями</h2>
             <span
-              class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap"
+              class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap dark:bg-emerald-900/30 dark:text-emerald-200"
             >
               Всего: {{ directions.length }}
             </span>
@@ -299,7 +299,7 @@ const removeSchoolLogo = () => {
         <button
           type="button"
           @click="openDirectionModal()"
-          class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+          class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600 dark:bg-amber-700 dark:text-amber-50 dark:hover:bg-amber-800"
         >
           Добавить направление
         </button>
@@ -327,7 +327,7 @@ const removeSchoolLogo = () => {
           <div class="flex items-center gap-3">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-slate-100">Управление уровнями</h2>
             <span
-              class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-violet-100 text-violet-700 whitespace-nowrap"
+              class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-violet-100 text-violet-700 whitespace-nowrap dark:bg-violet-900/30 dark:text-violet-200"
             >
               Всего: {{ managedLevels.length }}
             </span>
@@ -338,7 +338,7 @@ const removeSchoolLogo = () => {
         <button
           type="button"
           @click="openLevelModal()"
-          class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+          class="mb-4 px-3.5 py-2 text-sm md:text-base bg-amber-500 text-white rounded-lg hover:bg-amber-600 dark:bg-amber-700 dark:text-amber-50 dark:hover:bg-amber-800"
         >
           Добавить уровень
         </button>

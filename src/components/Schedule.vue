@@ -298,7 +298,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
         <button
           v-if="isAdmin"
           @click="openLessonModal()"
-          class="mb-2 w-full md:mb-0 md:w-auto md:shrink-0 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+          class="mb-2 w-full md:mb-0 md:w-auto md:shrink-0 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 dark:bg-amber-700 dark:text-amber-50 dark:hover:bg-amber-800"
         >
           Добавить занятие
         </button>
