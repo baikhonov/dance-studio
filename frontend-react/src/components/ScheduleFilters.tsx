@@ -31,8 +31,8 @@ export function ScheduleFilters({ directions, levels, value, onChange, filteredC
   const resetFilters = () => onChange({ direction: null, level: null })
 
   return (
-    <section className="mb-2 md:flex md:items-start md:gap-2">
-      <div className="flex w-full flex-row flex-nowrap items-center gap-2">
+    <section className="filters w-full md:w-auto">
+      <div className="flex w-full flex-row flex-nowrap items-center gap-2 md:w-auto">
         <label className="grid min-w-0 flex-1 gap-1 md:max-w-[220px] md:flex-none">
           <span className="sr-only">Направление</span>
           <select

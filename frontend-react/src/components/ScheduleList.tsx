@@ -243,7 +243,8 @@ export function ScheduleList({ lessons, directions, levels, teachers, stickyTop 
               key={`head-${day}`}
               className="flex items-center justify-center border border-r-0 border-gray-300 bg-gray-200 p-2 text-center font-semibold text-gray-700 last:border-r md:bg-gray-200/50"
             >
-              {day}
+              <span className="md:hidden">{day.slice(0, 11)}</span>
+              <span className="hidden md:inline">{day}</span>
             </div>
           ))}
         </div>
@@ -263,7 +264,7 @@ export function ScheduleList({ lessons, directions, levels, teachers, stickyTop 
               </div>
             ))}
           </div>
-          {visibleDays.map((day, dayIndex) => (
+          {visibleDays.map((day) => (
             <div
               key={`day-${day}`}
               className="relative border border-b-0 border-r-0 border-gray-300 bg-gray-100 last:border-r"
@@ -289,8 +290,6 @@ export function ScheduleList({ lessons, directions, levels, teachers, stickyTop 
                   />
                 </div>
               ))}
-
-              {dayIndex !== visibleDays.length - 1 && <div className="absolute right-0 top-0 h-full w-px bg-gray-300" />}
             </div>
           ))}
         </div>

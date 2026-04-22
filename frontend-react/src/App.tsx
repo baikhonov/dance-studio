@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { API_BASE_URL } from './config/runtime'
 import { ScheduleFilters } from './components/ScheduleFilters'
 import { ScheduleList } from './components/ScheduleList'
 import {
@@ -113,15 +112,23 @@ function App() {
       </header>
 
       <main className="mx-auto mb-4 w-full max-w-[1800px]">
-        <p className="mb-2 text-xs text-slate-500">API: {API_BASE_URL}</p>
-        <div ref={filtersRef}>
-          <ScheduleFilters
-            directions={directions}
-            levels={levels}
-            value={filters}
-            onChange={setFilters}
-            filteredCount={filteredLessons.length}
-          />
+        <div ref={filtersRef} className="mb-2 max-md:mb-0 md:flex md:items-start md:gap-2">
+          <div className="flex flex-row flex-nowrap items-center gap-2 pb-1 md:flex-1 md:justify-end md:pb-0">
+            <div className="min-w-0 flex-1 md:flex-none">
+              <ScheduleFilters
+                directions={directions}
+                levels={levels}
+                value={filters}
+                onChange={setFilters}
+                filteredCount={filteredLessons.length}
+              />
+            </div>
+            {(filters.direction !== null || filters.level !== null) && (
+              <div className="hidden shrink-0 rounded-full bg-gray-100 px-3 py-1.5 text-center text-sm text-gray-600 md:block">
+                Найдено: {filteredLessons.length}
+              </div>
+            )}
+          </div>
         </div>
         <ScheduleList
           lessons={filteredLessons}
