@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
+import { initThemeMode } from './utils/theme'
+
+initThemeMode()
 import { isAuthenticated } from './auth/session'
 import { AdminPage } from './pages/AdminPage'
 import { LoginPage } from './pages/LoginPage'

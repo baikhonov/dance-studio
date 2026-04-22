@@ -180,42 +180,47 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}>
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <div
-            className="relative max-h-[90vh] w-full max-w-lg overflow-hidden rounded-2xl border border-transparent bg-white shadow-2xl"
+            className="relative max-h-[90vh] w-full max-w-lg overflow-hidden rounded-2xl border border-transparent bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="overflow-y-auto p-6" style={{ maxHeight: 'calc(90vh - 8px)' }}>
               {!isEditing ? (
                 <>
-                  <h3 className="mb-3 pr-8 text-2xl font-bold text-gray-900">{direction?.name ?? 'Без направления'}</h3>
+                  <h3 className="mb-3 pr-8 text-2xl font-bold text-gray-900 dark:text-slate-300">
+                    {direction?.name ?? 'Без направления'}
+                  </h3>
 
                   <div className="mb-4 flex flex-wrap items-start gap-2 text-sm md:items-center">
-                    <span className="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700">
+                    <span className="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-slate-800/60 dark:text-slate-400">
                       {lesson?.time} - {lesson?.endTime}
                     </span>
-                    <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-700 md:ml-3 md:mt-0">
+                    <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-700 md:ml-3 md:mt-0 dark:bg-amber-900/20 dark:text-amber-400/90">
                       {levelNames.join(', ')}
                     </span>
                   </div>
 
                   {direction?.description && (
-                    <p className="mb-4 whitespace-pre-line text-sm text-gray-700">{direction.description}</p>
+                    <p className="mb-4 whitespace-pre-line text-sm text-gray-700 dark:text-slate-400">{direction.description}</p>
                   )}
 
                   {lessonTeachers.length > 0 && (
                     <div className="mb-6">
-                      <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+                      <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-500">
                         {lessonTeachers.length > 1 ? 'Преподаватели' : 'Преподаватель'}
                       </h4>
                       <div className="flex flex-wrap gap-4">
                         {lessonTeachers.map((teacher) => (
-                          <div key={teacher.id} className="flex min-w-45 items-center gap-3 rounded-lg border border-transparent bg-gray-50 p-3">
+                          <div
+                            key={teacher.id}
+                            className="flex min-w-45 items-center gap-3 rounded-lg border border-transparent bg-gray-50 p-3 dark:border-slate-600 dark:bg-slate-700/70"
+                          >
                             <img
                               src={resolveTeacherPhotoUrl(teacher.photo)}
                               alt={teacher.name}
-                              className="h-16 w-16 rounded-full border-2 border-white object-cover shadow-sm"
+                              className="h-16 w-16 rounded-full border-2 border-white object-cover shadow-sm dark:border-slate-500"
                               onError={(event) => setFallbackImage(event, DEFAULT_TEACHER_AVATAR)}
                             />
-                            <p className="font-semibold text-gray-800">{teacher.name}</p>
+                            <p className="font-semibold text-gray-800 dark:text-slate-300">{teacher.name}</p>
                           </div>
                         ))}
                       </div>
@@ -234,17 +239,17 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                   )}
 
                   {isAdmin && (
-                    <div className="mt-4 flex gap-2 border-t border-gray-200 pt-4">
+                    <div className="mt-4 flex gap-2 border-t border-gray-200 pt-4 dark:border-slate-700">
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="rounded-lg bg-amber-500 px-4 py-2 text-white hover:bg-amber-600"
+                        className="rounded-lg bg-amber-500 px-4 py-2 text-white hover:bg-amber-600 dark:bg-amber-700 dark:text-amber-100 dark:hover:bg-amber-800"
                         type="button"
                       >
                         Редактировать
                       </button>
                       <button
                         onClick={handleDelete}
-                        className="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-60"
+                        className="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-60 dark:bg-red-700 dark:text-red-200 dark:hover:bg-red-800"
                         type="button"
                         disabled={isSubmitting}
                       >
@@ -262,9 +267,9 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                   }}
                 >
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">Направление</label>
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-400">Направление</label>
                     <select
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400"
                       value={draft.directionId}
                       onChange={(event) =>
                         setDraft((prev) => (prev ? { ...prev, directionId: Number(event.target.value) } : prev))
@@ -279,8 +284,8 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">Уровни</label>
-                    <div className="max-h-32 space-y-2 overflow-y-auto rounded-lg border border-gray-300 p-3">
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-400">Уровни</label>
+                    <div className="max-h-32 space-y-2 overflow-y-auto rounded-lg border border-gray-300 p-3 dark:border-slate-600">
                       {sortedLevels.map((level) => (
                         <label key={level.id} className="flex items-center gap-2">
                           <input
@@ -288,7 +293,7 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                             checked={draft.levelIds.includes(level.id)}
                             onChange={(event: ChangeEvent<HTMLInputElement>) => onToggleLevel(level.id, event.target.checked)}
                           />
-                          <span className="text-sm text-gray-700">{level.name}</span>
+                          <span className="text-sm text-gray-700 dark:text-slate-400">{level.name}</span>
                         </label>
                       ))}
                     </div>
@@ -296,26 +301,26 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-gray-700">Время начала</label>
+                      <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-400">Время начала</label>
                       <input
                         type="time"
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400"
                         value={draft.time}
                         onChange={(event) => setDraft((prev) => (prev ? { ...prev, time: event.target.value } : prev))}
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-gray-700">Время окончания</label>
+                      <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-400">Время окончания</label>
                       <input
                         type="time"
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400"
                         value={draft.endTime}
                         onChange={(event) => setDraft((prev) => (prev ? { ...prev, endTime: event.target.value } : prev))}
                       />
                     </div>
                   </div>
 
-                  <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <label className="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-slate-400">
                     <input
                       type="checkbox"
                       checked={draft.crossesMidnight}
@@ -327,9 +332,9 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                   </label>
 
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">День недели</label>
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-400">День недели</label>
                     <select
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400"
                       value={draft.day}
                       onChange={(event) => setDraft((prev) => (prev ? { ...prev, day: event.target.value } : prev))}
                     >
@@ -345,8 +350,8 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">Преподаватели</label>
-                    <div className="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-gray-300 p-3">
+                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-slate-400">Преподаватели</label>
+                    <div className="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-gray-300 p-3 dark:border-slate-600">
                       {teachers.map((teacher) => (
                         <label key={teacher.id} className="flex items-center gap-2">
                           <input
@@ -357,19 +362,19 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                             }
                           />
                           <img src={resolveTeacherPhotoUrl(teacher.photo)} alt={teacher.name} className="h-6 w-6 rounded-full object-cover" />
-                          <span className="text-sm text-gray-700">{teacher.name}</span>
+                          <span className="text-sm text-gray-700 dark:text-slate-400">{teacher.name}</span>
                         </label>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Постер</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-1">Постер</label>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={(event) => void handlePosterUpload(event)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-amber-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400"
                     />
                     <div className="flex items-center gap-2">
                       {draft.poster ? (
@@ -384,7 +389,7 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                         <button
                           type="button"
                           onClick={removePoster}
-                          className="mt-2 mb-2 px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 dark:bg-red-900/30 dark:text-red-200 dark:hover:bg-red-900/50"
+                          className="mt-2 mb-2 px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50"
                         >
                           Удалить текущий постер
                         </button>
@@ -392,12 +397,12 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                     </div>
                   </div>
 
-                  {error && <p className="text-sm text-red-600">{error}</p>}
+                  {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
                   <div className="flex gap-3 pt-2">
                     <button
                       type="submit"
-                      className="flex-1 rounded-lg bg-amber-500 px-4 py-2 text-white hover:bg-amber-600 disabled:opacity-60"
+                      className="flex-1 rounded-lg bg-amber-500 px-4 py-2 text-white hover:bg-amber-600 disabled:opacity-60 dark:bg-amber-700 dark:text-amber-100 dark:hover:bg-amber-800"
                       disabled={isSubmitting || !canSave}
                     >
                       Сохранить
@@ -415,7 +420,7 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
                         }
                         setError(null)
                       }}
-                      className="flex-1 rounded-lg bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
+                      className="flex-1 rounded-lg bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600"
                     >
                       {mode === 'create' ? 'Закрыть' : 'Отмена'}
                     </button>
@@ -426,7 +431,7 @@ export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions
 
             <button
               onClick={onClose}
-              className="absolute top-2 right-2 cursor-pointer p-2 text-gray-400 transition-colors hover:text-gray-600"
+              className="absolute top-2 right-2 cursor-pointer p-2 text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-400"
               aria-label="Закрыть"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

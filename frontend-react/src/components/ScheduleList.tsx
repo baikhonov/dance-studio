@@ -1,4 +1,5 @@
 import type { Direction, Lesson, Level, Teacher } from '../services/schedule'
+import { getLevelCardStyle } from '../utils/levelColors'
 import { LessonCard } from './LessonCard'
 
 type ScheduleListProps = {
@@ -213,10 +214,12 @@ export function ScheduleList({
     const top = getMinutesOffset(startMinutes)
     const height = getMinutesOffset(endMinutes) - top
     return {
+      position: 'absolute' as const,
       top: `${top + 3}px`,
       left: '3px',
       right: '3px',
       height: `${height - 6}px`,
+      zIndex: 1,
     }
   }
 
@@ -229,18 +232,18 @@ export function ScheduleList({
     <section className="max-h-[75dvh] overflow-x-auto overflow-y-auto md:max-h-none md:overflow-visible">
       <div className="mx-auto min-w-[870px] border-gray-300 md:min-w-0 md:max-w-[1280px]">
         <div
-          className="sticky top-0 z-30 grid grid-cols-[90px_repeat(7,minmax(110px,1fr))] bg-gray-100 shadow-sm"
+          className="sticky top-0 z-30 grid grid-cols-[90px_repeat(7,minmax(110px,1fr))] bg-gray-100 shadow-sm dark:bg-slate-900"
           style={{
             top: `${stickyTop}px`,
           }}
         >
-          <div className="sticky left-0 z-20 flex items-center justify-center border border-r border-gray-300 bg-gray-200 p-2 text-center font-semibold text-gray-700 md:border-r-0 md:bg-gray-200/50 md:p-3">
+          <div className="sticky left-0 z-20 flex items-center justify-center border border-r border-gray-300 bg-gray-200 p-2 text-center font-semibold text-gray-700 md:border-r-0 md:bg-gray-200/50 md:p-3 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
             Время
           </div>
           {visibleDays.map((day) => (
             <div
               key={`head-${day}`}
-              className="flex items-center justify-center border border-r-0 border-gray-300 bg-gray-200 p-2 text-center font-semibold text-gray-700 last:border-r md:bg-gray-200/50 md:p-3"
+              className="flex items-center justify-center border border-r-0 border-gray-300 bg-gray-200 p-2 text-center font-semibold text-gray-700 last:border-r md:bg-gray-200/50 md:p-3 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               <span className="md:hidden">{day.slice(0, 11)}</span>
               <span className="hidden md:inline">{day}</span>
@@ -249,11 +252,11 @@ export function ScheduleList({
         </div>
 
         <div className="grid grid-cols-[90px_repeat(7,minmax(110px,1fr))]">
-          <div className="sticky left-0 z-10 bg-gray-100 md:static">
+          <div className="sticky left-0 z-10 bg-gray-100 md:static dark:bg-slate-900">
             {timeRows.map((row) => (
               <div
                 key={row.key}
-                className="flex items-center justify-center whitespace-nowrap border border-b-0 border-gray-300 p-2 text-center text-sm font-medium text-gray-600 last:border-b md:p-3"
+                className="flex items-center justify-center whitespace-nowrap border border-b-0 border-gray-300 p-2 text-center text-sm font-medium text-gray-600 last:border-b md:p-3 dark:border-slate-700 dark:text-slate-300"
                 style={{ height: `${row.height}px` }}
               >
                 {row.label}
@@ -263,27 +266,35 @@ export function ScheduleList({
           {visibleDays.map((day) => (
             <div
               key={`day-${day}`}
-              className="relative border border-b-0 border-r-0 border-gray-300 bg-gray-100 last:border-r"
+              className="relative border border-b-0 border-r-0 border-gray-300 bg-gray-100 last:border-r dark:border-slate-700 dark:bg-slate-900"
               style={{ minHeight: `${totalGridHeight}px` }}
             >
               {timeRows.map((row) => (
                 <div
                   key={`grid-${day}-${row.key}`}
-                  className="border-b border-gray-300"
+                  className="border-b border-gray-300 dark:border-slate-700"
                   style={{ height: `${row.height}px` }}
                 />
               ))}
 
               {getLessonsForDay(day).map((lesson) => (
-                <div key={lesson.id} className="absolute z-10" style={getLessonStyle(lesson)}>
+                <div
+                  key={lesson.id}
+                  className="absolute cursor-pointer overflow-hidden rounded-lg border-l-2 shadow-sm transition-all hover:brightness-[0.98] hover:shadow-md md:border-l-2"
+                  style={{
+                    ...getLessonStyle(lesson),
+                    ...getLevelCardStyle(getLevelColorByIds(lesson.levelIds)),
+                  }}
+                  title={`${getDirectionNameById(lesson.directionId)} (${lesson.time}-${lesson.endTime})`}
+                  onClick={() => onSelectLesson?.(lesson)}
+                >
+                  <div className="pointer-events-none absolute inset-0 hidden dark:block bg-slate-950/45" />
                   <LessonCard
                     lesson={lesson}
                     directionName={getDirectionNameById(lesson.directionId)}
                     levelLabel={getLevelNamesByIds(lesson.levelIds)}
                     teacherNames={getTeacherNamesByIds(lesson.teacherIds)}
                     teacherPhotos={getTeacherPhotosByIds(lesson.teacherIds)}
-                    levelColor={getLevelColorByIds(lesson.levelIds)}
-                    onSelect={() => onSelectLesson?.(lesson)}
                   />
                 </div>
               ))}

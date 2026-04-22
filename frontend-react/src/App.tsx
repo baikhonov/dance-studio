@@ -4,6 +4,8 @@ import { AUTH_UNAUTHORIZED_EVENT, clearAuthToken, isAuthenticated } from './auth
 import { getSettings, SITE_SETTINGS_UPDATED_EVENT } from './services/settings'
 import { resolveBrandingLogoUrl } from './utils/assets'
 import { shouldUseLogoContrastBackground } from './utils/logoContrast'
+import { getResolvedTheme, getStoredThemeMode, setThemeMode as persistThemeMode, type ThemeMode } from './utils/theme'
+import { ThemeSwitch } from './components/ThemeSwitch'
 
 const DEFAULT_SCHOOL_NAME = 'Школа танцев'
 
@@ -17,6 +19,7 @@ function App() {
   const [logoPath, setLogoPath] = useState<string | null>(null)
   const [needsLogoContrastBg, setNeedsLogoContrastBg] = useState(false)
   const [isDarkUi, setIsDarkUi] = useState(() => document.documentElement.classList.contains('dark'))
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(() => getStoredThemeMode())
 
   const pageTitle = location.pathname === '/admin' ? 'Администрирование' : 'Расписание занятий'
   const schoolLogoUrl = resolveBrandingLogoUrl(logoPath)
@@ -47,6 +50,23 @@ function App() {
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
     return () => observer.disconnect()
   }, [])
+
+  useEffect(() => {
+    if (themeMode !== 'system') return
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const onSystemThemeChange = () => {
+      persistThemeMode('system')
+    }
+    mq.addEventListener('change', onSystemThemeChange)
+    return () => mq.removeEventListener('change', onSystemThemeChange)
+  }, [themeMode])
+
+  const toggleTheme = () => {
+    const wasDark = getResolvedTheme(themeMode) === 'dark'
+    const next: ThemeMode = wasDark ? 'light' : 'dark'
+    persistThemeMode(next)
+    setThemeModeState(next)
+  }
 
   useEffect(() => {
     if (!schoolLogoUrl) {
@@ -121,7 +141,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen text-slate-900">
+    <div className="min-h-screen text-slate-900 dark:text-slate-100">
       <header className="mx-auto mb-3 grid w-full max-w-[1800px] grid-cols-[1fr_auto] gap-2 border-b border-gray-200 pb-2 md:grid-cols-[1fr_auto_1fr] md:items-center dark:border-slate-700">
         <div className="min-w-0">
           <Link to="/" className="inline-flex items-center">
@@ -140,17 +160,19 @@ function App() {
         </div>
 
         <div className="flex items-center gap-3 justify-self-end md:justify-self-end">
-          {!isAdmin ? (
-            <div className="text-right">
-              <Link
-                to="/login"
-                className="text-sm text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
-              >
-                Войти
-              </Link>
-            </div>
-          ) : (
-            <div ref={userMenuRef} className="relative">
+          <div className="flex items-center justify-end gap-3">
+            <ThemeSwitch themeMode={themeMode} isDark={isDarkUi} onToggle={toggleTheme} />
+            {!isAdmin ? (
+              <div className="text-right">
+                <Link
+                  to="/login"
+                  className="text-sm text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+                >
+                  Войти
+                </Link>
+              </div>
+            ) : (
+              <div ref={userMenuRef} className="relative">
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
@@ -191,8 +213,9 @@ function App() {
                   </button>
                 </div>
               ) : null}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="col-span-2 flex justify-center md:col-span-1 md:col-start-2 md:row-start-1">
