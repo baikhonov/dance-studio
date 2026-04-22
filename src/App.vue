@@ -31,6 +31,8 @@ const schoolLogoUrl = computed(() => resolveBrandingLogoUrl(logoPath.value))
 const needsLogoContrastBg = ref(false)
 const themeMode = ref<ThemeMode>(getStoredThemeMode())
 const themeMedia = window.matchMedia('(prefers-color-scheme: dark)')
+const isUserMenuOpen = ref(false)
+const userMenuRef = ref<HTMLElement | null>(null)
 
 const resolvedTheme = computed(() => getResolvedTheme(themeMode.value))
 const isDark = computed(() => resolvedTheme.value === 'dark')
@@ -151,6 +153,7 @@ const detectLightLogo = async (logoUrl: string | null) => {
 }
 
 const handleLogout = () => {
+  isUserMenuOpen.value = false
   userStore.logout()
   router.push('/')
 }
@@ -173,6 +176,27 @@ const setSystemTheme = () => {
   applyThemeSelection('system')
 }
 
+const toggleUserMenu = () => {
+  isUserMenuOpen.value = !isUserMenuOpen.value
+}
+
+const closeUserMenu = () => {
+  isUserMenuOpen.value = false
+}
+
+const handleDocumentClick = (event: MouseEvent) => {
+  const target = event.target as Node | null
+  if (!target) return
+  if (!userMenuRef.value?.contains(target)) {
+    closeUserMenu()
+  }
+}
+
+const goToAdmin = () => {
+  closeUserMenu()
+  void router.push('/admin')
+}
+
 const handleSystemThemeChange = () => {
   if (themeMode.value === 'system') {
     setThemeMode('system')
@@ -182,17 +206,26 @@ const handleSystemThemeChange = () => {
 onMounted(() => {
   window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized)
   themeMedia.addEventListener('change', handleSystemThemeChange)
+  document.addEventListener('click', handleDocumentClick)
   void siteSettingsStore.ensureLoaded()
 })
 
 onUnmounted(() => {
   window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized)
   themeMedia.removeEventListener('change', handleSystemThemeChange)
+  document.removeEventListener('click', handleDocumentClick)
 })
 
 watch(browserTitle, (title) => {
   document.title = title
 }, { immediate: true })
+
+watch(
+  () => route.fullPath,
+  () => {
+    closeUserMenu()
+  },
+)
 
 watch(
   schoolLogoUrl,
@@ -262,9 +295,45 @@ watch(
           Войти
         </router-link>
       </div>
-      <div v-else class="flex items-center justify-end gap-4">
-        <router-link to="/admin" class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Админка</router-link>
-        <button @click="handleLogout" class="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">Выйти</button>
+      <div v-else ref="userMenuRef" class="relative">
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          aria-label="Меню администратора"
+          @click.stop="toggleUserMenu"
+        >
+          <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path
+                fill-rule="evenodd"
+                d="M10 3a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7ZM8 6.5a2 2 0 1 1 4 0 2 2 0 0 1-4 0ZM4.25 14A2.25 2.25 0 0 1 6.5 11.75h7A2.25 2.25 0 0 1 15.75 14v.75a.75.75 0 0 1-1.5 0V14a.75.75 0 0 0-.75-.75h-7a.75.75 0 0 0-.75.75v.75a.75.75 0 0 1-1.5 0V14Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </span>
+          <span class="hidden sm:inline">Админ</span>
+          <span class="text-[10px] text-gray-500 dark:text-slate-400">▼</span>
+        </button>
+
+        <div
+          v-if="isUserMenuOpen"
+          class="absolute right-0 mt-2 w-40 rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden z-50 dark:border-slate-600 dark:bg-slate-800"
+        >
+          <button
+            type="button"
+            class="w-full px-3 py-2 text-left text-sm text-blue-600 hover:bg-gray-50 dark:text-blue-300 dark:hover:bg-slate-700"
+            @click="goToAdmin"
+          >
+            Админка
+          </button>
+          <button
+            type="button"
+            class="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-gray-50 dark:text-red-300 dark:hover:bg-slate-700"
+            @click="handleLogout"
+          >
+            Выйти
+          </button>
+        </div>
       </div>
     </div>
 
