@@ -1,5 +1,8 @@
 # dance-studio
 
+[![CI](https://github.com/baikhonov/dance-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/baikhonov/dance-studio/actions/workflows/ci.yml)
+[![Deploy to VPS](https://github.com/baikhonov/dance-studio/actions/workflows/deploy.yml/badge.svg)](https://github.com/baikhonov/dance-studio/actions/workflows/deploy.yml)
+
 Portfolio project for a dance studio website with a public class schedule and an admin panel for content management.
 
 The app includes:
@@ -13,6 +16,12 @@ Tech stack:
 - frontend: Vue 3 + Vite
 - backend: Node.js + Express + Drizzle ORM
 - database: PostgreSQL
+
+## CI/CD
+
+- CI: runs on each push/PR and validates frontend build + frontend type-check + backend type-check.
+- CD: deploys to VPS via GitHub Actions over SSH (Docker Compose rebuild + restart).
+- Production host: [https://dance-studio-portfolio.ru/](https://dance-studio-portfolio.ru/)
 
 ## Live demo
 
