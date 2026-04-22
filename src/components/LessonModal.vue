@@ -150,6 +150,24 @@ const enableEditing = () => {
   isEditing.value = true
 }
 
+const cancelEditing = () => {
+  const lesson = props.lesson
+  if (!lesson) {
+    emit('close')
+    return
+  }
+  if (!lesson.id) {
+    emit('close')
+    return
+  }
+
+  editableLesson.value = JSON.parse(JSON.stringify(lesson)) as LessonForm
+  selectedTeacherIds.value = [...(editableLesson.value.teacherIds || [])]
+  directionSelectValue.value = String(editableLesson.value.directionId)
+  customDirectionName.value = ''
+  isEditing.value = false
+}
+
 const onLessonDirectionChange = (event: Event) => {
   if (!editableLesson.value) return
   const raw = (event.target as HTMLSelectElement).value
@@ -617,7 +635,7 @@ onUnmounted(() => {
                       </button>
                       <button
                         type="button"
-                        @click="emit('close')"
+                        @click="cancelEditing"
                         class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
                       >
                         Отмена
