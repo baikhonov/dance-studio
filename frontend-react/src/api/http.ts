@@ -15,10 +15,12 @@ export class ApiError extends Error {
 }
 
 export const apiRequest = async <T>(path: string, options: RequestOptions = {}): Promise<T> => {
+  const token = localStorage.getItem('admin_token')
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: options.method ?? 'GET',
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   })

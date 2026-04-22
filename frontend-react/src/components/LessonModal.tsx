@@ -1,22 +1,45 @@
-import { useEffect } from 'react'
-import type { SyntheticEvent } from 'react'
-import type { Direction, Lesson, Level, Teacher } from '../services/schedule'
+import { useEffect, useMemo, useState } from 'react'
+import type { ChangeEvent, SyntheticEvent } from 'react'
+import { deleteLesson, updateLesson, type Direction, type Lesson, type Level, type NewLesson, type Teacher } from '../services/schedule'
 import { DEFAULT_EVENT_POSTER, DEFAULT_TEACHER_AVATAR, resolvePosterUrl, resolveTeacherPhotoUrl } from '../utils/assets'
 
 type LessonModalProps = {
   lesson: Lesson | null
   isOpen: boolean
   onClose: () => void
+  onSaved: () => void
   directions: Direction[]
   levels: Level[]
   teachers: Teacher[]
+  isAdmin: boolean
 }
 
 const setFallbackImage = (event: SyntheticEvent<HTMLImageElement>, fallbackSrc: string) => {
   event.currentTarget.src = fallbackSrc
 }
 
-export function LessonModal({ lesson, isOpen, onClose, directions, levels, teachers }: LessonModalProps) {
+const cloneLesson = (lesson: Lesson): Lesson => ({
+  ...lesson,
+  levelIds: [...lesson.levelIds],
+  teacherIds: [...lesson.teacherIds],
+})
+
+export function LessonModal({ lesson, isOpen, onClose, onSaved, directions, levels, teachers, isAdmin }: LessonModalProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [draft, setDraft] = useState<Lesson | null>(lesson)
+  const sortedDirections = useMemo(() => [...directions].sort((a, b) => a.name.localeCompare(b.name)), [directions])
+  const sortedLevels = useMemo(() => [...levels].sort((a, b) => a.name.localeCompare(b.name)), [levels])
+
+  useEffect(() => {
+    if (lesson) {
+      setDraft(cloneLesson(lesson))
+      setIsEditing(false)
+      setError(null)
+    }
+  }, [lesson, isOpen])
+
   useEffect(() => {
     const onEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isOpen) onClose()
@@ -25,16 +48,84 @@ export function LessonModal({ lesson, isOpen, onClose, directions, levels, teach
     return () => window.removeEventListener('keydown', onEsc)
   }, [isOpen, onClose])
 
-  if (!isOpen || !lesson) return null
+  if (!isOpen || !lesson || !draft) return null
 
   const direction = directions.find((item) => item.id === lesson.directionId)
   const levelNames =
-    lesson.levelIds.length === 0
-      ? ['Для всех']
-      : lesson.levelIds.map((id) => levels.find((level) => level.id === id)?.name ?? 'Для всех')
+    lesson.levelIds.length === 0 ? ['Для всех'] : lesson.levelIds.map((id) => levels.find((level) => level.id === id)?.name ?? 'Для всех')
   const lessonTeachers = lesson.teacherIds
     .map((id) => teachers.find((teacher) => teacher.id === id))
     .filter((teacher): teacher is Teacher => Boolean(teacher))
+
+  const canSave =
+    draft.day.trim() !== '' &&
+    draft.time.trim() !== '' &&
+    draft.endTime.trim() !== '' &&
+    Number.isFinite(draft.directionId)
+
+  const onToggleLevel = (levelId: number, checked: boolean) => {
+    setDraft((prev) =>
+      prev
+        ? {
+            ...prev,
+            levelIds: checked ? [...new Set([...prev.levelIds, levelId])] : prev.levelIds.filter((id) => id !== levelId),
+          }
+        : prev,
+    )
+  }
+
+  const onToggleTeacher = (teacherId: number, checked: boolean) => {
+    setDraft((prev) =>
+      prev
+        ? {
+            ...prev,
+            teacherIds: checked ? [...new Set([...prev.teacherIds, teacherId])] : prev.teacherIds.filter((id) => id !== teacherId),
+          }
+        : prev,
+    )
+  }
+
+  const handleSave = async () => {
+    if (!draft || !canSave) return
+    setError(null)
+    setIsSubmitting(true)
+    try {
+      const payload: NewLesson = {
+        day: draft.day,
+        time: draft.time,
+        endTime: draft.endTime,
+        crossesMidnight: draft.crossesMidnight,
+        directionId: draft.directionId,
+        levelIds: draft.levelIds,
+        teacherIds: draft.teacherIds,
+        poster: draft.poster,
+      }
+      await updateLesson(draft.id, payload)
+      onSaved()
+      onClose()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось сохранить занятие')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!draft) return
+    const confirmDelete = window.confirm('Удалить занятие?')
+    if (!confirmDelete) return
+    setError(null)
+    setIsSubmitting(true)
+    try {
+      await deleteLesson(draft.id)
+      onSaved()
+      onClose()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось удалить занятие')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50">
@@ -45,54 +136,206 @@ export function LessonModal({ lesson, isOpen, onClose, directions, levels, teach
             onClick={(event) => event.stopPropagation()}
           >
             <div className="overflow-y-auto p-6" style={{ maxHeight: 'calc(90vh - 8px)' }}>
-              <h3 className="mb-3 pr-8 text-2xl font-bold text-gray-900">{direction?.name ?? 'Без направления'}</h3>
+              {!isEditing ? (
+                <>
+                  <h3 className="mb-3 pr-8 text-2xl font-bold text-gray-900">{direction?.name ?? 'Без направления'}</h3>
 
-              <div className="mb-4 flex flex-wrap items-start gap-2 text-sm md:items-center">
-                <span className="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700">
-                  {lesson.time} - {lesson.endTime}
-                </span>
-                <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-700 md:ml-3 md:mt-0">
-                  {levelNames.join(', ')}
-                </span>
-              </div>
-
-              {direction?.description && (
-                <p className="mb-4 whitespace-pre-line text-sm text-gray-700">{direction.description}</p>
-              )}
-
-              {lessonTeachers.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-                    {lessonTeachers.length > 1 ? 'Преподаватели' : 'Преподаватель'}
-                  </h4>
-                  <div className="flex flex-wrap gap-4">
-                    {lessonTeachers.map((teacher) => (
-                      <div
-                        key={teacher.id}
-                        className="flex min-w-45 items-center gap-3 rounded-lg border border-transparent bg-gray-50 p-3"
-                      >
-                        <img
-                          src={resolveTeacherPhotoUrl(teacher.photo)}
-                          alt={teacher.name}
-                          className="h-16 w-16 rounded-full border-2 border-white object-cover shadow-sm"
-                          onError={(event) => setFallbackImage(event, DEFAULT_TEACHER_AVATAR)}
-                        />
-                        <p className="font-semibold text-gray-800">{teacher.name}</p>
-                      </div>
-                    ))}
+                  <div className="mb-4 flex flex-wrap items-start gap-2 text-sm md:items-center">
+                    <span className="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700">
+                      {lesson.time} - {lesson.endTime}
+                    </span>
+                    <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-700 md:ml-3 md:mt-0">
+                      {levelNames.join(', ')}
+                    </span>
                   </div>
-                </div>
-              )}
 
-              {lesson.poster && (
-                <div>
-                  <img
-                    src={resolvePosterUrl(lesson.poster)}
-                    alt={direction?.name ?? 'Занятие'}
-                    className="mx-auto w-full rounded-lg shadow-md"
-                    onError={(event) => setFallbackImage(event, DEFAULT_EVENT_POSTER)}
-                  />
-                </div>
+                  {direction?.description && <p className="mb-4 whitespace-pre-line text-sm text-gray-700">{direction.description}</p>}
+
+                  {lessonTeachers.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+                        {lessonTeachers.length > 1 ? 'Преподаватели' : 'Преподаватель'}
+                      </h4>
+                      <div className="flex flex-wrap gap-4">
+                        {lessonTeachers.map((teacher) => (
+                          <div key={teacher.id} className="flex min-w-45 items-center gap-3 rounded-lg border border-transparent bg-gray-50 p-3">
+                            <img
+                              src={resolveTeacherPhotoUrl(teacher.photo)}
+                              alt={teacher.name}
+                              className="h-16 w-16 rounded-full border-2 border-white object-cover shadow-sm"
+                              onError={(event) => setFallbackImage(event, DEFAULT_TEACHER_AVATAR)}
+                            />
+                            <p className="font-semibold text-gray-800">{teacher.name}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {lesson.poster && (
+                    <div>
+                      <img
+                        src={resolvePosterUrl(lesson.poster)}
+                        alt={direction?.name ?? 'Занятие'}
+                        className="mx-auto w-full rounded-lg shadow-md"
+                        onError={(event) => setFallbackImage(event, DEFAULT_EVENT_POSTER)}
+                      />
+                    </div>
+                  )}
+
+                  {isAdmin && (
+                    <div className="mt-4 flex gap-2 border-t border-gray-200 pt-4">
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="rounded-lg bg-amber-500 px-4 py-2 text-white hover:bg-amber-600"
+                        type="button"
+                      >
+                        Редактировать
+                      </button>
+                      <button
+                        onClick={handleDelete}
+                        className="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-60"
+                        type="button"
+                        disabled={isSubmitting}
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <form
+                  className="space-y-4"
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    void handleSave()
+                  }}
+                >
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Направление</label>
+                    <select
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                      value={draft.directionId}
+                      onChange={(event) =>
+                        setDraft((prev) => (prev ? { ...prev, directionId: Number(event.target.value) } : prev))
+                      }
+                    >
+                      {sortedDirections.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Уровни</label>
+                    <div className="max-h-32 space-y-2 overflow-y-auto rounded-lg border border-gray-300 p-3">
+                      {sortedLevels.map((level) => (
+                        <label key={level.id} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={draft.levelIds.includes(level.id)}
+                            onChange={(event: ChangeEvent<HTMLInputElement>) => onToggleLevel(level.id, event.target.checked)}
+                          />
+                          <span className="text-sm text-gray-700">{level.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-gray-700">Время начала</label>
+                      <input
+                        type="time"
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                        value={draft.time}
+                        onChange={(event) => setDraft((prev) => (prev ? { ...prev, time: event.target.value } : prev))}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-gray-700">Время окончания</label>
+                      <input
+                        type="time"
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                        value={draft.endTime}
+                        onChange={(event) => setDraft((prev) => (prev ? { ...prev, endTime: event.target.value } : prev))}
+                      />
+                    </div>
+                  </div>
+
+                  <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={draft.crossesMidnight}
+                      onChange={(event) =>
+                        setDraft((prev) => (prev ? { ...prev, crossesMidnight: event.target.checked } : prev))
+                      }
+                    />
+                    Переходит за полночь
+                  </label>
+
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">День недели</label>
+                    <select
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                      value={draft.day}
+                      onChange={(event) => setDraft((prev) => (prev ? { ...prev, day: event.target.value } : prev))}
+                    >
+                      <option value="">Выберите день</option>
+                      {['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'].map(
+                        (day) => (
+                          <option key={day} value={day}>
+                            {day}
+                          </option>
+                        ),
+                      )}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">Преподаватели</label>
+                    <div className="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-gray-300 p-3">
+                      {teachers.map((teacher) => (
+                        <label key={teacher.id} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={draft.teacherIds.includes(teacher.id)}
+                            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                              onToggleTeacher(teacher.id, event.target.checked)
+                            }
+                          />
+                          <img src={resolveTeacherPhotoUrl(teacher.photo)} alt={teacher.name} className="h-6 w-6 rounded-full object-cover" />
+                          <span className="text-sm text-gray-700">{teacher.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {error && <p className="text-sm text-red-600">{error}</p>}
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="submit"
+                      className="flex-1 rounded-lg bg-amber-500 px-4 py-2 text-white hover:bg-amber-600 disabled:opacity-60"
+                      disabled={isSubmitting || !canSave}
+                    >
+                      Сохранить
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDraft(cloneLesson(lesson))
+                        setIsEditing(false)
+                        setError(null)
+                      }}
+                      className="flex-1 rounded-lg bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
+                    >
+                      Отмена
+                    </button>
+                  </div>
+                </form>
               )}
             </div>
 

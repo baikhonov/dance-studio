@@ -24,6 +24,7 @@ function App() {
   const filtersRef = useRef<HTMLDivElement | null>(null)
   const [filtersHeight, setFiltersHeight] = useState(0)
   const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth)
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => Boolean(localStorage.getItem('admin_token')))
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false)
   const [filters, setFilters] = useState<{ direction: number | null; level: number | null }>({
@@ -31,7 +32,7 @@ function App() {
     level: null,
   })
 
-  useEffect(() => {
+  const loadData = () =>
     Promise.all([getPublicSchedule(), getDirections(), getLevels(), getTeachers()])
       .then(([lessonsData, directionsData, levelsData, teachersData]) => {
         setLessons(lessonsData)
@@ -45,6 +46,12 @@ function App() {
       .finally(() => {
         setIsLoading(false)
       })
+
+  useEffect(() => {
+    void loadData()
+    const syncAuth = () => setIsAdmin(Boolean(localStorage.getItem('admin_token')))
+    window.addEventListener('storage', syncAuth)
+    return () => window.removeEventListener('storage', syncAuth)
   }, [])
 
   useEffect(() => {
@@ -159,6 +166,8 @@ function App() {
         directions={directions}
         levels={levels}
         teachers={teachers}
+        isAdmin={isAdmin}
+        onSaved={() => void loadData()}
       />
     </div>
   )

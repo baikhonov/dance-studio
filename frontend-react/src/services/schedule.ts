@@ -30,7 +30,12 @@ export type Teacher = {
   photo: string
 }
 
+export type NewLesson = Omit<Lesson, 'id'>
+
 export const getPublicSchedule = () => apiRequest<Lesson[]>('/lessons')
 export const getDirections = () => apiRequest<Direction[]>('/directions')
 export const getLevels = () => apiRequest<Level[]>('/levels')
 export const getTeachers = () => apiRequest<Teacher[]>('/teachers')
+export const updateLesson = (id: number, payload: NewLesson) =>
+  apiRequest<Lesson>(`/lessons/${id}`, { method: 'PUT', body: payload })
+export const deleteLesson = (id: number) => apiRequest<void>(`/lessons/${id}`, { method: 'DELETE' })
