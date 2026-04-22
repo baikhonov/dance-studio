@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent, SyntheticEvent } from 'react'
-import { deleteLesson, updateLesson, type Direction, type Lesson, type Level, type NewLesson, type Teacher } from '../services/schedule'
+import { createLesson, deleteLesson, updateLesson, type Direction, type Lesson, type Level, type NewLesson, type Teacher } from '../services/schedule'
 import { DEFAULT_EVENT_POSTER, DEFAULT_TEACHER_AVATAR, resolvePosterUrl, resolveTeacherPhotoUrl } from '../utils/assets'
 
 type LessonModalProps = {
   lesson: Lesson | null
+  mode: 'view' | 'create'
   isOpen: boolean
   onClose: () => void
   onSaved: () => void
@@ -18,27 +19,52 @@ const setFallbackImage = (event: SyntheticEvent<HTMLImageElement>, fallbackSrc: 
   event.currentTarget.src = fallbackSrc
 }
 
-const cloneLesson = (lesson: Lesson): Lesson => ({
-  ...lesson,
+const weekDays = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+
+const cloneLesson = (lesson: NewLesson): NewLesson => ({
+  day: lesson.day,
+  time: lesson.time,
+  endTime: lesson.endTime,
+  crossesMidnight: lesson.crossesMidnight,
+  directionId: lesson.directionId,
   levelIds: [...lesson.levelIds],
   teacherIds: [...lesson.teacherIds],
+  poster: lesson.poster,
 })
 
-export function LessonModal({ lesson, isOpen, onClose, onSaved, directions, levels, teachers, isAdmin }: LessonModalProps) {
+const buildEmptyDraft = (directions: Direction[]): NewLesson => ({
+  day: weekDays[0],
+  time: '19:00',
+  endTime: '20:00',
+  crossesMidnight: false,
+  directionId: directions[0]?.id ?? 0,
+  levelIds: [],
+  teacherIds: [],
+  poster: null,
+})
+
+export function LessonModal({ lesson, mode, isOpen, onClose, onSaved, directions, levels, teachers, isAdmin }: LessonModalProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [draft, setDraft] = useState<Lesson | null>(lesson)
+  const [draft, setDraft] = useState<NewLesson | null>(lesson ? cloneLesson(lesson) : null)
   const sortedDirections = useMemo(() => [...directions].sort((a, b) => a.name.localeCompare(b.name)), [directions])
   const sortedLevels = useMemo(() => [...levels].sort((a, b) => a.name.localeCompare(b.name)), [levels])
 
   useEffect(() => {
+    if (mode === 'create') {
+      setDraft(buildEmptyDraft(directions))
+      setIsEditing(true)
+      setError(null)
+      return
+    }
+
     if (lesson) {
       setDraft(cloneLesson(lesson))
       setIsEditing(false)
       setError(null)
     }
-  }, [lesson, isOpen])
+  }, [lesson, isOpen, mode, directions])
 
   useEffect(() => {
     const onEsc = (event: KeyboardEvent) => {
@@ -48,12 +74,17 @@ export function LessonModal({ lesson, isOpen, onClose, onSaved, directions, leve
     return () => window.removeEventListener('keydown', onEsc)
   }, [isOpen, onClose])
 
-  if (!isOpen || !lesson || !draft) return null
+  if (!isOpen || !draft) return null
+  if (mode === 'view' && !lesson) return null
 
-  const direction = directions.find((item) => item.id === lesson.directionId)
+  const direction = directions.find((item) => item.id === (mode === 'view' && lesson ? lesson.directionId : draft.directionId))
   const levelNames =
-    lesson.levelIds.length === 0 ? ['Для всех'] : lesson.levelIds.map((id) => levels.find((level) => level.id === id)?.name ?? 'Для всех')
-  const lessonTeachers = lesson.teacherIds
+    (mode === 'view' && lesson ? lesson.levelIds : draft.levelIds).length === 0
+      ? ['Для всех']
+      : (mode === 'view' && lesson ? lesson.levelIds : draft.levelIds).map(
+          (id) => levels.find((level) => level.id === id)?.name ?? 'Для всех',
+        )
+  const lessonTeachers = (mode === 'view' && lesson ? lesson.teacherIds : draft.teacherIds)
     .map((id) => teachers.find((teacher) => teacher.id === id))
     .filter((teacher): teacher is Teacher => Boolean(teacher))
 
@@ -61,7 +92,8 @@ export function LessonModal({ lesson, isOpen, onClose, onSaved, directions, leve
     draft.day.trim() !== '' &&
     draft.time.trim() !== '' &&
     draft.endTime.trim() !== '' &&
-    Number.isFinite(draft.directionId)
+    Number.isFinite(draft.directionId) &&
+    draft.directionId > 0
 
   const onToggleLevel = (levelId: number, checked: boolean) => {
     setDraft((prev) =>
@@ -90,17 +122,12 @@ export function LessonModal({ lesson, isOpen, onClose, onSaved, directions, leve
     setError(null)
     setIsSubmitting(true)
     try {
-      const payload: NewLesson = {
-        day: draft.day,
-        time: draft.time,
-        endTime: draft.endTime,
-        crossesMidnight: draft.crossesMidnight,
-        directionId: draft.directionId,
-        levelIds: draft.levelIds,
-        teacherIds: draft.teacherIds,
-        poster: draft.poster,
+      const payload: NewLesson = cloneLesson(draft)
+      if (mode === 'create') {
+        await createLesson(payload)
+      } else if (lesson) {
+        await updateLesson(lesson.id, payload)
       }
-      await updateLesson(draft.id, payload)
       onSaved()
       onClose()
     } catch (err) {
@@ -111,13 +138,13 @@ export function LessonModal({ lesson, isOpen, onClose, onSaved, directions, leve
   }
 
   const handleDelete = async () => {
-    if (!draft) return
+    if (!lesson) return
     const confirmDelete = window.confirm('Удалить занятие?')
     if (!confirmDelete) return
     setError(null)
     setIsSubmitting(true)
     try {
-      await deleteLesson(draft.id)
+      await deleteLesson(lesson.id)
       onSaved()
       onClose()
     } catch (err) {
@@ -142,14 +169,16 @@ export function LessonModal({ lesson, isOpen, onClose, onSaved, directions, leve
 
                   <div className="mb-4 flex flex-wrap items-start gap-2 text-sm md:items-center">
                     <span className="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700">
-                      {lesson.time} - {lesson.endTime}
+                      {lesson?.time} - {lesson?.endTime}
                     </span>
                     <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-700 md:ml-3 md:mt-0">
                       {levelNames.join(', ')}
                     </span>
                   </div>
 
-                  {direction?.description && <p className="mb-4 whitespace-pre-line text-sm text-gray-700">{direction.description}</p>}
+                  {direction?.description && (
+                    <p className="mb-4 whitespace-pre-line text-sm text-gray-700">{direction.description}</p>
+                  )}
 
                   {lessonTeachers.length > 0 && (
                     <div className="mb-6">
@@ -172,7 +201,7 @@ export function LessonModal({ lesson, isOpen, onClose, onSaved, directions, leve
                     </div>
                   )}
 
-                  {lesson.poster && (
+                  {lesson?.poster && (
                     <div>
                       <img
                         src={resolvePosterUrl(lesson.poster)}
@@ -326,13 +355,19 @@ export function LessonModal({ lesson, isOpen, onClose, onSaved, directions, leve
                     <button
                       type="button"
                       onClick={() => {
-                        setDraft(cloneLesson(lesson))
-                        setIsEditing(false)
+                        if (mode === 'create') {
+                          onClose()
+                          return
+                        }
+                        if (lesson) {
+                          setDraft(cloneLesson(lesson))
+                          setIsEditing(false)
+                        }
                         setError(null)
                       }}
                       className="flex-1 rounded-lg bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
                     >
-                      Отмена
+                      {mode === 'create' ? 'Закрыть' : 'Отмена'}
                     </button>
                   </div>
                 </form>

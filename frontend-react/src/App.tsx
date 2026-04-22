@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { LessonModal } from './components/LessonModal'
 import { ScheduleFilters } from './components/ScheduleFilters'
 import { ScheduleList } from './components/ScheduleList'
@@ -26,11 +26,16 @@ function App() {
   const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth)
   const [isAdmin, setIsAdmin] = useState<boolean>(() => Boolean(localStorage.getItem('admin_token')))
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
+  const [modalMode, setModalMode] = useState<'view' | 'create'>('view')
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false)
   const [filters, setFilters] = useState<{ direction: number | null; level: number | null }>({
     direction: null,
     level: null,
   })
+
+  const measureFiltersHeight = () => {
+    setFiltersHeight(filtersRef.current?.offsetHeight ?? 0)
+  }
 
   const loadData = () =>
     Promise.all([getPublicSchedule(), getDirections(), getLevels(), getTeachers()])
@@ -55,9 +60,11 @@ function App() {
   }, [])
 
   useEffect(() => {
+    if (isLoading) return
+
     const updateMetrics = () => {
       setWindowWidth(window.innerWidth)
-      setFiltersHeight(filtersRef.current?.offsetHeight ?? 0)
+      measureFiltersHeight()
     }
 
     updateMetrics()
@@ -72,7 +79,15 @@ function App() {
       window.removeEventListener('resize', updateMetrics)
       observer.disconnect()
     }
-  }, [])
+  }, [isLoading])
+
+  useLayoutEffect(() => {
+    if (isLoading) return
+
+    measureFiltersHeight()
+    const frameId = window.requestAnimationFrame(measureFiltersHeight)
+    return () => window.cancelAnimationFrame(frameId)
+  }, [isLoading, isAdmin, filters.direction, filters.level, directions.length, levels.length])
 
   if (isLoading) {
     return (
@@ -102,7 +117,14 @@ function App() {
   })
 
   const openLessonModal = (lesson: Lesson) => {
+    setModalMode('view')
     setSelectedLesson(lesson)
+    setIsLessonModalOpen(true)
+  }
+
+  const openCreateLessonModal = () => {
+    setModalMode('create')
+    setSelectedLesson(null)
     setIsLessonModalOpen(true)
   }
 
@@ -129,6 +151,15 @@ function App() {
       <main className="mx-auto mb-4 w-full max-w-[1800px]">
         <div ref={filtersRef} className="z-40 bg-gray-100 py-2 md:sticky md:top-0">
           <div className="mb-2 max-md:mb-0 md:flex md:items-start md:gap-2">
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={openCreateLessonModal}
+                className="mb-2 w-full rounded-lg bg-amber-500 px-4 py-2 text-white hover:bg-amber-600 md:mb-0 md:w-auto md:shrink-0"
+              >
+                Добавить занятие
+              </button>
+            )}
             <div className="flex flex-row flex-nowrap items-center gap-2 pb-1 md:flex-1 md:justify-end md:pb-0">
               <div className="min-w-0 flex-1 md:flex-none">
                 <ScheduleFilters
@@ -167,6 +198,7 @@ function App() {
         levels={levels}
         teachers={teachers}
         isAdmin={isAdmin}
+        mode={modalMode}
         onSaved={() => void loadData()}
       />
     </div>

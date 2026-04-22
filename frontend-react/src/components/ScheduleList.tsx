@@ -216,7 +216,7 @@ export function ScheduleList({
       top: `${top + 3}px`,
       left: '3px',
       right: '3px',
-      height: `${Math.max(height - 6, 44)}px`,
+      height: `${height - 6}px`,
     }
   }
 
@@ -229,10 +229,9 @@ export function ScheduleList({
     <section className="max-h-[75dvh] overflow-x-auto overflow-y-auto md:max-h-none md:overflow-visible">
       <div className="mx-auto min-w-[870px] border-gray-300 md:min-w-0 md:max-w-[1280px]">
         <div
-          className="sticky top-0 z-30 grid bg-gray-100 shadow-sm"
+          className="sticky top-0 z-30 grid grid-cols-[90px_repeat(7,minmax(110px,1fr))] bg-gray-100 shadow-sm"
           style={{
             top: `${stickyTop}px`,
-            gridTemplateColumns: '90px repeat(7, minmax(110px, 1fr))',
           }}
         >
           <div className="sticky left-0 z-20 flex items-center justify-center border border-r border-gray-300 bg-gray-200 p-2 text-center font-semibold text-gray-700 md:border-r-0 md:bg-gray-200/50 md:p-3">
@@ -249,10 +248,7 @@ export function ScheduleList({
           ))}
         </div>
 
-        <div
-          className="grid"
-          style={{ gridTemplateColumns: '90px repeat(7, minmax(110px, 1fr))' }}
-        >
+        <div className="grid grid-cols-[90px_repeat(7,minmax(110px,1fr))]">
           <div className="sticky left-0 z-10 bg-gray-100 md:static">
             {timeRows.map((row) => (
               <div
