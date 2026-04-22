@@ -127,8 +127,9 @@ const saveDirection = async () => {
     }
 
     emit('close')
-  } catch {
-    showAlert('Не удалось сохранить направление')
+  } catch (error) {
+    const message = error instanceof Error ? error.message : ''
+    showAlert(message ? `Не удалось сохранить направление: ${message}` : 'Не удалось сохранить направление')
   }
 }
 
