@@ -31,12 +31,12 @@ export function ScheduleFilters({ directions, levels, value, onChange, filteredC
   const resetFilters = () => onChange({ direction: null, level: null })
 
   return (
-    <section className="mb-5 rounded-xl border border-slate-200 bg-white/80 p-3 shadow-sm">
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="grid min-w-[220px] grow gap-1">
-          <span className="text-xs text-slate-500">Направление</span>
+    <section className="mb-2 md:flex md:items-start md:gap-2">
+      <div className="flex w-full flex-row flex-nowrap items-center gap-2">
+        <label className="grid min-w-0 flex-1 gap-1 md:max-w-[220px] md:flex-none">
+          <span className="sr-only">Направление</span>
           <select
-            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none ring-violet-200 transition focus:ring-2"
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm outline-none ring-amber-200 transition focus:ring-2"
             value={value.direction ?? ''}
             onChange={(event) => onDirectionChange(event.target.value)}
           >
@@ -49,10 +49,10 @@ export function ScheduleFilters({ directions, levels, value, onChange, filteredC
           </select>
         </label>
 
-        <label className="grid min-w-[220px] grow gap-1">
-          <span className="text-xs text-slate-500">Уровень</span>
+        <label className="grid min-w-0 flex-1 gap-1 md:max-w-[220px] md:flex-none">
+          <span className="sr-only">Уровень</span>
           <select
-            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none ring-violet-200 transition focus:ring-2"
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm outline-none ring-amber-200 transition focus:ring-2"
             value={value.level ?? ''}
             onChange={(event) => onLevelChange(event.target.value)}
           >
@@ -68,14 +68,27 @@ export function ScheduleFilters({ directions, levels, value, onChange, filteredC
         {(value.direction !== null || value.level !== null) && (
           <button
             type="button"
-            className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 transition hover:bg-slate-50"
+            className="hidden shrink-0 rounded-lg px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 md:inline-flex"
             onClick={resetFilters}
           >
-            Сбросить
+            ✕ Сбросить
           </button>
         )}
       </div>
-      <p className="mt-2 text-sm text-slate-600">Найдено занятий: {filteredCount}</p>
+      {(value.direction !== null || value.level !== null) && (
+        <div className="mt-2 flex items-center justify-between gap-2 md:hidden">
+          <button
+            type="button"
+            className="rounded-lg px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            onClick={resetFilters}
+          >
+            ✕ Сбросить
+          </button>
+          <span className="rounded-full bg-gray-100 px-3 py-1.5 text-center text-sm text-gray-600">
+            Найдено: {filteredCount}
+          </span>
+        </div>
+      )}
     </section>
   )
 }

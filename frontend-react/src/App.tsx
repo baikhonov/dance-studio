@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { API_BASE_URL } from './config/runtime'
 import { ScheduleFilters } from './components/ScheduleFilters'
 import { ScheduleList } from './components/ScheduleList'
@@ -14,12 +14,16 @@ import {
 } from './services/schedule'
 
 function App() {
+  const schoolName = 'Dance Studio'
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [directions, setDirections] = useState<Direction[]>([])
   const [levels, setLevels] = useState<Level[]>([])
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const filtersRef = useRef<HTMLDivElement | null>(null)
+  const [filtersHeight, setFiltersHeight] = useState(0)
+  const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth)
   const [filters, setFilters] = useState<{ direction: number | null; level: number | null }>({
     direction: null,
     level: null,
@@ -41,21 +45,43 @@ function App() {
       })
   }, [])
 
+  useEffect(() => {
+    const updateMetrics = () => {
+      setWindowWidth(window.innerWidth)
+      setFiltersHeight(filtersRef.current?.offsetHeight ?? 0)
+    }
+
+    updateMetrics()
+    window.addEventListener('resize', updateMetrics)
+
+    const observer = new ResizeObserver(updateMetrics)
+    if (filtersRef.current) {
+      observer.observe(filtersRef.current)
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateMetrics)
+      observer.disconnect()
+    }
+  }, [])
+
   if (isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-4 py-10">
-        <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Dance Studio (React)</h1>
-        <p className="mt-3 text-slate-600">Loading schedule...</p>
-      </main>
+      <div className="min-h-screen px-3 py-3 md:px-4">
+        <main className="mx-auto max-w-[1800px]">
+          <p className="mt-3 text-slate-600">Loading schedule...</p>
+        </main>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <main className="mx-auto max-w-5xl px-4 py-10">
-        <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Dance Studio (React)</h1>
-        <p className="mt-3 text-rose-600">Error: {error}</p>
-      </main>
+      <div className="min-h-screen px-3 py-3 md:px-4">
+        <main className="mx-auto max-w-[1800px]">
+          <p className="mt-3 text-rose-600">Error: {error}</p>
+        </main>
+      </div>
     )
   }
 
@@ -67,20 +93,47 @@ function App() {
   })
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 md:py-10">
-      <h1 className="text-4xl font-semibold tracking-tight text-slate-900 md:text-5xl">Dance Studio (React)</h1>
-      <p className="mt-2 text-sm text-slate-600">Migration in progress</p>
-      <p className="mt-1 text-xs text-slate-500">API: {API_BASE_URL}</p>
-      <ScheduleFilters
-        directions={directions}
-        levels={levels}
-        value={filters}
-        onChange={setFilters}
-        filteredCount={filteredLessons.length}
-      />
-      <p className="mb-4 text-sm text-slate-600">Lessons count: {filteredLessons.length}</p>
-      <ScheduleList lessons={filteredLessons} directions={directions} levels={levels} teachers={teachers} />
-    </main>
+    <div className="min-h-screen px-3 py-3 font-sans text-slate-900 md:px-4">
+      <header className="mx-auto mb-3 grid w-full max-w-[1800px] grid-cols-[1fr_auto] gap-2 border-b border-gray-200 pb-2 md:grid-cols-[1fr_auto_1fr] md:items-center">
+        <div className="min-w-0">
+          <a href="#" className="inline-flex items-center">
+            <h1 className="truncate text-base font-semibold text-gray-800 md:text-lg">{schoolName}</h1>
+          </a>
+        </div>
+
+        <div className="flex items-center gap-3 justify-self-end md:justify-self-end">
+          <a href="#" className="text-sm text-amber-600 hover:text-amber-700">
+            Войти
+          </a>
+        </div>
+
+        <div className="col-span-2 flex justify-center md:col-span-1 md:col-start-2 md:row-start-1">
+          <h2 className="text-lg font-semibold text-gray-800 md:text-xl">Расписание занятий</h2>
+        </div>
+      </header>
+
+      <main className="mx-auto mb-4 w-full max-w-[1800px]">
+        <p className="mb-2 text-xs text-slate-500">API: {API_BASE_URL}</p>
+        <div ref={filtersRef}>
+          <ScheduleFilters
+            directions={directions}
+            levels={levels}
+            value={filters}
+            onChange={setFilters}
+            filteredCount={filteredLessons.length}
+          />
+        </div>
+        <ScheduleList
+          lessons={filteredLessons}
+          directions={directions}
+          levels={levels}
+          teachers={teachers}
+          stickyTop={windowWidth >= 768 ? Math.max(filtersHeight - 1, 0) : 0}
+        />
+      </main>
+
+      <footer className="my-6 text-center text-gray-600">© 2026 {schoolName}. Все права защищены.</footer>
+    </div>
   )
 }
 
