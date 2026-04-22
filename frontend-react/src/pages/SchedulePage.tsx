@@ -118,13 +118,13 @@ export function SchedulePage() {
 
   return (
     <>
-      <div ref={filtersRef} className="z-40 bg-gray-100 py-2 md:sticky md:top-0">
+      <div ref={filtersRef} className="z-40 bg-gray-100 py-2 md:sticky md:top-0 dark:bg-slate-900">
         <div className="mb-2 max-md:mb-0 md:flex md:items-start md:gap-2">
           {isAdmin && (
             <button
               type="button"
               onClick={openCreateLessonModal}
-              className="mb-2 w-full rounded-lg bg-amber-500 px-4 py-2 text-white hover:bg-amber-600 md:mb-0 md:w-auto md:shrink-0"
+              className="mb-2 w-full rounded-lg bg-amber-500 px-4 py-2 text-white hover:bg-amber-600 md:mb-0 md:w-auto md:shrink-0 dark:bg-amber-700 dark:text-amber-50 dark:hover:bg-amber-800"
             >
               Добавить занятие
             </button>
@@ -140,7 +140,7 @@ export function SchedulePage() {
               />
             </div>
             {(filters.direction !== null || filters.level !== null) && (
-              <div className="hidden shrink-0 rounded-full bg-gray-100 px-3 py-1.5 text-center text-sm text-gray-600 md:block">
+              <div className="hidden shrink-0 rounded-full bg-gray-100 px-3 py-1.5 text-center text-sm text-gray-600 md:block dark:bg-slate-800 dark:text-slate-300">
                 Найдено: {filteredLessons.length}
               </div>
             )}
