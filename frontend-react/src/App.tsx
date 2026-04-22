@@ -1,17 +1,32 @@
 import { useEffect, useState } from 'react'
 import { API_BASE_URL } from './config/runtime'
 import { ScheduleList } from './components/ScheduleList'
-import { getPublicSchedule, type Lesson } from './services/schedule'
+import {
+  getDirections,
+  getLevels,
+  getPublicSchedule,
+  getTeachers,
+  type Direction,
+  type Lesson,
+  type Level,
+  type Teacher,
+} from './services/schedule'
 
 function App() {
   const [lessons, setLessons] = useState<Lesson[]>([])
+  const [directions, setDirections] = useState<Direction[]>([])
+  const [levels, setLevels] = useState<Level[]>([])
+  const [teachers, setTeachers] = useState<Teacher[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    getPublicSchedule()
-      .then((data) => {
-        setLessons(data)
+    Promise.all([getPublicSchedule(), getDirections(), getLevels(), getTeachers()])
+      .then(([lessonsData, directionsData, levelsData, teachersData]) => {
+        setLessons(lessonsData)
+        setDirections(directionsData)
+        setLevels(levelsData)
+        setTeachers(teachersData)
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : 'Unknown error')
@@ -45,7 +60,7 @@ function App() {
       <p>Migration in progress</p>
       <p>API: {API_BASE_URL}</p>
       <p>Lessons count: {lessons.length}</p>
-      <ScheduleList lessons={lessons} />
+      <ScheduleList lessons={lessons} directions={directions} levels={levels} teachers={teachers} />
     </main>
   )
 }
