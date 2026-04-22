@@ -1,6 +1,32 @@
 # dance-studio
 
-This template should help get you started developing with Vue 3 in Vite.
+Portfolio project for a dance studio website with a public class schedule and an admin panel for content management.
+
+The app includes:
+- public timetable view for students
+- JWT-based admin authentication
+- lesson CRUD (directions, levels, teachers, schedule)
+- image uploads for teacher photos and lesson posters
+- production deployment with Docker Compose, PostgreSQL, and HTTPS (Caddy)
+
+Tech stack:
+- frontend: Vue 3 + Vite
+- backend: Node.js + Express + Drizzle ORM
+- database: PostgreSQL
+
+## Live demo
+
+[https://dance-studio-portfolio.ru/](https://dance-studio-portfolio.ru/)
+
+## Screenshots
+
+### Public schedule
+
+![Public schedule](docs/screenshots/public.png)
+
+### Admin panel
+
+![Admin panel](docs/screenshots/admin.png)
 
 ## Recommended IDE Setup
 
@@ -43,17 +69,6 @@ npm run build
 npm run lint
 ```
 
-## Legacy Image Path Cleanup
-
-If your database still contains old image file names from `public/images` (for example `party.webp` or `teacher.jpg`), run this one-time command to normalize them to empty values and use built-in fallback placeholders:
-
-```sh
-cd server
-npm run db:normalize-assets
-```
-
-Use this after pulling the upload/fallback changes to avoid requests to removed `/images/*` paths.
-
 ## Docker workflow (learn + production)
 
 ### Local learning setup (backend + postgres)
@@ -76,31 +91,6 @@ curl http://localhost:3000/health
 ```sh
 cd server
 npm run db:seed
-```
-
-### Data migration from SQLite to PostgreSQL
-
-1) Export current SQLite data:
-
-```sh
-cd server
-npm run db:export-sqlite
-```
-
-This creates `server/data/sqlite-export.sql`.
-
-2) Import SQL into running Postgres container:
-
-```sh
-docker compose exec -T postgres psql -U dance -d dance_studio < server/data/sqlite-export.sql
-```
-
-3) Check source counts before/after import:
-
-```sh
-cd server
-npm run db:count-sqlite
-docker compose exec postgres psql -U dance -d dance_studio -c "SELECT 'directions' AS table, COUNT(*) FROM directions UNION ALL SELECT 'levels', COUNT(*) FROM levels UNION ALL SELECT 'teachers', COUNT(*) FROM teachers UNION ALL SELECT 'studio_settings', COUNT(*) FROM studio_settings UNION ALL SELECT 'lessons', COUNT(*) FROM lessons UNION ALL SELECT 'lesson_levels', COUNT(*) FROM lesson_levels UNION ALL SELECT 'lesson_teachers', COUNT(*) FROM lesson_teachers;"
 ```
 
 ### VPS production deploy (Docker Compose + HTTPS)
