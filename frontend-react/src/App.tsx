@@ -120,22 +120,24 @@ function App() {
       </header>
 
       <main className="mx-auto mb-4 w-full max-w-[1800px]">
-        <div ref={filtersRef} className="mb-2 max-md:mb-0 md:flex md:items-start md:gap-2">
-          <div className="flex flex-row flex-nowrap items-center gap-2 pb-1 md:flex-1 md:justify-end md:pb-0">
-            <div className="min-w-0 flex-1 md:flex-none">
-              <ScheduleFilters
-                directions={directions}
-                levels={levels}
-                value={filters}
-                onChange={setFilters}
-                filteredCount={filteredLessons.length}
-              />
-            </div>
-            {(filters.direction !== null || filters.level !== null) && (
-              <div className="hidden shrink-0 rounded-full bg-gray-100 px-3 py-1.5 text-center text-sm text-gray-600 md:block">
-                Найдено: {filteredLessons.length}
+        <div ref={filtersRef} className="z-40 bg-gray-100 py-2 md:sticky md:top-0">
+          <div className="mb-2 max-md:mb-0 md:flex md:items-start md:gap-2">
+            <div className="flex flex-row flex-nowrap items-center gap-2 pb-1 md:flex-1 md:justify-end md:pb-0">
+              <div className="min-w-0 flex-1 md:flex-none">
+                <ScheduleFilters
+                  directions={directions}
+                  levels={levels}
+                  value={filters}
+                  onChange={setFilters}
+                  filteredCount={filteredLessons.length}
+                />
               </div>
-            )}
+              {(filters.direction !== null || filters.level !== null) && (
+                <div className="hidden shrink-0 rounded-full bg-gray-100 px-3 py-1.5 text-center text-sm text-gray-600 md:block">
+                  Найдено: {filteredLessons.length}
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <ScheduleList
