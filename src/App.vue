@@ -252,7 +252,7 @@ watch(
   >
     <div class="min-w-0">
       <router-link to="/" class="inline-flex items-center">
-        <span v-if="schoolLogoUrl" :class="{ 'logo-contrast-bg': needsLogoContrastBg }">
+        <span v-if="schoolLogoUrl" :class="{ 'logo-contrast-bg': needsLogoContrastBg && !isDark }">
           <img :src="schoolLogoUrl" :alt="schoolName" class="max-h-9 md:max-h-10 w-auto object-contain" />
         </span>
         <h1 v-else class="truncate text-base font-semibold text-gray-800 md:text-lg dark:text-slate-100">
@@ -414,7 +414,4 @@ footer {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
 }
 
-html.dark .logo-contrast-bg {
-  background: rgba(2, 6, 23, 0.82);
-}
 </style>
