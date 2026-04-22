@@ -1,4 +1,5 @@
 import type { Direction, Lesson, Level, Teacher } from '../services/schedule'
+import { LessonCard } from './LessonCard'
 
 type ScheduleListProps = {
   lessons: Lesson[]
@@ -41,6 +42,16 @@ export function ScheduleList({ lessons, directions, levels, teachers }: Schedule
     return ids.map((id) => teachers.find((teacher) => teacher.id === id)?.name ?? `#${id}`).join(', ')
   }
 
+  const getTeacherPhotosByIds = (ids: number[]) =>
+    ids
+      .map((id) => teachers.find((teacher) => teacher.id === id)?.photo)
+      .filter((value): value is string => Boolean(value))
+
+  const getLevelColorByIds = (ids: number[]) => {
+    if (ids.length === 0) return null
+    return levels.find((level) => level.id === ids[0])?.color ?? null
+  }
+
   const grouped = weekDaysOrder
     .map((day) => {
       const byDay = lessons
@@ -55,12 +66,17 @@ export function ScheduleList({ lessons, directions, levels, teachers }: Schedule
       {grouped.map((group) => (
         <div key={group.day}>
           <h2>{group.day}</h2>
-          <ul>
+          <ul className="schedule-list__cards">
             {group.lessons.map((lesson) => (
               <li key={lesson.id}>
-                {lesson.time}-{lesson.endTime} | {getDirectionNameById(lesson.directionId)} | уровни:{' '}
-                {getLevelNamesByIds(lesson.levelIds)} | преподаватели:{' '}
-                {getTeacherNamesByIds(lesson.teacherIds)}
+                <LessonCard
+                  lesson={lesson}
+                  directionName={getDirectionNameById(lesson.directionId)}
+                  levelLabel={getLevelNamesByIds(lesson.levelIds)}
+                  teacherNames={getTeacherNamesByIds(lesson.teacherIds)}
+                  teacherPhotos={getTeacherPhotosByIds(lesson.teacherIds)}
+                  levelColor={getLevelColorByIds(lesson.levelIds)}
+                />
               </li>
             ))}
           </ul>

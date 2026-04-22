@@ -1,0 +1,10 @@
+---
+description: Commit message policy for assistant-created commits
+alwaysApply: true
+---
+
+# Commit Message Policy
+
+- Never include `Made-with: Cursor` in commit messages.
+- Use concise commit messages focused on intent and outcome.
+- Keep commit bodies relevant to the actual code changes.

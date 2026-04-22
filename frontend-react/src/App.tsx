@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { API_BASE_URL } from './config/runtime'
 import { ScheduleList } from './components/ScheduleList'
+import './App.css'
 import {
   getDirections,
   getLevels,
