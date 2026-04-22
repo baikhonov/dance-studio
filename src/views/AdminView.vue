@@ -170,21 +170,21 @@ const removeSchoolLogo = () => {
 <template>
   <div class="space-y-8 py-2">
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 xl:gap-8">
-      <section class="rounded-2xl border border-amber-100 bg-white p-4 md:p-5 shadow-sm">
+      <section class="rounded-2xl border border-amber-100 bg-white p-4 md:p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="flex flex-col gap-3 mb-4">
-          <h2 class="text-xl font-semibold text-gray-900">Настройки школы</h2>
-          <p class="text-sm text-gray-600">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-slate-100">Настройки школы</h2>
+          <p class="text-sm text-gray-600 dark:text-slate-300">
             Название используется в шапке, футере и title страницы
           </p>
         </div>
 
         <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
           <label class="block">
-            <span class="mb-1 block text-sm text-gray-700">Название школы</span>
+            <span class="mb-1 block text-sm text-gray-700 dark:text-slate-300">Название школы</span>
             <input
               v-model="schoolNameDraft"
               type="text"
-              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm md:text-base"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm md:text-base bg-white text-gray-900 dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100"
               maxlength="80"
             />
           </label>
@@ -200,15 +200,15 @@ const removeSchoolLogo = () => {
         </div>
 
         <div class="mt-4 flex flex-col gap-3">
-          <p class="text-sm text-gray-700">Логотип</p>
+          <p class="text-sm text-gray-700 dark:text-slate-300">Логотип</p>
           <div class="flex flex-wrap items-center gap-3">
             <img
               v-if="logoPreviewUrl"
               :src="logoPreviewUrl"
               alt="Логотип школы"
-              class="h-14 max-w-[180px] object-contain rounded border border-gray-200 bg-white p-1"
+              class="h-14 max-w-[180px] object-contain rounded border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 p-1"
             />
-            <span v-else class="text-sm text-gray-500">Логотип не загружен</span>
+            <span v-else class="text-sm text-gray-500 dark:text-slate-400">Логотип не загружен</span>
 
             <label
               class="inline-flex cursor-pointer items-center rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
@@ -224,7 +224,7 @@ const removeSchoolLogo = () => {
 
             <button
               type="button"
-              class="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+              class="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-60 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700"
               :disabled="!logoPathDraft"
               @click="removeSchoolLogo"
             >
@@ -237,17 +237,17 @@ const removeSchoolLogo = () => {
         <p v-if="settingsError" class="mt-3 text-sm text-red-600">{{ settingsError }}</p>
       </section>
 
-      <section class="rounded-2xl border border-amber-100 bg-white p-4 md:p-5 shadow-sm">
+      <section class="rounded-2xl border border-amber-100 bg-white p-4 md:p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="flex flex-col gap-3 mb-4">
           <div class="flex items-center gap-3">
-            <h2 class="text-xl font-semibold text-gray-900">Управление преподавателями</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-slate-100">Управление преподавателями</h2>
             <span
               class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-blue-100 text-blue-700 whitespace-nowrap"
             >
               Всего: {{ teachers.length }}
             </span>
           </div>
-          <p class="text-sm text-gray-600">Состав и карточки преподавателей</p>
+          <p class="text-sm text-gray-600 dark:text-slate-300">Состав и карточки преподавателей</p>
         </div>
 
         <button
@@ -265,7 +265,7 @@ const removeSchoolLogo = () => {
             role="button"
             tabindex="0"
             :aria-label="`Карточка преподавателя ${teacher.name}`"
-            class="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-200 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400"
+            class="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-600 hover:border-blue-200 dark:hover:border-blue-500 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400"
             @click="openTeacherModal(teacher)"
             @keydown.enter="openTeacherModal(teacher)"
             @keydown.space.prevent="openTeacherModal(teacher)"
@@ -276,24 +276,24 @@ const removeSchoolLogo = () => {
               class="w-14 h-14 rounded-full object-cover shrink-0 pointer-events-none"
               @error="setFallbackImage($event, DEFAULT_TEACHER_AVATAR)"
             />
-            <p class="font-semibold text-base leading-tight text-gray-900">
+            <p class="font-semibold text-base leading-tight text-gray-900 dark:text-slate-100">
               {{ teacher.name }}
             </p>
           </div>
         </div>
       </section>
 
-      <section class="rounded-2xl border border-amber-100 bg-white p-4 md:p-5 shadow-sm">
+      <section class="rounded-2xl border border-amber-100 bg-white p-4 md:p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="flex flex-col gap-3 mb-4">
           <div class="flex items-center gap-3">
-            <h2 class="text-xl font-semibold text-gray-900">Управление направлениями</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-slate-100">Управление направлениями</h2>
             <span
               class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap"
             >
               Всего: {{ directions.length }}
             </span>
           </div>
-          <p class="text-sm text-gray-600">Справочник направлений для расписания</p>
+          <p class="text-sm text-gray-600 dark:text-slate-300">Справочник направлений для расписания</p>
         </div>
 
         <button
@@ -311,28 +311,28 @@ const removeSchoolLogo = () => {
             role="button"
             tabindex="0"
             :aria-label="`Элемент направления ${direction.name}`"
-            class="min-h-11 px-3 py-2.5 bg-white border border-gray-200 rounded-lg flex items-center justify-between gap-3 hover:border-emerald-200 hover:bg-emerald-50/40 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            class="min-h-11 px-3 py-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg flex items-center justify-between gap-3 hover:border-emerald-200 hover:bg-emerald-50/40 dark:hover:border-emerald-500 dark:hover:bg-emerald-900/20 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400"
             @click="openDirectionModal(direction)"
             @keydown.enter="openDirectionModal(direction)"
             @keydown.space.prevent="openDirectionModal(direction)"
           >
-            <span class="font-medium text-gray-800 leading-tight">{{ direction.name }}</span>
+            <span class="font-medium text-gray-800 dark:text-slate-100 leading-tight">{{ direction.name }}</span>
             <span class="text-emerald-600 text-sm font-semibold" aria-hidden="true">></span>
           </li>
         </ul>
       </section>
 
-      <section class="rounded-2xl border border-amber-100 bg-white p-4 md:p-5 shadow-sm">
+      <section class="rounded-2xl border border-amber-100 bg-white p-4 md:p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="flex flex-col gap-3 mb-4">
           <div class="flex items-center gap-3">
-            <h2 class="text-xl font-semibold text-gray-900">Управление уровнями</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-slate-100">Управление уровнями</h2>
             <span
               class="px-2.5 py-1 text-xs md:text-sm font-medium rounded-full bg-violet-100 text-violet-700 whitespace-nowrap"
             >
               Всего: {{ managedLevels.length }}
             </span>
           </div>
-          <p class="text-sm text-gray-600">Единый справочник уровней занятий</p>
+          <p class="text-sm text-gray-600 dark:text-slate-300">Единый справочник уровней занятий</p>
         </div>
 
         <button
@@ -350,12 +350,12 @@ const removeSchoolLogo = () => {
             role="button"
             tabindex="0"
             :aria-label="`Элемент уровня ${level.name}`"
-            class="min-h-11 px-3 py-2.5 bg-white border border-gray-200 rounded-lg flex items-center justify-between gap-3 hover:border-violet-200 hover:bg-violet-50/40 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-400"
+            class="min-h-11 px-3 py-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg flex items-center justify-between gap-3 hover:border-violet-200 hover:bg-violet-50/40 dark:hover:border-violet-500 dark:hover:bg-violet-900/20 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-400"
             @click="openLevelModal(level)"
             @keydown.enter="openLevelModal(level)"
             @keydown.space.prevent="openLevelModal(level)"
           >
-            <span class="font-medium text-gray-800 leading-tight">{{ level.name }}</span>
+            <span class="font-medium text-gray-800 dark:text-slate-100 leading-tight">{{ level.name }}</span>
             <span class="text-violet-600 text-sm font-semibold" aria-hidden="true">></span>
           </li>
         </ul>

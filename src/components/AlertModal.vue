@@ -53,12 +53,12 @@ onUnmounted(() => {
 
         <div class="fixed inset-0 flex items-center justify-center p-4">
           <div
-            class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+            class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-transparent dark:border-slate-700"
             @click.stop
           >
             <div class="p-6">
-              <h3 class="text-xl font-bold text-gray-900 mb-2">{{ title }}</h3>
-              <p class="text-gray-600">{{ message }}</p>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-slate-100 mb-2">{{ title }}</h3>
+              <p class="text-gray-600 dark:text-slate-300">{{ message }}</p>
             </div>
 
             <div class="flex gap-3 p-6 pt-0">
@@ -74,7 +74,7 @@ onUnmounted(() => {
             <button
               type="button"
               @click="handleClose"
-              class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
             >
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path

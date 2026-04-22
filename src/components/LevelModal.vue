@@ -170,22 +170,22 @@ onUnmounted(() => {
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="emit('close')">
           <div class="fixed inset-0 flex items-center justify-center p-4">
             <div
-              class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden"
+              class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden border border-transparent dark:border-slate-700"
               @click.stop
             >
               <div class="overflow-y-auto p-6" style="max-height: calc(90vh - 8px)">
                 <template v-if="level && !isEditing && level.id !== null">
-                  <h3 class="text-2xl font-bold text-gray-900 mb-4 pr-8">
+                  <h3 class="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-4 pr-8">
                     {{ level.name }}
                   </h3>
-                  <div class="mb-4 flex items-center gap-2 text-sm text-gray-600">
-                    <span class="h-3 w-3 rounded-full border border-gray-300" :style="{ backgroundColor: level.color }"></span>
+                  <div class="mb-4 flex items-center gap-2 text-sm text-gray-600 dark:text-slate-300">
+                    <span class="h-3 w-3 rounded-full border border-gray-300 dark:border-slate-600" :style="{ backgroundColor: level.color }"></span>
                     <span>{{ level.color }}</span>
                   </div>
-                  <p class="text-sm text-gray-600 mb-6">
+                  <p class="text-sm text-gray-600 dark:text-slate-300 mb-6">
                     При удалении уровня у связанных занятий поле уровня будет очищено.
                   </p>
-                  <div class="flex gap-2 mt-4 pt-4 border-t border-gray-200">
+                  <div class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
                     <button
                       type="button"
                       @click="enableEditing"
@@ -203,24 +203,24 @@ onUnmounted(() => {
                   </div>
                 </template>
                 <template v-else-if="editableLevel">
-                  <h3 class="text-xl font-bold text-gray-900 mb-4 pr-8">
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-slate-100 mb-4 pr-8">
                     {{ editableLevel.id === null ? 'Новый уровень' : 'Редактирование' }}
                   </h3>
                   <form @submit.prevent="saveLevel" class="space-y-4">
                     <div>
-                      <label for="level-name" class="block text-sm font-medium text-gray-700 mb-1">
+                      <label for="level-name" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Название уровня
                       </label>
                       <input
                         id="level-name"
                         v-model="editableLevel.name"
                         type="text"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-amber-400 focus:border-transparent dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100"
                         required
                       />
                     </div>
                     <div>
-                      <label for="level-color" class="block text-sm font-medium text-gray-700 mb-1">
+                      <label for="level-color" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Цвет уровня
                       </label>
                       <div class="flex items-center gap-3">
@@ -228,12 +228,12 @@ onUnmounted(() => {
                           id="level-color"
                           v-model="editableLevel.color"
                           type="color"
-                          class="h-10 w-14 rounded border border-gray-300 bg-white px-1 py-1"
+                          class="h-10 w-14 rounded border border-gray-300 bg-white dark:border-slate-600 dark:bg-slate-900 px-1 py-1"
                         />
                         <input
                           v-model="editableLevel.color"
                           type="text"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-amber-400 focus:border-transparent dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100"
                           pattern="^#[0-9A-Fa-f]{6}$"
                           required
                         />
@@ -249,7 +249,7 @@ onUnmounted(() => {
                       <button
                         type="button"
                         @click="cancelEditing"
-                        class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                        class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
                       >
                         Отмена
                       </button>
@@ -261,7 +261,7 @@ onUnmounted(() => {
               <button
                 type="button"
                 @click="emit('close')"
-                class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-200 transition-colors cursor-pointer"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path

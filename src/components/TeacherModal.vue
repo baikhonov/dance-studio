@@ -174,23 +174,23 @@ onUnmounted(() => {
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="emit('close')">
           <div class="fixed inset-0 flex items-center justify-center p-4">
             <div
-              class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden"
+              class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden border border-transparent dark:border-slate-700"
               @click.stop
             >
               <div class="overflow-y-auto p-6" style="max-height: calc(90vh - 8px)">
                 <template v-if="teacher && !isEditing && teacher.id !== null">
-                  <h3 class="text-2xl font-bold text-gray-900 mb-4 pr-8">
+                  <h3 class="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-4 pr-8">
                     {{ teacher.name }}
                   </h3>
                   <div class="flex justify-center mb-6">
                     <img
                       :src="resolveTeacherPhotoUrl(teacher.photo)"
                       :alt="teacher.name"
-                      class="w-40 h-40 rounded-lg object-cover border-2 border-gray-100 shadow-md"
+                      class="w-40 h-40 rounded-lg object-cover border-2 border-gray-100 dark:border-slate-600 shadow-md"
                       @error="setFallbackImage($event, DEFAULT_TEACHER_AVATAR)"
                     />
                   </div>
-                  <div class="flex gap-2 mt-4 pt-4 border-t border-gray-200">
+                  <div class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
                     <button
                       type="button"
                       @click="enableEditing"
@@ -208,36 +208,36 @@ onUnmounted(() => {
                   </div>
                 </template>
                 <template v-else-if="editableTeacher">
-                  <h3 class="text-xl font-bold text-gray-900 mb-4 pr-8">
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-slate-100 mb-4 pr-8">
                     {{ editableTeacher.id === null ? 'Новый преподаватель' : 'Редактирование' }}
                   </h3>
                   <form @submit.prevent="saveTeacher" class="space-y-4">
                     <div>
-                      <label for="teacher-name" class="block text-sm font-medium text-gray-700 mb-1">
+                      <label for="teacher-name" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Имя преподавателя
                       </label>
                       <input
                         id="teacher-name"
                         v-model="editableTeacher.name"
                         type="text"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-amber-400 focus:border-transparent dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100"
                       />
                     </div>
                     <div>
-                      <label for="teacher-photo" class="block text-sm font-medium text-gray-700 mb-1">
+                      <label for="teacher-photo" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Фото преподавателя
                       </label>
                       <input
                         id="teacher-photo"
                         type="file"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-amber-400 focus:border-transparent dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100"
                         @change="handlePhotoUpload"
                       />
                       <img
                         v-if="editableTeacher.photo"
                         :src="resolveTeacherPhotoUrl(editableTeacher.photo)"
                         alt=""
-                        class="mt-2 w-24 h-24 object-cover rounded-lg border border-gray-200"
+                        class="mt-2 w-24 h-24 object-cover rounded-lg border border-gray-200 dark:border-slate-600"
                         @error="setFallbackImage($event, DEFAULT_TEACHER_AVATAR)"
                       />
                     </div>
@@ -251,7 +251,7 @@ onUnmounted(() => {
                       <button
                         type="button"
                         @click="cancelEditing"
-                        class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                        class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
                       >
                         Отмена
                       </button>
@@ -263,7 +263,7 @@ onUnmounted(() => {
               <button
                 type="button"
                 @click="emit('close')"
-                class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-200 transition-colors cursor-pointer"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path

@@ -163,28 +163,28 @@ onUnmounted(() => {
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="emit('close')">
           <div class="fixed inset-0 flex items-center justify-center p-4">
             <div
-              class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden"
+              class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden border border-transparent dark:border-slate-700"
               @click.stop
             >
               <div class="overflow-y-auto p-6" style="max-height: calc(90vh - 8px)">
                 <template v-if="direction && !isEditing && direction.id !== null">
-                  <h3 class="text-2xl font-bold text-gray-900 mb-4 pr-8">
+                  <h3 class="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-4 pr-8">
                     {{ direction.name }}
                   </h3>
                   <div v-if="direction.description" class="mb-4">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Описание</p>
-                    <p class="text-sm text-gray-700 whitespace-pre-line">
+                    <p class="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">Описание</p>
+                    <p class="text-sm text-gray-700 dark:text-slate-300 whitespace-pre-line">
                       {{ direction.description }}
                     </p>
                   </div>
-                  <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                  <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-700/50 dark:bg-amber-900/20">
                     <p class="text-sm font-semibold text-amber-800">Внимание</p>
                     <p class="mt-1 text-sm text-amber-700">
                       При удалении направления все связанные занятия будут удалены из расписания без возможности
                       восстановления.
                     </p>
                   </div>
-                  <div class="flex gap-2 mt-2 pt-4 border-t border-gray-200">
+                  <div class="flex gap-2 mt-2 pt-4 border-t border-gray-200 dark:border-slate-700">
                     <button
                       type="button"
                       @click="enableEditing"
@@ -202,24 +202,24 @@ onUnmounted(() => {
                   </div>
                 </template>
                 <template v-else-if="editableDirection">
-                  <h3 class="text-xl font-bold text-gray-900 mb-4 pr-8">
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-slate-100 mb-4 pr-8">
                     {{ editableDirection.id === null ? 'Новое направление' : 'Редактирование' }}
                   </h3>
                   <form @submit.prevent="saveDirection" class="space-y-4">
                     <div>
-                      <label for="direction-name" class="block text-sm font-medium text-gray-700 mb-1">
+                      <label for="direction-name" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Название направления
                       </label>
                       <input
                         id="direction-name"
                         v-model="editableDirection.name"
                         type="text"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-amber-400 focus:border-transparent dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100"
                         required
                       />
                     </div>
                     <div>
-                      <label for="direction-description" class="block text-sm font-medium text-gray-700 mb-1">
+                      <label for="direction-description" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Описание направления
                       </label>
                       <textarea
@@ -227,7 +227,7 @@ onUnmounted(() => {
                         v-model="editableDirection.description"
                         rows="4"
                         placeholder="Для кого это направление, что изучается на занятии и т.п."
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-amber-400 focus:border-transparent dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100"
                       />
                     </div>
                     <div class="flex gap-3 pt-4">
@@ -240,7 +240,7 @@ onUnmounted(() => {
                       <button
                         type="button"
                         @click="cancelEditing"
-                        class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                        class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
                       >
                         Отмена
                       </button>
@@ -252,7 +252,7 @@ onUnmounted(() => {
               <button
                 type="button"
                 @click="emit('close')"
-                class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-200 transition-colors cursor-pointer"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path

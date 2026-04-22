@@ -42,16 +42,17 @@ const formatTeacherNames = (teachers: Teacher[]): string =>
     :style="[cardStyle, levelStyle]"
     @click="emit('select')"
   >
-    <div class="lesson-card-content h-full p-1 flex flex-col text-[10px] overflow-hidden">
+    <div class="pointer-events-none absolute inset-0 hidden dark:block bg-slate-950/45"></div>
+    <div class="lesson-card-content relative z-10 h-full p-1 flex flex-col text-[10px] overflow-hidden">
       <p class="shrink-0 font-bold text-xs leading-tight truncate text-gray-900" :title="directionName">
         {{ directionName }}
       </p>
 
-      <p class="text-xs text-gray-700 mt-0 font-medium truncate" :title="levelTitle">
+      <p class="text-xs text-gray-700 dark:text-slate-200 mt-0 font-medium truncate" :title="levelTitle">
         {{ levelName }}
       </p>
 
-      <div class="text-xs font-medium mt-0.5 bg-white/50 px-1 py-0.5 rounded inline-block self-start">
+      <div class="text-xs font-medium mt-0.5 bg-white/50 dark:bg-slate-800/80 dark:text-slate-100 px-1 py-0.5 rounded inline-block self-start">
         {{ lesson.time }}—{{ lesson.endTime }}
       </div>
 
@@ -73,7 +74,7 @@ const formatTeacherNames = (teachers: Teacher[]): string =>
           />
         </div>
         <p
-          class="mt-0.5 text-[10px] leading-tight text-gray-700 font-medium text-right truncate"
+          class="mt-0.5 text-[10px] leading-tight text-gray-700 dark:text-slate-300 font-medium text-right truncate"
           :title="lesson.teachers.map((t) => t.name).join(', ')"
         >
           {{ formatTeacherNames(lesson.teachers) }}
@@ -98,5 +99,14 @@ const formatTeacherNames = (teachers: Teacher[]): string =>
 <style scoped>
 .text-gray-900 {
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+:global(.dark) .lesson-card-content {
+  background: rgba(15, 23, 42, 0.82);
+}
+
+:global(.dark) .text-gray-900 {
+  color: #f8fafc;
+  text-shadow: none;
 }
 </style>

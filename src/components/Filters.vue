@@ -58,11 +58,19 @@ const selectedLevelColor = computed(() => {
 const selectedLevelDotStyle = computed(() => getLevelDotStyle(selectedLevelColor.value))
 
 const toggleLevelsMenu = () => {
-  isLevelsOpen.value = !isLevelsOpen.value
+  const next = !isLevelsOpen.value
+  isLevelsOpen.value = next
+  if (next) {
+    isDirectionsOpen.value = false
+  }
 }
 
 const toggleDirectionsMenu = () => {
-  isDirectionsOpen.value = !isDirectionsOpen.value
+  const next = !isDirectionsOpen.value
+  isDirectionsOpen.value = next
+  if (next) {
+    isLevelsOpen.value = false
+  }
 }
 
 const handleOutsideClick = (event: MouseEvent) => {
@@ -96,12 +104,12 @@ onUnmounted(() => {
       >
         <button
           type="button"
-          class="w-full px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer inline-flex items-center justify-between gap-2"
+          class="w-full px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer inline-flex items-center justify-between gap-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
           @click.stop="toggleDirectionsMenu"
         >
           <span class="truncate">{{ selectedDirectionLabel }}</span>
           <span
-            class="text-xs text-gray-500 transition-transform duration-200 ease-in-out"
+            class="text-xs text-gray-500 dark:text-slate-400 transition-transform duration-200 ease-in-out"
             :class="{ 'rotate-180': isDirectionsOpen }"
             >▼</span
           >
@@ -109,11 +117,11 @@ onUnmounted(() => {
 
         <div
           v-if="isDirectionsOpen"
-          class="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden"
+          class="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden dark:border-slate-600 dark:bg-slate-800"
         >
           <button
             type="button"
-            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
+            class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 dark:text-slate-200 dark:hover:bg-slate-700"
             @click="selectDirection(null)"
           >
             Все направления
@@ -122,7 +130,7 @@ onUnmounted(() => {
             v-for="direction in directions"
             :key="direction.id"
             type="button"
-            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
+            class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 dark:text-slate-200 dark:hover:bg-slate-700"
             @click="selectDirection(direction.id)"
           >
             {{ direction.name }}
@@ -135,7 +143,7 @@ onUnmounted(() => {
       >
         <button
           type="button"
-          class="w-full px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer inline-flex items-center justify-between gap-2"
+          class="w-full px-4 py-2 border border-gray-300 bg-white rounded-lg shadow-sm text-gray-700 cursor-pointer inline-flex items-center justify-between gap-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
           @click.stop="toggleLevelsMenu"
         >
           <span class="inline-flex items-center gap-2 truncate">
@@ -143,7 +151,7 @@ onUnmounted(() => {
             <span class="truncate">{{ selectedLevelLabel }}</span>
           </span>
           <span
-            class="text-xs text-gray-500 transition-transform duration-200 ease-in-out"
+            class="text-xs text-gray-500 dark:text-slate-400 transition-transform duration-200 ease-in-out"
             :class="{ 'rotate-180': isLevelsOpen }"
             >▼</span
           >
@@ -151,11 +159,11 @@ onUnmounted(() => {
 
         <div
           v-if="isLevelsOpen"
-          class="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden"
+          class="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden dark:border-slate-600 dark:bg-slate-800"
         >
           <button
             type="button"
-            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 inline-flex items-center gap-2"
+            class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 inline-flex items-center gap-2 dark:text-slate-200 dark:hover:bg-slate-700"
             @click="selectLevel(null)"
           >
             <span class="h-2.5 w-2.5 rounded-full" :style="getLevelDotStyle(DEFAULT_LEVEL_COLOR)"></span>
@@ -165,7 +173,7 @@ onUnmounted(() => {
             v-for="level in levels"
             :key="level.id"
             type="button"
-            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 inline-flex items-center gap-2"
+            class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 inline-flex items-center gap-2 dark:text-slate-200 dark:hover:bg-slate-700"
             @click="selectLevel(level.id)"
           >
             <span class="h-2.5 w-2.5 rounded-full" :style="getLevelDotStyle(level.color)"></span>
@@ -176,7 +184,7 @@ onUnmounted(() => {
       <button
         v-if="filters.direction || filters.level"
         @click="resetFilters"
-        class="hidden md:inline-flex shrink-0 px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        class="hidden md:inline-flex shrink-0 px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-700"
       >
         ✕ Сбросить
       </button>
@@ -187,11 +195,11 @@ onUnmounted(() => {
     >
       <button
         @click="resetFilters"
-        class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-700"
       >
         ✕ Сбросить
       </button>
-      <span class="text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full text-center">
+      <span class="text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full text-center dark:text-slate-300 dark:bg-slate-700">
         Найдено: {{ filteredCount ?? 0 }}
       </span>
     </div>

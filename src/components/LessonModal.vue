@@ -373,20 +373,20 @@ onUnmounted(() => {
           <div class="fixed inset-0 flex items-center justify-center p-4">
             <!-- Модальное окно -->
             <div
-              class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden"
+              class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden border border-transparent dark:border-slate-700"
               @click.stop
             >
               <!-- Контент с прокруткой -->
               <div class="overflow-y-auto p-6" style="max-height: calc(90vh - 8px)">
                 <template v-if="lesson && !isEditing">
                   <!-- Заголовок -->
-                  <h3 class="text-2xl font-bold text-gray-900 mb-3 pr-8">
+                  <h3 class="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-3 pr-8">
                     {{ store.getDirectionNameById(lesson.directionId) }}
                   </h3>
 
                   <!-- Время и уровень: на mobile уровень под временем -->
                   <div class="flex flex-wrap items-start md:items-center md:flex-row gap-2 mb-4 text-sm">
-                    <span class="bg-gray-100 px-3 py-1 rounded-full text-gray-700 font-medium">
+                    <span class="bg-gray-100 dark:bg-slate-700 px-3 py-1 rounded-full text-gray-700 dark:text-slate-200 font-medium">
                       {{ lesson.time }} — {{ lesson.endTime }}
                     </span>
                     <span
@@ -395,7 +395,7 @@ onUnmounted(() => {
                       {{ store.getLevelNamesByIds(lesson.levelIds).join(', ') }}
                     </span>
                   </div>
-                  <p v-if="directionDescription" class="text-sm text-gray-700 whitespace-pre-line mb-4">
+                  <p v-if="directionDescription" class="text-sm text-gray-700 dark:text-slate-300 whitespace-pre-line mb-4">
                     {{ directionDescription }}
                   </p>
 
@@ -408,15 +408,15 @@ onUnmounted(() => {
                       <div
                         v-for="teacher in lessonTeachers"
                         :key="teacher.id"
-                        class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 min-w-45"
+                        class="flex items-center gap-3 bg-gray-50 dark:bg-slate-700/70 rounded-lg p-3 min-w-45 border border-transparent dark:border-slate-600"
                       >
                         <img
                           :src="resolveTeacherPhotoUrl(teacher.photo)"
                           :alt="teacher.name"
-                          class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
+                          class="w-16 h-16 rounded-full object-cover border-2 border-white dark:border-slate-500 shadow-sm"
                           @error="setFallbackImage($event, DEFAULT_TEACHER_AVATAR)"
                         />
-                        <p class="font-semibold text-gray-800">
+                        <p class="font-semibold text-gray-800 dark:text-slate-100">
                           {{ teacher.name }}
                         </p>
                       </div>
@@ -432,7 +432,7 @@ onUnmounted(() => {
                     />
                   </div>
                   <!-- Кнопки действий (только если глобальный режим редактирования) -->
-                  <div v-if="isAdmin" class="flex gap-2 mt-4 pt-4 border-t border-gray-200">
+                  <div v-if="isAdmin" class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
                     <button
                       @click="enableEditing"
                       class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
@@ -450,14 +450,14 @@ onUnmounted(() => {
                 <template v-else-if="editableLesson">
                   <form @submit.prevent="saveLesson" class="space-y-4">
                     <div>
-                      <label for="direction" class="block text-sm font-medium text-gray-700 mb-1">
+                      <label for="direction" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Направление
                       </label>
                       <select
                         id="direction"
                         :value="directionSelectValue"
                         @change="onLessonDirectionChange"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-amber-400 focus:border-transparent dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100"
                         required
                       >
                         <option v-for="direction in directions" :key="direction.id" :value="direction.id">
@@ -487,7 +487,7 @@ onUnmounted(() => {
                     </div>
 
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Уровни</label>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Уровни</label>
                       <p class="text-xs text-gray-500 mb-2">Если ничего не выбрано, занятие считается "Для всех".</p>
                       <div class="space-y-2 max-h-40 overflow-y-auto border border-gray-300 rounded-lg p-3">
                         <label v-for="level in levels" :key="level.id" class="flex items-center gap-2">
@@ -497,14 +497,14 @@ onUnmounted(() => {
                             @change="toggleLessonLevel($event, level.id)"
                             class="rounded border-gray-300 text-amber-500 focus:ring-amber-400"
                           />
-                          <span class="text-sm text-gray-700">{{ level.name }}</span>
+                          <span class="text-sm text-gray-700 dark:text-slate-300">{{ level.name }}</span>
                         </label>
                       </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label for="startTime" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="startTime" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                           Время начала
                         </label>
                         <input
@@ -516,7 +516,7 @@ onUnmounted(() => {
                         />
                       </div>
                       <div>
-                        <label for="endTime" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="endTime" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                           Время окончания
                         </label>
                         <input
@@ -529,7 +529,7 @@ onUnmounted(() => {
                       </div>
                     </div>
 
-                    <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-slate-300">
                       <input
                         v-model="editableLesson.crossesMidnight"
                         type="checkbox"
@@ -539,7 +539,7 @@ onUnmounted(() => {
                     </label>
 
                     <div>
-                      <label for="day" class="block text-sm font-medium text-gray-700 mb-1">
+                      <label for="day" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         День недели
                       </label>
                       <select
@@ -552,7 +552,7 @@ onUnmounted(() => {
                     </div>
 
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                         Преподаватели
                       </label>
                       <div
@@ -574,13 +574,13 @@ onUnmounted(() => {
                             :alt="teacher.name"
                             class="w-6 h-6 rounded-full object-cover"
                           />
-                          <span class="text-sm text-gray-700">{{ teacher.name }}</span>
+                          <span class="text-sm text-gray-700 dark:text-slate-300">{{ teacher.name }}</span>
                         </label>
                       </div>
                     </div>
 
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">
+                      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                         Постер
                       </label>
                       <input
@@ -618,7 +618,7 @@ onUnmounted(() => {
                       <button
                         type="button"
                         @click="emit('close')"
-                        class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                        class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
                       >
                         Отмена
                       </button>
@@ -629,7 +629,7 @@ onUnmounted(() => {
 
               <button
                 @click="emit('close')"
-                class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-200 transition-colors cursor-pointer"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path

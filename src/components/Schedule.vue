@@ -293,7 +293,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
 <template>
   <div class="schedule">
     <!-- БЛОК ФИЛЬТРОВ (sticky) -->
-    <div ref="filtersSection" class="md:sticky md:top-0 z-40 bg-gray-100 py-2">
+    <div ref="filtersSection" class="md:sticky md:top-0 z-40 bg-gray-100 py-2 dark:bg-slate-900">
       <div class="mb-2 max-md:mb-0 md:flex md:items-start md:gap-2">
         <button
           v-if="isAdmin"
@@ -317,7 +317,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
 
           <div
             v-if="filters.direction || filters.level"
-            class="hidden md:block shrink-0 text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full text-center"
+            class="hidden md:block shrink-0 text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full text-center dark:bg-slate-800 dark:text-slate-300"
           >
             Найдено: {{ filteredLessons.length }}
           </div>
@@ -326,16 +326,16 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
     </div>
 
     <!-- СЕТКА РАСПИСАНИЯ -->
-    <div class="max-h-[75dvh] overflow-x-auto overflow-y-auto md:max-h-none md:overflow-visible">
+    <div class="max-h-[75dvh] overflow-x-auto overflow-y-auto md:max-h-none md:overflow-visible rounded-xl border border-gray-300 dark:border-slate-700">
       <div class="mx-auto min-w-[870px] md:min-w-0 md:max-w-[1280px] border-gray-300">
         <!-- ШАПКА С ДНЯМИ (sticky) -->
         <div
-          class="sticky top-0 z-30 grid grid-cols-[90px_repeat(7,minmax(110px,1fr))] bg-gray-100 shadow-sm"
+          class="sticky top-0 z-30 grid grid-cols-[90px_repeat(7,minmax(110px,1fr))] bg-gray-100 shadow-sm dark:bg-slate-900"
           :style="windowWidth >= 768 ? { top: `${scheduleHeaderTop}px` } : {}"
         >
           <!-- УГЛОВАЯ ЯЧЕЙКА "Время" -->
           <div
-            class="sticky left-0 z-20 flex items-center justify-center p-2 md:p-3 font-semibold text-gray-700 border border-r border-gray-300 text-center bg-gray-200 md:border-r-0 md:bg-gray-200/50"
+            class="sticky left-0 z-20 flex items-center justify-center p-2 md:p-3 font-semibold text-gray-700 border border-r border-gray-300 text-center bg-gray-200 md:border-r-0 md:bg-gray-200/50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
           >
             Время
           </div>
@@ -343,7 +343,7 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
           <div
             v-for="day in days"
             :key="day"
-            class="flex items-center justify-center p-2 md:p-3 font-semibold text-gray-700 text-center border border-r-0 border-gray-300 last:border-r bg-gray-200 md:bg-gray-200/50"
+            class="flex items-center justify-center p-2 md:p-3 font-semibold text-gray-700 text-center border border-r-0 border-gray-300 last:border-r bg-gray-200 md:bg-gray-200/50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
           >
             <span class="md:hidden">{{ day.slice(0, 11) }}</span>
             <span class="hidden md:inline">{{ day }}</span>
@@ -353,11 +353,11 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
         <!-- ОСНОВНОЙ КОНТЕЙНЕР: временная сетка + занятия -->
         <div class="grid grid-cols-[90px_repeat(7,minmax(110px,1fr))]">
           <!-- КОЛОНКА С ВРЕМЕННЫМИ МЕТКАМИ -->
-          <div class="sticky left-0 z-10 bg-gray-100 md:static">
+          <div class="sticky left-0 z-10 bg-gray-100 md:static dark:bg-slate-900">
             <div
               v-for="row in timeRows"
               :key="row.key"
-              class="flex items-center justify-center whitespace-nowrap border border-b-0 last:border-b border-gray-300 text-sm p-2 md:p-3 text-gray-600 font-medium text-center"
+              class="flex items-center justify-center whitespace-nowrap border border-b-0 last:border-b border-gray-300 text-sm p-2 md:p-3 text-gray-600 font-medium text-center dark:border-slate-700 dark:text-slate-300"
               :style="{ height: `${row.height}px` }"
             >
               {{ row.label }}
@@ -368,14 +368,14 @@ const openLessonModal = (lesson?: Lesson | LessonDraft) => {
           <div
             v-for="day in days"
             :key="day"
-            class="relative bg-gray-100 border border-b-0 border-r-0 border-gray-300 last:border-r"
+            class="relative bg-gray-100 border border-b-0 border-r-0 border-gray-300 last:border-r dark:bg-slate-900 dark:border-slate-700"
             :style="{ minHeight: `${totalGridHeight}px` }"
           >
             <!-- ФОНОВАЯ СЕТКА (серые линии) -->
             <div
               v-for="row in timeRows"
               :key="row.key"
-              class="border-b border-gray-300"
+              class="border-b border-gray-300 dark:border-slate-700"
               :style="{ height: `${row.height}px` }"
             ></div>
 
