@@ -163,13 +163,13 @@ function App() {
         <div className="min-w-0">
           <Link to="/" className="inline-flex items-center">
             {schoolLogoUrl ? (
-              needsLogoContrastBg && !isDarkUi ? (
-                <span className="logo-contrast-bg">
-                  <img src={schoolLogoUrl} alt={schoolName} className="max-h-9 w-auto object-contain md:max-h-10" />
-                </span>
-              ) : (
+              <span
+                className={`inline-flex items-center rounded-[10px] px-2 py-1 ${
+                  needsLogoContrastBg && !isDarkUi ? 'bg-gray-900/80 shadow-[0_1px_2px_rgba(0,0,0,0.28)]' : ''
+                }`}
+              >
                 <img src={schoolLogoUrl} alt={schoolName} className="max-h-9 w-auto object-contain md:max-h-10" />
-              )
+              </span>
             ) : (
               <h1 className="truncate text-base font-semibold text-gray-800 md:text-lg dark:text-slate-100">{schoolName}</h1>
             )}
