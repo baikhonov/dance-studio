@@ -48,11 +48,11 @@ const formatTeacherNames = (teachers: Teacher[]): string =>
         {{ directionName }}
       </p>
 
-      <p class="text-xs text-gray-700 dark:text-slate-200 mt-0 font-medium truncate" :title="levelTitle">
+      <p class="shrink-0 text-xs text-gray-700 dark:text-slate-200 mt-0 font-medium truncate" :title="levelTitle">
         {{ levelName }}
       </p>
 
-      <div class="text-xs font-medium mt-0.5 bg-white/50 dark:bg-slate-800/80 dark:text-slate-100 px-1 py-0.5 rounded inline-block self-start">
+      <div class="shrink-0 text-xs font-medium mt-0.5 bg-white/50 dark:bg-slate-800/80 dark:text-slate-100 px-1 py-0.5 rounded inline-block self-start">
         {{ lesson.time }}—{{ lesson.endTime }}
       </div>
 
@@ -88,7 +88,7 @@ const formatTeacherNames = (teachers: Teacher[]): string =>
         <img
           :src="resolvePosterUrl(lesson.poster ?? '')"
           :alt="directionName"
-          class="h-full w-full rounded-md shadow-sm object-cover"
+          class="h-full w-full rounded-md object-cover"
           @error="setFallbackImage($event, DEFAULT_EVENT_POSTER)"
         />
       </div>
