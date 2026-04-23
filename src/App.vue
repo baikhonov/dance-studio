@@ -252,7 +252,11 @@ watch(
   >
     <div class="min-w-0">
       <router-link to="/" class="inline-flex items-center">
-        <span v-if="schoolLogoUrl" :class="{ 'logo-contrast-bg': needsLogoContrastBg && !isDark }">
+        <span
+          v-if="schoolLogoUrl"
+          class="inline-flex items-center rounded-[10px] px-2 py-1"
+          :class="{ 'bg-gray-900/80 shadow-[0_1px_2px_rgba(0,0,0,0.28)]': needsLogoContrastBg && !isDark }"
+        >
           <img :src="schoolLogoUrl" :alt="schoolName" class="max-h-9 md:max-h-10 w-auto object-contain" />
         </span>
         <h1 v-else class="truncate text-base font-semibold text-gray-800 md:text-lg dark:text-slate-100">
@@ -403,15 +407,6 @@ main {
 }
 footer {
   margin-top: auto;
-}
-
-.logo-contrast-bg {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 10px;
-  padding: 4px 8px;
-  background: rgba(17, 24, 39, 0.78);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
 }
 
 </style>
