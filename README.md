@@ -21,7 +21,6 @@ Tech stack:
 
 - CI: runs on each push/PR and validates frontend build + frontend type-check + backend type-check.
 - CD: deploys to VPS via GitHub Actions over SSH (Docker Compose rebuild + restart).
-- Production host: [https://dance-studio-portfolio.ru/](https://dance-studio-portfolio.ru/)
 
 ## Live demo
 
